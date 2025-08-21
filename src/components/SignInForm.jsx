@@ -3,6 +3,8 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Lock } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Home/Header";
+import axios from 'axios';
+import Toast from './common/Toast';
 
 export default function SignInForm() {
   const navigate = useNavigate();
@@ -11,6 +13,8 @@ export default function SignInForm() {
     password: "",
     rememberMe: false,
   });
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -20,10 +24,38 @@ export default function SignInForm() {
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Form submitted:", formData);
-    // Add sign-in logic here
+    setIsLoading(true);
+    try {
+      const response = await axios.post('/api/signin', {
+        email: formData.email,
+        password: formData.password,
+      });
+      const { token, user } = response.data;
+      localStorage.setItem('authToken', token);
+      localStorage.setItem('user', JSON.stringify(user));
+
+      // Dispatch custom event to refresh the header
+      window.dispatchEvent(new Event('authChange'));
+
+      setToast({
+        show: true,
+        message: 'Successfully signed in!',
+        type: 'success'
+      });
+
+      // Delay navigation to allow toast to display
+      setTimeout(() => navigate('/'), 2000);
+    } catch (error) {
+      setToast({
+        show: true,
+        message: error.response?.data?.error || 'Error signing in',
+        type: 'error'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleSignUpClick = (e) => {
@@ -117,9 +149,20 @@ export default function SignInForm() {
 
               <button
                 type="submit"
-                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-medium"
+                disabled={isLoading}
+                className="w-full px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-medium relative"
               >
-                Sign In
+                {isLoading ? (
+                  <motion.div
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    className="flex items-center justify-center"
+                  >
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  </motion.div>
+                ) : (
+                  'Sign In'
+                )}
               </button>
             </form>
 
@@ -154,6 +197,13 @@ export default function SignInForm() {
           </div>
         </div>
       </motion.div>
+
+      <Toast 
+        isVisible={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </div>
   );
 }

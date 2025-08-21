@@ -115,7 +115,7 @@ companies. Designed for clarity, simplicity, and actionable insights.
                         </button>
                         
                   <button
-                    onClick={() => navigate("/custom")}
+                    onClick={() => navigate("/contact")}
                     className="px-8 py-4 bg-white text-slate-700 rounded-xl font-semibold shadow-lg shadow-slate-200/50 hover:shadow-xl hover:shadow-slate-200/70 hover:scale-[1.02] border border-slate-200 hover:border-slate-300 transition-all duration-300 flex items-center justify-center gap-3"
                   >
                     <span>Get Custom Analysis</span>
@@ -128,7 +128,7 @@ companies. Designed for clarity, simplicity, and actionable insights.
               <motion.div variants={itemVariants}>
                 <div className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 rounded-full text-blue-700 text-sm font-medium shadow-sm mt-4">
                   <Sparkles size={16} className="text-blue-500" />
-                  <span>All reports are priced at ₹300.</span>
+                  <span>All reports are priced at ₹500.</span>
                 </div>
               </motion.div>
             </div>

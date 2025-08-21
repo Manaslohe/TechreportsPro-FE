@@ -1,8 +1,10 @@
 import React, { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Phone, Mail, Lock, ArrowRight } from "lucide-react";
+import { X, User, Phone, Mail, Lock, ArrowRight, CheckCircle } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Home/Header";
+import axios from 'axios';
+import Toast from './common/Toast';
 
 export default function SignupForm() {
   const navigate = useNavigate();
@@ -18,6 +20,9 @@ export default function SignupForm() {
   });
 
   const [passwordMatch, setPasswordMatch] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -42,14 +47,40 @@ export default function SignupForm() {
     if (step > 1) setStep(step - 1);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (formData.password !== formData.confirmPassword) {
       setPasswordMatch(false);
       return;
     }
-    console.log("Form submitted:", formData);
-    // Add form submission logic here
+    setIsLoading(true);
+    try {
+      await axios.post('/api/signup', {
+        firstName: formData.firstName,
+        lastName: formData.lastName,
+        email: formData.email,
+        password: formData.password,
+      });
+      
+      setShowSuccess(true);
+      setToast({
+        show: true,
+        message: 'Account created successfully!',
+        type: 'success'
+      });
+      
+      setTimeout(() => {
+        navigate('/signin');
+      }, 2000);
+    } catch (error) {
+      setToast({
+        show: true,
+        message: error.response?.data?.error || 'Error creating account',
+        type: 'error'
+      });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const slideVariants = {
@@ -228,100 +259,147 @@ export default function SignupForm() {
     });
   };
 
-  return (
-    <div className="min-h-screen bg-white flex items-center justify-center p-4">
-      <Header handleNavigation={(path) => window.location.href = path} />
-      
+  // Add success animation component
+  const SuccessAnimation = () => (
+    <motion.div
+      initial={{ scale: 0 }}
+      animate={{ scale: 1 }}
+      className="absolute inset-0 bg-white/90 backdrop-blur-sm flex items-center justify-center z-10"
+    >
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        exit={{ opacity: 0, y: -20 }}
-        transition={{
-          type: "spring",
-          stiffness: 260,
-          damping: 20,
-          duration: 0.3
-        }}
-        className="max-w-7xl w-full mx-auto bg-white rounded-2xl shadow-xl flex overflow-hidden relative min-h-[600px]"
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ type: "spring", damping: 20, stiffness: 300 }}
+        className="text-center"
       >
-        {/* Left Column - Form */}
-        <div className="w-full lg:w-1/2 p-12">
-          <div className="max-w-md mx-auto pt-4">
-            <h2 className="text-3xl font-bold text-gray-900 mb-2">
-              {step === 1 && "Personal Information"}
-              {step === 2 && "Set Your Password"}
-            </h2>
-            <p className="text-gray-600 mb-8">
-              Step {step} of 2
-            </p>
+        <motion.div
+          initial={{ scale: 0 }}
+          animate={{ scale: 1 }}
+          transition={{ delay: 0.2 }}
+          className="w-16 h-16 mx-auto mb-4 text-green-500"
+        >
+          <CheckCircle className="w-full h-full" />
+        </motion.div>
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">Registration Successful!</h3>
+        <p className="text-gray-600">Redirecting to login...</p>
+      </motion.div>
+    </motion.div>
+  );
 
-            {/* Form content with increased spacing */}
-            <form onSubmit={handleSubmit} className="space-y-8">
-              {renderStepContent()}
-              
-              {/* Navigation buttons - adjusted spacing and size */}
-              <div className="flex justify-between pt-6">
-                {step > 1 && (
-                  <button
-                    type="button"
-                    onClick={handleBack}
-                    className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
-                  >
-                    Back
-                  </button>
-                )}
-                {step < 2 ? (
-                  <button
-                    type="button"
-                    onClick={handleNext}
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-medium ml-auto"
-                  >
-                    Continue
-                  </button>
-                ) : (
-                  <button
-                    type="submit"
-                    className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-medium ml-auto"
-                  >
-                    Create Account
-                  </button>
-                )}
-              </div>
-            </form>
+  return (
+    <>
+      <Toast 
+        isVisible={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
+      <div className="min-h-screen bg-white flex items-center justify-center p-4">
+        <Header handleNavigation={(path) => window.location.href = path} />
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -20 }}
+          transition={{
+            type: "spring",
+            stiffness: 260,
+            damping: 20,
+            duration: 0.3
+          }}
+          className="max-w-7xl w-full mx-auto bg-white rounded-2xl shadow-xl flex overflow-hidden relative min-h-[600px]"
+        >
+          {/* Left Column - Form */}
+          <div className="w-full lg:w-1/2 p-12">
+            <div className="max-w-md mx-auto pt-4">
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                {step === 1 && "Personal Information"}
+                {step === 2 && "Set Your Password"}
+              </h2>
+              <p className="text-gray-600 mb-8">
+                Step {step} of 2
+              </p>
 
-            {/* Add login link */}
-            <div className="text-center mt-4">
-              <motion.p 
-                className="text-sm text-gray-600"
-                whileHover={{ scale: 1.02 }}
-              >
-                Already have an account?{" "}
-                <motion.a
-                  href="/signin"
-                  onClick={handleSignInClick}
-                  className="text-blue-600 hover:underline inline-block"
-                  whileHover={{ x: 3 }}
-                  transition={{ type: "spring", stiffness: 400, damping: 10 }}
+              {/* Form content with increased spacing */}
+              <form onSubmit={handleSubmit} className="space-y-8">
+                {renderStepContent()}
+                
+                {/* Navigation buttons - adjusted spacing and size */}
+                <div className="flex justify-between pt-6">
+                  {step > 1 && (
+                    <button
+                      type="button"
+                      onClick={handleBack}
+                      className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-colors text-sm font-medium"
+                    >
+                      Back
+                    </button>
+                  )}
+                  {step < 2 ? (
+                    <button
+                      type="button"
+                      onClick={handleNext}
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-medium ml-auto"
+                    >
+                      Continue
+                    </button>
+                  ) : (
+                    <button
+                      type="submit"
+                      disabled={isLoading}
+                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-colors text-sm font-medium ml-auto relative"
+                    >
+                      {isLoading ? (
+                        <motion.div
+                          initial={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          className="flex items-center justify-center"
+                        >
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        </motion.div>
+                      ) : (
+                        'Create Account'
+                      )}
+                    </button>
+                  )}
+                </div>
+              </form>
+
+              {/* Add login link */}
+              <div className="text-center mt-4">
+                <motion.p 
+                  className="text-sm text-gray-600"
+                  whileHover={{ scale: 1.02 }}
                 >
-                  Login here
-                </motion.a>
-              </motion.p>
+                  Already have an account?{" "}
+                  <motion.a
+                    href="/signin"
+                    onClick={handleSignInClick}
+                    className="text-blue-600 hover:underline inline-block"
+                    whileHover={{ x: 3 }}
+                    transition={{ type: "spring", stiffness: 400, damping: 10 }}
+                  >
+                    Login here
+                  </motion.a>
+                </motion.p>
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Right Column - Image */}
-        <div className="hidden lg:block w-1/2 bg-blue-50 p-12">
-          <div className="h-full flex items-center justify-center">
-            <img
-              src="/signup.png"
-              alt="Signup Illustration"
-              className="w-full max-w-lg object-contain"
-            />
+          {/* Right Column - Image */}
+          <div className="hidden lg:block w-1/2 bg-blue-50 p-12">
+            <div className="h-full flex items-center justify-center">
+              <img
+                src="/signup.png"
+                alt="Signup Illustration"
+                className="w-full max-w-lg object-contain"
+              />
+            </div>
           </div>
-        </div>
-      </motion.div>
-    </div>
+        </motion.div>
+      </div>
+      {showSuccess && <SuccessAnimation />}
+    </>
   );
 }
 

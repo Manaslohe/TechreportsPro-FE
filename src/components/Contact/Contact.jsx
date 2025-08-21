@@ -1,13 +1,21 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, MapPin, Copy, CheckCircle, Send, AlertCircle } from "lucide-react";
+import axios from 'axios';
+import Toast from '../common/Toast';
 
 const Contact = () => {
   const [formData, setFormData] = useState({
-    name: '', email: '', phone: '', subject: '', message: ''
+    name: '',
+    email: '',
+    phone: '',
+    subject: '',
+    message: ''
   });
   const [copied, setCopied] = useState(null); // Track which item was copied
-  
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
   // Animation variants
   const fadeInUp = {
     initial: { opacity: 0, y: 20 },
@@ -44,6 +52,47 @@ const Contact = () => {
       copyable: false
     }
   ];
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      const token = localStorage.getItem('authToken');
+      await axios.post('/api/contact', formData, {
+        headers: {
+          Authorization: token ? `Bearer ${token}` : undefined
+        }
+      });
+
+      setToast({
+        show: true,
+        message: 'Your message has been sent successfully!',
+        type: 'success'
+      });
+
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        subject: '',
+        message: ''
+      });
+    } catch (error) {
+      setToast({
+        show: true,
+        message: error.response?.data?.error || 'Error submitting the form',
+        type: 'error'
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
@@ -112,14 +161,29 @@ const Contact = () => {
       <section className="py-20 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
+            {/* Right Column - Title and Image */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              className="lg:pt-10 flex flex-col items-center justify-center text-center lg:text-left"
+            >
+              <h2 className="text-3xl font-bold text-gray-900 mb-6">
+                Get in Touch or Request Custom Analysis
+              </h2>
+              <img
+                src="/contact.png"
+                alt="Contact Illustration"
+                className="max-w-full"
+              />
+            </motion.div>
+
             {/* Left Column - Form */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="bg-white rounded-2xl p-8 shadow-xl"
             >
-              <h2 className="text-2xl font-bold text-gray-900 mb-6">Send us a message</h2>
-              <form className="space-y-6">
+              <form onSubmit={handleSubmit} className="space-y-6">
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -127,8 +191,12 @@ const Contact = () => {
                     </label>
                     <input
                       type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                       placeholder="John Doe"
+                      required
                     />
                   </div>
                   <div>
@@ -137,51 +205,82 @@ const Contact = () => {
                     </label>
                     <input
                       type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleInputChange}
                       className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
                       placeholder="john@example.com"
+                      required
                     />
                   </div>
                 </div>
-                
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Phone (Optional)
+                  </label>
+                  <input
+                    type="tel"
+                    name="phone"
+                    value={formData.phone}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="+1 555-555-5555"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                    Subject (Optional)
+                  </label>
+                  <input
+                    type="text"
+                    name="subject"
+                    value={formData.subject}
+                    onChange={handleInputChange}
+                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
+                    placeholder="Subject"
+                  />
+                </div>
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Message
                   </label>
                   <textarea
+                    name="message"
+                    value={formData.message}
+                    onChange={handleInputChange}
                     rows="6"
                     className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
                     placeholder="Your message..."
+                    required
                   ></textarea>
                 </div>
-
                 <button
                   type="submit"
+                  disabled={isSubmitting}
                   className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
                 >
-                  <Send className="w-4 h-4" />
-                  Send Message
+                  {isSubmitting ? (
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                  ) : (
+                    <>
+                      <Send className="w-4 h-4" />
+                      Send Message
+                    </>
+                  )}
                 </button>
               </form>
-            </motion.div>
-
-            {/* Right Column - Image */}
-            <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="lg:pt-10 flex items-center justify-center"
-            >
-              <img
-                src="/contact.png"
-                alt="Signup Illustration"
-                className="max-w-full "
-              />
             </motion.div>
           </div>
         </div>
       </section>
+      <Toast
+        isVisible={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </div>
   );
 };
 
 export default Contact;
-                   

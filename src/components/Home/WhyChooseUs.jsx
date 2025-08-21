@@ -1,8 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
 import { BarChart3, Shield, TrendingUp, Star } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 
 const WhyChooseUs = () => {
+  const navigate = useNavigate();
+
+  const handleLearnMore = () => {
+    navigate('/contact');
+  };
+
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
@@ -126,6 +133,7 @@ const WhyChooseUs = () => {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={handleLearnMore}
                   className="inline-flex items-center px-6 py-2.5 bg-white/70 hover:bg-white text-slate-700 rounded-xl font-medium shadow-lg hover:shadow-xl transition-all duration-300 backdrop-blur-sm border border-white/30"
                 >
                   Learn more

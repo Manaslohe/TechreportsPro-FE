@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, User } from 'lucide-react';
 import { useLocation } from 'react-router-dom';
 import About from '../About/About';
+import Toast from '../common/Toast'; // Import Toast
 
 const NavButton = ({ children, variant = 'secondary', onClick, isActive }) => (
   <button
@@ -22,10 +23,47 @@ const NavButton = ({ children, variant = 'secondary', onClick, isActive }) => (
 const Header = ({ handleNavigation }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
+  const [user, setUser] = useState(null);
+  const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // Toast state
   const location = useLocation();
+
+  useEffect(() => {
+    // Function to update user state from localStorage
+    const updateUser = () => {
+      const storedUser = localStorage.getItem('user');
+      setUser(storedUser ? JSON.parse(storedUser) : null);
+    };
+
+    // Initial user state setup
+    updateUser();
+
+    // Listen for custom "authChange" events
+    const handleAuthChange = () => updateUser();
+    window.addEventListener('authChange', handleAuthChange);
+
+    return () => {
+      window.removeEventListener('authChange', handleAuthChange);
+    };
+  }, []);
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
+  };
+
+  const handleLogout = () => {
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('user');
+    setUser(null);
+    handleNavigation('/');
+    // Dispatch custom event to notify other components
+    window.dispatchEvent(new Event('authChange'));
+
+    // Show logout success toast
+    setToast({
+      show: true,
+      message: 'Successfully logged out!',
+      type: 'success',
+    });
   };
 
   return (
@@ -78,16 +116,10 @@ const Header = ({ handleNavigation }) => {
               About
             </NavButton>
             <NavButton
-              onClick={() => handleNavigation('/reports')}
-              isActive={location.pathname === '/reports'}
+              onClick={() => handleNavigation('/catalog')}
+              isActive={location.pathname === '/catalog'}
             >
               Reports
-            </NavButton>
-            <NavButton
-              onClick={() => handleNavigation('/pricing')}
-              isActive={location.pathname === '/pricing'}
-            >
-              Pricing
             </NavButton>
             <NavButton
               onClick={() => handleNavigation('/contact')}
@@ -97,10 +129,24 @@ const Header = ({ handleNavigation }) => {
             </NavButton>
           </div>
           <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-200">
-            <NavButton onClick={() => handleNavigation('/signin')}>Sign in</NavButton>
-            <NavButton variant="primary" onClick={() => handleNavigation('/signup')}>
-              Get Started
-            </NavButton>
+            {user ? (
+              <>
+                <button
+                  onClick={handleLogout}
+                  className="px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-red-500/25 hover:shadow-lg"
+                >
+                  Logout
+                </button>
+                <User className="text-gray-600" />
+              </>
+            ) : (
+              <>
+                <NavButton onClick={() => handleNavigation('/signin')}>Sign in</NavButton>
+                <NavButton variant="primary" onClick={() => handleNavigation('/signup')}>
+                  Get Started
+                </NavButton>
+              </>
+            )}
           </div>
         </div>
 
@@ -142,21 +188,12 @@ const Header = ({ handleNavigation }) => {
               </NavButton>
               <NavButton
                 onClick={() => {
-                  handleNavigation('/reports');
+                  handleNavigation('/catalog');
                   toggleMenu();
                 }}
-                isActive={location.pathname === '/reports'}
+                isActive={location.pathname === '/catalog'}
               >
                 Reports
-              </NavButton>
-              <NavButton
-                onClick={() => {
-                  handleNavigation('/pricing');
-                  toggleMenu();
-                }}
-                isActive={location.pathname === '/pricing'}
-              >
-                Pricing
               </NavButton>
               <NavButton
                 onClick={() => {
@@ -168,23 +205,34 @@ const Header = ({ handleNavigation }) => {
                 Contact
               </NavButton>
               <div className="flex flex-col items-center gap-4 mt-4 border-t border-gray-200 pt-4">
-                <NavButton
-                  onClick={() => {
-                    handleNavigation('/signin');
-                    toggleMenu();
-                  }}
-                >
-                  Sign in
-                </NavButton>
-                <NavButton
-                  variant="primary"
-                  onClick={() => {
-                    handleNavigation('/signup');
-                    toggleMenu();
-                  }}
-                >
-                  Get Started
-                </NavButton>
+                {user ? (
+                  <button
+                    onClick={handleLogout}
+                    className="px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-red-500/25 hover:shadow-lg"
+                  >
+                    Logout
+                  </button>
+                ) : (
+                  <>
+                    <NavButton
+                      onClick={() => {
+                        handleNavigation('/signin');
+                        toggleMenu();
+                      }}
+                    >
+                      Sign in
+                    </NavButton>
+                    <NavButton
+                      variant="primary"
+                      onClick={() => {
+                        handleNavigation('/signup');
+                        toggleMenu();
+                      }}
+                    >
+                      Get Started
+                    </NavButton>
+                  </>
+                )}
               </div>
             </div>
           </div>
@@ -192,6 +240,14 @@ const Header = ({ handleNavigation }) => {
       </nav>
 
       <About isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
+
+      {/* Toast Notification */}
+      <Toast
+        isVisible={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </>
   );
 };
