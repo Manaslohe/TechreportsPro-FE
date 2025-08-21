@@ -19,7 +19,7 @@ import AdminRequest from './components/Admin/AdminRequest';
 import AdminContact from './components/Admin/AdminContact';
 import AdminUser from './components/Admin/AdminUser';
 
-axios.defaults.baseURL = 'http://localhost:5000'; // Update with your backend URL
+axios.defaults.baseURL = 'https://techbe-zeta.vercel.app'; // Update with your backend URL
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 
