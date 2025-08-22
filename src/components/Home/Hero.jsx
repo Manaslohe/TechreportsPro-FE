@@ -107,7 +107,7 @@ companies. Designed for clarity, simplicity, and actionable insights.
               <motion.div variants={itemVariants}>
                 <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start">
                   <button
-                        onClick={() => navigate("/reports")}
+                        onClick={() => navigate("/catalog")}
                         className="px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-3"
                         >
                         <span>View All Reports</span>

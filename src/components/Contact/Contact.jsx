@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, MapPin, Copy, CheckCircle, Send, AlertCircle } from "lucide-react";
+import { Mail, Phone, Copy, CheckCircle, Send } from "lucide-react";
 import axios from 'axios';
 import Toast from '../common/Toast';
 
@@ -35,21 +35,16 @@ const Contact = () => {
       title: "Call Us",
       value: "+91 6264799001",
       details: "Mon-Fri 9AM-6PM IST",
-      copyable: true
+      copyable: true,
+      link: "tel:+916264799001"
     },
     {
       icon: <Mail className="w-5 h-5" />,
       title: "Email Us",
       value: "techreportspro@gmail.com",
       details: "24/7 Support",
-      copyable: true
-    },
-    {
-      icon: <MapPin className="w-5 h-5" />,
-      title: "Location",
-      value: "India",
-      details: "Global Service",
-      copyable: false
+      copyable: true,
+      link: "mailto:techreportspro@gmail.com"
     }
   ];
 
@@ -118,7 +113,7 @@ const Contact = () => {
       {/* Contact Info Cards */}
       <section className="relative -mt-16 z-10 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {contactInfo.map((info, index) => (
               <motion.div
                 key={index}
@@ -128,29 +123,31 @@ const Contact = () => {
                 className="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 relative"
               >
                 {info.copyable && (
-                  <div className="absolute top-4 right-4">
+                  <div className="absolute top-3 right-3">
                     <button
                       onClick={() => handleCopy(info.value)}
-                      className="p-2 bg-blue-100 rounded-full text-blue-600 hover:bg-blue-200 transition"
+                      className="p-1 bg-blue-100 rounded-full text-blue-600 hover:bg-blue-200 transition"
                     >
                       {copied === info.value ? (
-                        <CheckCircle className="w-5 h-5 text-green-600" />
+                        <CheckCircle className="w-4 h-4 text-green-600" />
                       ) : (
-                        <Copy className="w-5 h-5" />
+                        <Copy className="w-4 h-4" />
                       )}
                     </button>
                   </div>
                 )}
-                <div className="flex items-center gap-4 mb-4">
-                  <div className="p-3 bg-blue-100 rounded-xl text-blue-600">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
                     {info.icon}
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">{info.title}</h3>
-                    <p className="text-blue-600">{info.value}</p>
+                    <h3 className="font-semibold text-gray-900 text-sm">{info.title}</h3>
+                    <a href={info.link} className="text-blue-600 text-sm hover:underline">
+                      {info.value}
+                    </a>
                   </div>
                 </div>
-                <p className="text-sm text-gray-500">{info.details}</p>
+                <p className="text-xs text-gray-500">{info.details}</p>
               </motion.div>
             ))}
           </div>

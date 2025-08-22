@@ -3,7 +3,8 @@ import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { 
   Users, FileText, MessageSquare, Mail, ArrowRight, User, Calendar, 
-  Clock, CheckCircle, BarChart2, TrendingUp, AlertTriangle
+  Clock, CheckCircle, BarChart2, TrendingUp, AlertTriangle, Activity,
+  LayoutDashboard, PieChart, ChevronUp, Award
 } from 'lucide-react';
 import axios from 'axios';
 
@@ -18,6 +19,12 @@ const AdminDashboard = () => {
     recentUsers: [],
     recentRequests: [],
     popularReports: [],
+    last24h: {
+      users: 0,
+      reports: 0,
+      requests: 0,
+      contacts: 0
+    }
   });
   const [isLoading, setIsLoading] = useState(true);
 
@@ -79,88 +86,132 @@ const AdminDashboard = () => {
     );
   }
 
-  const cardVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: { 
       opacity: 1,
-      y: 0,
-      transition: {
-        delay: i * 0.1,
-        duration: 0.5,
-        ease: "easeOut"
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.2
       }
-    })
+    }
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        duration: 0.5,
+        ease: "easeOut" 
+      }
+    }
   };
 
   return (
     <div className="p-4 md:p-6 bg-slate-50 min-h-screen">
       <div className="max-w-7xl mx-auto">
-      
+     
 
-        {/* Summary Stats Banner */}
+        {/* Last 24 Hours Activity Banner */}
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.1, duration: 0.6 }}
-          className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl shadow-lg mb-8 p-5 md:p-6"
+          className="bg-gradient-to-r from-blue-600 to-indigo-700 rounded-2xl shadow-lg mb-8 overflow-hidden"
         >
-          <div className="flex items-center gap-3 mb-4">
-            <BarChart2 size={22} className="text-white" />
-            <h2 className="text-lg md:text-xl font-semibold text-white">Platform Overview</h2>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            <div key="users-stat" className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-              <p className="text-white/80 text-sm mb-1">Total Users</p>
-              <p className="text-white text-2xl font-bold">{dashboardData.totalUsers}</p>
+          <div className="p-5 md:p-6">
+            <div className="flex items-center gap-3 mb-5">
+              <Activity size={22} className="text-white" />
+              <h2 className="text-lg md:text-xl font-semibold text-white">Last 24 Hours Activity</h2>
             </div>
-            <div key="reports-stat" className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-              <p className="text-white/80 text-sm mb-1">Total Reports</p>
-              <p className="text-white text-2xl font-bold">{dashboardData.totalReports}</p>
-            </div>
-            <div key="requests-stat" className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-              <p className="text-white/80 text-sm mb-1">Support Requests</p>
-              <div className="flex items-center gap-2">
-                <p className="text-white text-2xl font-bold">{dashboardData.totalRequests}</p>
-                {dashboardData.pendingRequests > 0 && (
-                  <span className="text-xs bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full font-medium">
-                    {dashboardData.pendingRequests} pending
-                  </span>
-                )}
+            
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+              <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <Users size={18} className="text-blue-100" />
+                    <span className="text-xs text-blue-100 bg-blue-500/30 px-2 py-0.5 rounded-full">Users</span>
+                  </div>
+                  <p className="text-white text-2xl md:text-3xl font-bold mb-1">{dashboardData.last24h?.users || 0}</p>
+                  <p className="text-blue-100 text-xs">New registrations</p>
+                </div>
+                <div className="absolute bottom-0 right-0 opacity-10">
+                  <Users size={60} className="text-white" />
+                </div>
               </div>
-            </div>
-            <div key="contacts-stat" className="bg-white/15 backdrop-blur-sm rounded-xl p-4">
-              <p className="text-white/80 text-sm mb-1">Contact Messages</p>
-              <div className="flex items-center gap-2">
-                <p className="text-white text-2xl font-bold">{dashboardData.totalContacts}</p>
-                {dashboardData.unreadContacts > 0 && (
-                  <span className="text-xs bg-amber-400 text-amber-900 px-2 py-0.5 rounded-full font-medium">
-                    {dashboardData.unreadContacts} unread
-                  </span>
-                )}
+              
+              <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <FileText size={18} className="text-indigo-100" />
+                    <span className="text-xs text-indigo-100 bg-indigo-500/30 px-2 py-0.5 rounded-full">Reports</span>
+                  </div>
+                  <p className="text-white text-2xl md:text-3xl font-bold mb-1">{dashboardData.last24h?.reports || 0}</p>
+                  <p className="text-indigo-100 text-xs">New technical reports</p>
+                </div>
+                <div className="absolute bottom-0 right-0 opacity-10">
+                  <FileText size={60} className="text-white" />
+                </div>
+              </div>
+              
+              <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <MessageSquare size={18} className="text-purple-100" />
+                    <span className="text-xs text-purple-100 bg-purple-500/30 px-2 py-0.5 rounded-full">Requests</span>
+                  </div>
+                  <p className="text-white text-2xl md:text-3xl font-bold mb-1">{dashboardData.last24h?.requests || 0}</p>
+                  <p className="text-purple-100 text-xs">New support requests</p>
+                </div>
+                <div className="absolute bottom-0 right-0 opacity-10">
+                  <MessageSquare size={60} className="text-white" />
+                </div>
+              </div>
+              
+              <div className="bg-white/15 backdrop-blur-sm rounded-xl p-4 relative overflow-hidden">
+                <div className="relative z-10">
+                  <div className="flex items-center justify-between mb-2">
+                    <Mail size={18} className="text-cyan-100" />
+                    <span className="text-xs text-cyan-100 bg-cyan-500/30 px-2 py-0.5 rounded-full">Contacts</span>
+                  </div>
+                  <p className="text-white text-2xl md:text-3xl font-bold mb-1">{dashboardData.last24h?.contacts || 0}</p>
+                  <p className="text-cyan-100 text-xs">New contact messages</p>
+                </div>
+                <div className="absolute bottom-0 right-0 opacity-10">
+                  <Mail size={60} className="text-white" />
+                </div>
               </div>
             </div>
           </div>
         </motion.div>
 
-        {/* Detailed Analytics Cards */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8">
+        {/* Overall Statistics Cards */}
+        <motion.div
+          variants={containerVariants}
+          initial="hidden"
+          animate="visible"
+          className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 mb-8"
+        >
           {/* Users Card */}
           <motion.div 
-            custom={0}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md"
           >
             <div className="p-5">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center justify-between mb-3">
                 <div className="p-2.5 bg-blue-100 rounded-lg">
                   <Users size={20} className="text-blue-600" />
                 </div>
-                <h3 className="text-slate-700 font-medium">Users</h3>
+                <div className="flex items-center text-xs font-medium text-green-600">
+                  <ChevronUp size={14} />
+                  <span>{Math.round((dashboardData.last24h?.users / dashboardData.totalUsers) * 100 || 0)}%</span>
+                </div>
               </div>
+              <h3 className="text-slate-500 text-sm mb-1">Total Users</h3>
               <p className="text-3xl font-bold text-slate-800 mb-1">{dashboardData.totalUsers}</p>
-              <p className="text-sm text-slate-500 mb-4">Registered platform users</p>
+              <p className="text-xs text-slate-500 mb-4">Platform registered users</p>
               <Link to="/admin/users" className="inline-flex items-center gap-1 text-sm text-blue-600 hover:text-blue-800 font-medium transition-colors">
                 Manage users
                 <ArrowRight size={16} />
@@ -171,21 +222,22 @@ const AdminDashboard = () => {
 
           {/* Reports Card */}
           <motion.div 
-            custom={1}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md"
           >
             <div className="p-5">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center justify-between mb-3">
                 <div className="p-2.5 bg-emerald-100 rounded-lg">
                   <FileText size={20} className="text-emerald-600" />
                 </div>
-                <h3 className="text-slate-700 font-medium">Reports</h3>
+                <div className="flex items-center text-xs font-medium text-green-600">
+                  <ChevronUp size={14} />
+                  <span>{Math.round((dashboardData.last24h?.reports / dashboardData.totalReports) * 100 || 0)}%</span>
+                </div>
               </div>
+              <h3 className="text-slate-500 text-sm mb-1">Total Reports</h3>
               <p className="text-3xl font-bold text-slate-800 mb-1">{dashboardData.totalReports}</p>
-              <p className="text-sm text-slate-500 mb-4">Technical reports generated</p>
+              <p className="text-xs text-slate-500 mb-4">Technical reports generated</p>
               <Link to="/admin/reports" className="inline-flex items-center gap-1 text-sm text-emerald-600 hover:text-emerald-800 font-medium transition-colors">
                 View reports
                 <ArrowRight size={16} />
@@ -196,19 +248,20 @@ const AdminDashboard = () => {
 
           {/* Support Requests Card */}
           <motion.div 
-            custom={2}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md"
           >
             <div className="p-5">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center justify-between mb-3">
                 <div className="p-2.5 bg-amber-100 rounded-lg">
                   <MessageSquare size={20} className="text-amber-600" />
                 </div>
-                <h3 className="text-slate-700 font-medium">Support</h3>
+                <div className="flex items-center text-xs font-medium text-green-600">
+                  <ChevronUp size={14} />
+                  <span>{Math.round((dashboardData.last24h?.requests / dashboardData.totalRequests) * 100 || 0)}%</span>
+                </div>
               </div>
+              <h3 className="text-slate-500 text-sm mb-1">Support Requests</h3>
               <div className="flex items-baseline gap-2 mb-1">
                 <p className="text-3xl font-bold text-slate-800">{dashboardData.totalRequests}</p>
                 {dashboardData.pendingRequests > 0 && (
@@ -217,7 +270,7 @@ const AdminDashboard = () => {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-500 mb-4">Support requests received</p>
+              <p className="text-xs text-slate-500 mb-4">Support requests received</p>
               <Link to="/admin/requests" className="inline-flex items-center gap-1 text-sm text-amber-600 hover:text-amber-800 font-medium transition-colors">
                 Handle requests
                 <ArrowRight size={16} />
@@ -228,19 +281,20 @@ const AdminDashboard = () => {
 
           {/* Contact Messages Card */}
           <motion.div 
-            custom={3}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
-            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
+            variants={itemVariants}
+            className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden transition-all duration-300 hover:shadow-md"
           >
             <div className="p-5">
-              <div className="flex items-center gap-3 mb-3">
+              <div className="flex items-center justify-between mb-3">
                 <div className="p-2.5 bg-purple-100 rounded-lg">
                   <Mail size={20} className="text-purple-600" />
                 </div>
-                <h3 className="text-slate-700 font-medium">Messages</h3>
+                <div className="flex items-center text-xs font-medium text-green-600">
+                  <ChevronUp size={14} />
+                  <span>{Math.round((dashboardData.last24h?.contacts / dashboardData.totalContacts) * 100 || 0)}%</span>
+                </div>
               </div>
+              <h3 className="text-slate-500 text-sm mb-1">Contact Messages</h3>
               <div className="flex items-baseline gap-2 mb-1">
                 <p className="text-3xl font-bold text-slate-800">{dashboardData.totalContacts}</p>
                 {dashboardData.unreadContacts > 0 && (
@@ -249,7 +303,7 @@ const AdminDashboard = () => {
                   </span>
                 )}
               </div>
-              <p className="text-sm text-slate-500 mb-4">Contact form submissions</p>
+              <p className="text-xs text-slate-500 mb-4">Contact form submissions</p>
               <Link to="/admin/contacts" className="inline-flex items-center gap-1 text-sm text-purple-600 hover:text-purple-800 font-medium transition-colors">
                 Read messages
                 <ArrowRight size={16} />
@@ -257,16 +311,13 @@ const AdminDashboard = () => {
             </div>
             <div className="h-1 w-full bg-purple-600"></div>
           </motion.div>
-        </div>
+        </motion.div>
 
-        {/* Main Content Area - Recent Activity */}
+        {/* Main Content Area */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Recent Support Requests */}
           <motion.div 
-            custom={4}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
+            variants={itemVariants}
             className="lg:col-span-2 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
           >
             <div className="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -294,12 +345,12 @@ const AdminDashboard = () => {
                     className="p-4 hover:bg-slate-50 transition-colors"
                   >
                     <div className="flex justify-between items-start mb-2">
-                      <h4 className="font-medium text-slate-800">{request.subject}</h4>
+                      <h4 className="font-medium text-slate-800">{request.subject || "Support Request"}</h4>
                       {getStatusBadge(request.status)}
                     </div>
                     <div className="flex items-center gap-2 text-xs text-slate-500">
                       <User size={12} />
-                      <span className="font-medium">{request.userName}</span>
+                      <span className="font-medium">{request.user?.firstName} {request.user?.lastName}</span>
                       <span className="text-slate-300">•</span>
                       <Calendar size={12} />
                       <span>{new Date(request.createdAt).toLocaleDateString()}</span>
@@ -312,15 +363,12 @@ const AdminDashboard = () => {
 
           {/* Popular Reports Section */}
           <motion.div 
-            custom={5}
-            variants={cardVariants}
-            initial="hidden"
-            animate="visible"
+            variants={itemVariants}
             className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
           >
             <div className="p-5 border-b border-slate-200 flex justify-between items-center">
               <div className="flex items-center gap-2">
-                <TrendingUp size={18} className="text-slate-700" />
+                <Award size={18} className="text-slate-700" />
                 <h3 className="font-semibold text-slate-800">Popular Reports</h3>
               </div>
               <Link to="/admin/reports" className="text-sm text-blue-600 hover:text-blue-800 font-medium">View all</Link>
@@ -343,10 +391,17 @@ const AdminDashboard = () => {
                     className="p-4 hover:bg-slate-50 transition-colors"
                   >
                     <h4 className="font-medium text-slate-800 mb-1">{report.title}</h4>
-                    <div className="flex items-center gap-1 text-xs text-slate-500">
-                      <span className="font-medium text-emerald-600">{report.views} views</span>
-                      <span className="text-slate-300">•</span>
-                      <span>{report.category}</span>
+                    <div className="flex items-center gap-2 text-xs text-slate-500">
+                      <div className="flex items-center gap-1">
+                        <PieChart size={12} className="text-emerald-500" />
+                        <span className="font-medium text-emerald-600">{report.views || 0} views</span>
+                      </div>
+                      {report.category && (
+                        <>
+                          <span className="text-slate-300">•</span>
+                          <span>{report.category}</span>
+                        </>
+                      )}
                     </div>
                   </motion.div>
                 ))
@@ -357,10 +412,7 @@ const AdminDashboard = () => {
 
         {/* Recent Users Section */}
         <motion.div 
-          custom={6}
-          variants={cardVariants}
-          initial="hidden"
-          animate="visible"
+          variants={itemVariants}
           className="mt-6 bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden"
         >
           <div className="p-5 border-b border-slate-200 flex justify-between items-center">
@@ -382,19 +434,22 @@ const AdminDashboard = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                 {dashboardData.recentUsers.map((user, index) => (
                   <motion.div 
-                    key={user.id}
+                    key={user.id || index}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     transition={{ delay: 0.7 + (index * 0.1) }}
-                    className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-lg border border-slate-200 hover:border-slate-300 hover:bg-slate-50 transition-all duration-200"
                   >
-                    <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center text-blue-700 font-medium">
-                      {user.name ? user.name.charAt(0).toUpperCase() : "?"}
+                    <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-full flex items-center justify-center text-white font-medium">
+                      {user.firstName ? user.firstName.charAt(0).toUpperCase() : "?"}
                     </div>
                     <div className="overflow-hidden">
-                      <h4 className="font-medium text-slate-800 truncate">{user.name || "Unknown User"}</h4>
+                      <h4 className="font-medium text-slate-800 truncate">{user.firstName} {user.lastName}</h4>
                       <p className="text-xs text-slate-500 truncate">{user.email || "No email provided"}</p>
                     </div>
+                    <span className="ml-auto text-xs text-slate-400">
+                      {new Date(user.createdAt).toLocaleDateString()}
+                    </span>
                   </motion.div>
                 ))}
               </div>
