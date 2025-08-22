@@ -332,7 +332,7 @@ const AdminReport = () => {
                                                 placeholder="Enter report title"
                                                 required
                                             />
-                                            <p className="mt-1.5 text-xs text-slate-500">
+                                            <p className="mt-1.5 text-xs font-medium text-red-500">
                                                 The title should match your PDF file name for better organization.
                                             </p>
                                         </div>

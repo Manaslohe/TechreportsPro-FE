@@ -339,7 +339,7 @@ const PdfViewer = () => {
                 <div 
                   className={`relative ${
                     isFullScreen ? 'h-[calc(100vh-80px)]' : 'h-[85vh]'
-                  } bg-gray-100`}
+                  } bg-gray-100 overflow-auto`} // Added overflow-auto for scrolling
                   onContextMenu={(e) => e.preventDefault()} // Disable right-click on PDF container
                 >
                   {pdfLoadError ? (
