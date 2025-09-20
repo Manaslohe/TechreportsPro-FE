@@ -76,15 +76,15 @@ const WhyChooseUs = () => {
           ></motion.div>
         </motion.div>
       ),
-      title: "Financial Analysis",
-      description: "Comprehensive financial modeling, ratio analysis, and performance metrics to drive informed decisions.",
+      title: translate("financialAnalysis"),
+      description: translate("financialAnalysisDescription"),
       teaser: {
-        title: "Tesla Inc. Financial Snapshot",
+        title: translate("teslaFinancialSnapshot"),
         content: [
-          "Revenue: $21.5B (↑56% YoY)",
-          "Operating Margin: 17.2% (↑2.5% QoQ)",
-          "Debt-to-Equity: 0.12",
-          "Quick Ratio: 1.5"
+          translate("teslaRevenue"),
+          translate("teslaOperatingMargin"),
+          translate("teslaDebtToEquity"),
+          translate("teslaQuickRatio")
         ],
         image: "/financial-chart.png"
       }
@@ -107,15 +107,15 @@ const WhyChooseUs = () => {
           ></motion.div>
         </motion.div>
       ),
-      title: "SWOT Analysis", 
-      description: "Detailed strengths, weaknesses, opportunities, and threats assessment for strategic planning.",
+      title: translate("swotAnalysis"),
+      description: translate("swotAnalysisDescription"),
       teaser: {
-        title: "Amazon SWOT Analysis",
+        title: translate("amazonSwotAnalysis"),
         content: [
-          "Strength: Robust cloud infrastructure",
-          "Weakness: High turnover rate in warehouses",
-          "Opportunity: Expansion in healthcare sector",
-          "Threat: Increasing regulatory scrutiny"
+          translate("amazonStrength"),
+          translate("amazonWeakness"),
+          translate("amazonOpportunity"),
+          translate("amazonThreat")
         ],
         image: "/swot-analysis.png"
       }
@@ -138,15 +138,15 @@ const WhyChooseUs = () => {
           ></motion.div>
         </motion.div>
       ),
-      title: "Future Projections",
-      description: "Data-driven forecasts and scenario planning backed by industry expertise and market intelligence.",
+      title: translate("futureProjections"),
+      description: translate("futureProjectionsDescription"),
       teaser: {
-        title: "Apple Inc. 5-Year Forecast",
+        title: translate("appleForecast"),
         content: [
-          "Market Cap: $3.2T by 2025 (↑24%)",
-          "Wearables Revenue: $41B by 2026",
-          "Services Growth: 18% CAGR through 2027",
-          "AI Integration: 85% of product lineup by 2026"
+          translate("appleMarketCap"),
+          translate("appleWearablesRevenue"),
+          translate("appleServicesGrowth"),
+          translate("appleAiIntegration")
         ],
         image: "/projection-graph.png"
       }
@@ -213,8 +213,8 @@ const WhyChooseUs = () => {
             className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 shadow-sm"
             whileHover={{ scale: 1.05 }}
           >
-            <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-semibold">
-              Why Choose Us
+            <span className="text-transparent bg-clip-text bg-blue-600 text-sm font-semibold">
+              {translate("whyChooseUs")}
             </span>
           </motion.span>
           
@@ -225,9 +225,9 @@ const WhyChooseUs = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.2, duration: 0.8 }}
           >
-            <span className="block text-slate-900">Expert Insights for</span>
-            <span className="block mt-2 text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600">
-              Strategic Decisions
+            <span className="block text-slate-900">{translate("expertInsights")}</span>
+            <span className="block mt-2 text-transparent bg-clip-text bg-blue-600">
+              {translate("strategicDecisions")}
             </span>
           </motion.h2>
           
@@ -238,7 +238,7 @@ const WhyChooseUs = () => {
             viewport={{ once: true }}
             transition={{ delay: 0.4, duration: 0.8 }}
           >
-            Transforming complex data into actionable business intelligence for today's decision makers
+            {translate("transformingData")}
           </motion.p>
         </motion.div>
 
@@ -301,7 +301,11 @@ const WhyChooseUs = () => {
                     : "bg-gradient-to-r from-blue-50 to-indigo-50 text-blue-700 hover:from-blue-100 hover:to-indigo-100"
                   }`}
                 >
-                  <span>{activeReport === feature.id ? 'Hide Sample' : 'View Sample'}</span>
+                  <span>
+                    {activeReport === feature.id 
+                      ? translate("hideSample") 
+                      : translate("viewSample")}
+                  </span>
                   <ChevronRight className={`w-4 h-4 transition-transform duration-300 ${activeReport === feature.id ? 'rotate-90' : ''}`} />
                 </motion.button>
               </div>
@@ -355,7 +359,7 @@ const WhyChooseUs = () => {
                           onClick={() => navigate("/catalog")}
                           className="inline-flex items-center gap-2 px-4 py-2 bg-blue-50 hover:bg-blue-100 text-blue-700 rounded-lg text-sm font-medium transition-colors duration-200"
                         >
-                          <span>Browse full reports</span>
+                          <span>{translate("browseFullReports")}</span>
                           <ChevronRight className="w-3.5 h-3.5" />
                         </motion.button>
                       </div>
@@ -382,9 +386,9 @@ const WhyChooseUs = () => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => navigate("/catalog")}
-            className="inline-flex items-center gap-3 px-8 py-4 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
+            className="inline-flex items-center gap-3 px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300"
           >
-            <span>Explore Our Reports</span>
+            <span>{translate("exploreReports")}</span>
             <ChevronRight className="w-5 h-5" />
           </motion.button>
         </motion.div>

@@ -1,12 +1,15 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { CheckCircle, BarChart, ArrowRight } from "lucide-react";
+import { CheckCircle, BarChart } from "lucide-react";
+import { useTranslation } from "../../contexts/TranslationContext";
 
 const ExpertAnalysis = () => {
+  const { translate } = useTranslation();
+
   const leftDetails = [
-    "20+ Years Industry Experience",
-    "500+ Companies Analyzed",
-    "Proven Analytical Framework"
+    translate("industryExperience"),
+    translate("companiesAnalyzed"),
+    translate("provenFramework")
   ];
 
   // Enhanced animation variants
@@ -126,7 +129,7 @@ const ExpertAnalysis = () => {
           >
             <motion.div variants={fadeInUp} className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 justify-center lg:justify-start">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-semibold">
-                Industry Leading Analysis
+                {translate("industryLeadingAnalysis")}
               </span>
             </motion.div>
             
@@ -134,9 +137,9 @@ const ExpertAnalysis = () => {
               variants={fadeInUp} 
               className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
             >
-              Expert Analysis 
+              {translate("expertAnalysis")}
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                You Can Trust
+                {translate("youCanTrust")}
               </span>
             </motion.h2>
             
@@ -144,7 +147,7 @@ const ExpertAnalysis = () => {
               variants={fadeInUp}
               className="text-base sm:text-lg text-slate-600 leading-relaxed"
             >
-              With over two decades of experience in financial analysis and business intelligence, our reports provide the deep insights you need to make critical business decisions.
+              {translate("expertAnalysisDescription")}
             </motion.p>
             
             <motion.ul variants={containerVariants} className="space-y-5">
@@ -163,8 +166,8 @@ const ExpertAnalysis = () => {
             </motion.ul>
             
             <motion.div variants={fadeInUp} className="flex justify-center lg:justify-start pt-4">
-              <button className="group inline-flex items-center gap-2 px-6 py-3 text-sm xl:text-lg font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:shadow-lg transition-all duration-300">
-                <span>Learn more about our methodology</span>
+              <button className="group inline-flex items-center gap-2 px-6 py-3 text-sm xl:text-lg font-semibold text-white bg-blue-600 rounded-xl hover:shadow-lg transition-all duration-300">
+                <span>{translate("learnMoreMethodology")}</span>
               </button>
             </motion.div>
           </motion.div>
@@ -207,11 +210,15 @@ const ExpertAnalysis = () => {
                       <div className="p-1 sm:p-1.5 bg-blue-100 rounded-lg">
                         <BarChart className="w-3 h-3 sm:w-4 sm:h-4 text-blue-600" />
                       </div>
-                      <span className="text-xs sm:text-sm font-semibold text-slate-900">Financial Performance</span>
+                      <span className="text-xs sm:text-sm font-semibold text-slate-900">
+                        {translate("financialPerformance")}
+                      </span>
                     </div>
                     <div className="flex justify-between text-xs text-slate-600">
-                      <span>Revenue Growth</span>
-                      <span className="font-medium text-green-600">+24.8%</span>
+                      <span>{translate("revenueGrowth")}</span>
+                      <span className="font-medium text-green-600">
+                        {translate("growthPercentage", { value: "+24.8%" })}
+                      </span>
                     </div>
                   </div>
                 </motion.div>

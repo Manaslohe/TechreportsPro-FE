@@ -53,11 +53,11 @@ const Footer = () => {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">MarketMinds</h3>
-                <p className="text-sm text-blue-200">Investment Insights & Reports</p>
+                <p className="text-sm text-blue-200">{translate("investmentInsights")}</p>
               </div>
             </div>
             <p className="text-slate-300 text-sm leading-relaxed">
-              Professional market intelligence and business research solutions for informed decision-making.
+              {translate("professionalMarketIntelligence")}
             </p>
           </motion.div>
 
@@ -70,7 +70,7 @@ const Footer = () => {
                 </div>
                 <div>
                   <h4 className="text-lg font-semibold text-white mb-2 flex items-center gap-2">
-                    Important Disclaimer
+                    {translate("importantDisclaimer")}
                     <AlertTriangle className="w-4 h-4 text-amber-400" />
                   </h4>
                 </div>
@@ -80,21 +80,21 @@ const Footer = () => {
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p>Market Minds Research provides research and study reports strictly for educational and informational purposes only.</p>
+                    <p>{translate("disclaimerEducationalPurpose")}</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p>We are not registered with SEBI as a Research Analyst or Investment Advisor.</p>
+                    <p>{translate("notRegisteredWithSEBI")}</p>
                   </div>
                 </div>
                 <div className="space-y-3">
                   <div className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p>We do not provide investment advice, stock tips, buy/sell/hold recommendations, or guaranteed returns.</p>
+                    <p>{translate("noInvestmentAdvice")}</p>
                   </div>
                   <div className="flex items-start gap-2">
                     <div className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 flex-shrink-0"></div>
-                    <p>Users are solely responsible for how they interpret and use the information in our reports.</p>
+                    <p>{translate("userResponsibility")}</p>
                   </div>
                 </div>
               </div>
@@ -103,7 +103,7 @@ const Footer = () => {
                 <div className="flex items-start gap-2">
                   <Info className="w-4 h-4 text-red-400 mt-0.5 flex-shrink-0" />
                   <p className="text-sm text-slate-300">
-                    <span className="font-medium text-red-400">Liability:</span> The company is not liable for any financial, legal, or personal decisions made based on our content.
+                    <span className="font-medium text-red-400">{translate("liability")}:</span> {translate("liabilityDescription")}
                   </p>
                 </div>
               </div>
@@ -119,10 +119,23 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="text-center sm:text-left">
               <p className="text-sm text-slate-400">
-                © 2025 MarketMinds Research. {translate('allRightsReserved')}
+                © 2025 MarketMinds Research. {translate("allRightsReserved")}
               </p>
               <p className="text-xs text-slate-500 mt-1">
-                Working Hours: 9 AM - 6 PM. Report access after hours may take 4-6 hours.
+                {translate("workingHours")}
+              </p>
+            </div>
+            
+            {/* Privacy Policy Link */}
+            <div className="text-center sm:text-right">
+              <a 
+                href="/privacy-policy" 
+                className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-300 underline"
+              >
+                Privacy Policy
+              </a>
+              <p className="text-xs text-slate-500 mt-1">
+                Your data protection matters to us
               </p>
             </div>
           </div>

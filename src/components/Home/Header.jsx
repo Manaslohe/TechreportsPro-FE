@@ -62,6 +62,9 @@ const Header = ({ handleNavigation }) => {
   const location = useLocation();
   const { language, setLanguage, translate } = useTranslation();
 
+  // Check if we're on auth pages
+  const isAuthPage = location.pathname === '/signin' || location.pathname === '/signup';
+
   useEffect(() => {
     const updateUser = () => {
       const storedUser = localStorage.getItem("user");
@@ -77,12 +80,17 @@ const Header = ({ handleNavigation }) => {
 
   useEffect(() => {
     const handleScroll = () => {
-      setIsDarkBackground(window.scrollY < 80);
+      // Force white background on auth pages
+      if (isAuthPage) {
+        setIsDarkBackground(false);
+      } else {
+        setIsDarkBackground(window.scrollY < 80);
+      }
     };
     window.addEventListener("scroll", handleScroll);
     handleScroll();
     return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
+  }, [isAuthPage]);
 
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
@@ -103,27 +111,28 @@ const Header = ({ handleNavigation }) => {
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
         className={`px-6 lg:px-8 py-4 flex justify-between items-center fixed w-full top-0 z-50 transition-all duration-300 backdrop-blur-sm ${
-          isDarkBackground ? "bg-black/10" : "bg-white/90"
+          isDarkBackground && !isAuthPage ? "bg-black/10" : "bg-white/95 shadow-sm"
         }`}
       >
         {/* Logo */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex items-center gap-3"
+          className="flex items-center gap-3 cursor-pointer"
+          onClick={() => handleNavigation("/")}
         >
           <div
             className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-              isDarkBackground ? "bg-blue-700" : "bg-blue-600"
+              isDarkBackground && !isAuthPage ? "bg-blue-700" : "bg-blue-600"
             }`}
           >
             <span className="text-white text-lg font-bold">T</span>
           </div>
           <div className="flex flex-col">
-            <span className={`text-lg font-bold ${isDarkBackground ? "text-white" : "text-blue-700"}`}>
+            <span className={`text-lg font-bold ${isDarkBackground && !isAuthPage ? "text-white" : "text-blue-700"}`}>
               MarketMinds
             </span>
-            <span className={`text-xs ${isDarkBackground ? "text-white/80" : "text-gray-600"}`}>
+            <span className={`text-xs ${isDarkBackground && !isAuthPage ? "text-white/80" : "text-gray-600"}`}>
               Investment Insights & Reports
             </span>
           </div>
@@ -143,12 +152,12 @@ const Header = ({ handleNavigation }) => {
                 whileHover={{ rotate: 180 }}
                 transition={{ duration: 0.6, ease: "easeInOut" }}
               >
-                <Globe size={18} className={isDarkBackground ? "text-white/80" : "text-blue-600"} />
+                <Globe size={18} className={isDarkBackground && !isAuthPage ? "text-white/80" : "text-blue-600"} />
               </motion.div>
               <motion.div 
                 className="flex gap-1 p-1 rounded-lg"
                 style={{
-                  background: isDarkBackground ? "rgba(255, 255, 255, 0.05)" : "rgba(37, 99, 235, 0.05)"
+                  background: isDarkBackground && !isAuthPage ? "rgba(255, 255, 255, 0.05)" : "rgba(37, 99, 235, 0.05)"
                 }}
                 whileHover={{ scale: 1.02 }}
                 transition={{ duration: 0.2 }}
@@ -157,13 +166,13 @@ const Header = ({ handleNavigation }) => {
                   language="en"
                   currentLang={language}
                   onClick={setLanguage}
-                  isDark={isDarkBackground}
+                  isDark={isDarkBackground && !isAuthPage}
                 />
                 <LanguageButton
                   language="hi"
                   currentLang={language}
                   onClick={setLanguage}
-                  isDark={isDarkBackground}
+                  isDark={isDarkBackground && !isAuthPage}
                 />
               </motion.div>
             </motion.div>
@@ -174,29 +183,29 @@ const Header = ({ handleNavigation }) => {
                   <NavButton
                     onClick={() => handleNavigation("/")}
                     isActive={location.pathname === "/"}
-                    isDark={isDarkBackground}
+                    isDark={isDarkBackground && !isAuthPage}
                   >
-                    {translate('home')}
+                    {translate("home")}
                   </NavButton>
                 </motion.div>
               )}
             </AnimatePresence>
-            <NavButton onClick={() => setIsAboutOpen(true)} isActive={isAboutOpen} isDark={isDarkBackground}>
-              {translate('about')}
+            <NavButton onClick={() => setIsAboutOpen(true)} isActive={isAboutOpen} isDark={isDarkBackground && !isAuthPage}>
+              {translate("about")}
             </NavButton>
             <NavButton
               onClick={() => handleNavigation("/catalog")}
               isActive={location.pathname === "/catalog"}
-              isDark={isDarkBackground}
+              isDark={isDarkBackground && !isAuthPage}
             >
-              {translate('reports')}
+              {translate("reports")}
             </NavButton>
             <NavButton
               onClick={() => handleNavigation("/contact")}
               isActive={location.pathname === "/contact"}
-              isDark={isDarkBackground}
+              isDark={isDarkBackground && !isAuthPage}
             >
-              {translate('contact')}
+              {translate("contact")}
             </NavButton>
           </div>
 
@@ -209,22 +218,22 @@ const Header = ({ handleNavigation }) => {
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
                   className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
-                    isDarkBackground
+                    isDarkBackground && !isAuthPage
                       ? "bg-red-600/80 text-white"
                       : "bg-red-600 text-white hover:bg-red-700"
                   }`}
                 >
-                  {translate('logout')}
+                  {translate("logout")}
                 </motion.button>
-                <User className={isDarkBackground ? "text-white" : "text-blue-600"} />
+                <User className={isDarkBackground && !isAuthPage ? "text-white" : "text-blue-600"} />
               </>
             ) : (
               <>
-                <NavButton onClick={() => handleNavigation("/signin")} isDark={isDarkBackground}>
-                  {translate('signin')}
+                <NavButton onClick={() => handleNavigation("/signin")} isDark={isDarkBackground && !isAuthPage}>
+                  {translate("signin")}
                 </NavButton>
-                <NavButton variant="primary" onClick={() => handleNavigation("/signup")} isDark={isDarkBackground}>
-                  {translate('getStarted')}
+                <NavButton variant="primary" onClick={() => handleNavigation("/signup")} isDark={isDarkBackground && !isAuthPage}>
+                  {translate("getStartedC")}
                 </NavButton>
               </>
             )}
@@ -237,7 +246,7 @@ const Header = ({ handleNavigation }) => {
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={toggleMenu}
-            className={`${isDarkBackground ? "text-white" : "text-blue-600"} p-2 rounded-lg`}
+            className={`${isDarkBackground && !isAuthPage ? "text-white" : "text-blue-600"} p-2 rounded-lg`}
           >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </motion.button>
@@ -277,16 +286,20 @@ const Header = ({ handleNavigation }) => {
               </div>
             </div>
 
-            <NavButton onClick={() => { handleNavigation("/"); toggleMenu(); }}>{translate('home')}</NavButton>
-            <NavButton onClick={() => { setIsAboutOpen(true); toggleMenu(); }}>{translate('about')}</NavButton>
-            <NavButton onClick={() => { handleNavigation("/catalog"); toggleMenu(); }}>{translate('reports')}</NavButton>
-            <NavButton onClick={() => { handleNavigation("/contact"); toggleMenu(); }}>{translate('contact')}</NavButton>
+            <NavButton onClick={() => { handleNavigation("/"); toggleMenu(); }}>{translate("home")}</NavButton>
+            <NavButton onClick={() => { setIsAboutOpen(true); toggleMenu(); }}>{translate("about")}</NavButton>
+            <NavButton onClick={() => { handleNavigation("/catalog"); toggleMenu(); }}>{translate("reports")}</NavButton>
+            <NavButton onClick={() => { handleNavigation("/contact"); toggleMenu(); }}>{translate("contact")}</NavButton>
             {user ? (
-              <NavButton variant="primary" onClick={handleLogout}>{translate('logout')}</NavButton>
+              <NavButton variant="primary" onClick={handleLogout}>{translate("logout")}</NavButton>
             ) : (
               <>
-                <NavButton onClick={() => { handleNavigation("/signin"); toggleMenu(); }}>{translate('signin')}</NavButton>
-                <NavButton variant="primary" onClick={() => { handleNavigation("/signup"); toggleMenu(); }}>{translate('getStarted')}</NavButton>
+                <NavButton onClick={() => { handleNavigation("/signin"); toggleMenu(); }}>
+                  {translate("signin")}
+                </NavButton>
+                <NavButton variant="primary" onClick={() => { handleNavigation("/signup"); toggleMenu(); }}>
+                  {translate("getStarted")}
+                </NavButton>
               </>
             )}
           </motion.div>

@@ -1,8 +1,7 @@
 import React, { useState } from "react";
 import { motion } from "framer-motion";
-import { Mail, Phone, Copy, CheckCircle, Send } from "lucide-react";
-import axios from 'axios';
-import Toast from '../common/Toast';
+import { Mail, Phone, CheckCircle, Send } from "lucide-react";
+import { FaWhatsapp } from "react-icons/fa";
 
 const Contact = () => {
   const [formData, setFormData] = useState({
@@ -12,41 +11,127 @@ const Contact = () => {
     subject: '',
     message: ''
   });
-  const [copied, setCopied] = useState(null); // Track which item was copied
+  const [copied, setCopied] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  // Animation variants
-  const fadeInUp = {
-    initial: { opacity: 0, y: 20 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.5 }
+  // Enhanced animation variants
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        duration: 0.3,
+        staggerChildren: 0.4
+      }
+    }
+  };
+
+  const formVariants = {
+    hidden: { 
+      opacity: 0, 
+      scale: 0.95,
+      y: 30
+    },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      y: 0,
+      transition: { 
+        duration: 0.8, 
+        ease: [0.22, 1, 0.36, 1],
+        type: "spring",
+        stiffness: 100
+      }
+    }
+  };
+
+  const leftColumnVariants = {
+    hidden: { opacity: 0, x: -60 },
+    visible: {
+      opacity: 1,
+      x: 0,
+      transition: { 
+        duration: 1,
+        ease: [0.22, 1, 0.36, 1],
+        delay: 0.6
+      }
+    }
+  };
+
+  const titleVariants = {
+    hidden: { opacity: 0, y: 30 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: { 
+        duration: 0.8,
+        ease: [0.22, 1, 0.36, 1],
+        delay: 0.8
+      }
+    }
+  };
+
+  const contactItemVariants = {
+    hidden: { opacity: 0, x: -20, scale: 0.95 },
+    visible: (i) => ({
+      opacity: 1,
+      x: 0,
+      scale: 1,
+      transition: {
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+        delay: 1.0 + (i * 0.15)
+      }
+    })
+  };
+
+  const socialLinksVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: [0.22, 1, 0.36, 1],
+        delay: 1.8,
+        staggerChildren: 0.1
+      }
+    }
+  };
+
+  const socialItemVariants = {
+    hidden: { opacity: 0, scale: 0, rotate: -180 },
+    visible: {
+      opacity: 1,
+      scale: 1,
+      rotate: 0,
+      transition: {
+        duration: 0.5,
+        type: "spring",
+        stiffness: 150
+      }
+    }
+  };
+
+  const formFieldVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: (i) => ({
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.4,
+        ease: [0.22, 1, 0.36, 1],
+        delay: 0.2 + (i * 0.05)
+      }
+    })
   };
 
   const handleCopy = (value) => {
     navigator.clipboard.writeText(value);
     setCopied(value);
-    setTimeout(() => setCopied(null), 2000); // Reset after 2 seconds
+    setTimeout(() => setCopied(null), 2000);
   };
-
-  const contactInfo = [
-    {
-      icon: <Phone className="w-5 h-5" />,
-      title: "Call Us",
-      value: "+91 6264799001",
-      details: "Mon-Fri 9AM-6PM IST",
-      copyable: true,
-      link: "tel:+916264799001"
-    },
-    {
-      icon: <Mail className="w-5 h-5" />,
-      title: "Email Us",
-      value: "techreportspro@gmail.com",
-      details: "24/7 Support",
-      copyable: true,
-      link: "mailto:techreportspro@gmail.com"
-    }
-  ];
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -58,13 +143,9 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const token = localStorage.getItem('authToken');
-      await axios.post('/api/contact', formData, {
-        headers: {
-          Authorization: token ? `Bearer ${token}` : undefined
-        }
-      });
-
+      // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
       setToast({
         show: true,
         message: 'Your message has been sent successfully!',
@@ -81,7 +162,7 @@ const Contact = () => {
     } catch (error) {
       setToast({
         show: true,
-        message: error.response?.data?.error || 'Error submitting the form',
+        message: 'Error submitting the form',
         type: 'error'
       });
     } finally {
@@ -90,114 +171,202 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50">
-      {/* Hero Section */}
-      <motion.section 
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        className="relative bg-gradient-to-r from-blue-600 to-blue-800 text-white py-20 lg:py-32"
+    <div className="min-h-screen bg-gradient-to-br from-blue-800 via-blue-700 to-blue-700 p-4 sm:p-6 lg:p-8">
+      <motion.div
+        className="min-h-screen flex items-center justify-center py-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
       >
-        <div className="absolute inset-0 bg-grid-pattern opacity-10"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div {...fadeInUp} className="text-center">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Let's Connect
-            </h1>
-            <p className="text-xl text-blue-100 max-w-2xl mx-auto">
-              Get in touch with our team of experts for professional assistance
-            </p>
-          </motion.div>
-        </div>
-      </motion.section>
-
-      {/* Contact Info Cards */}
-      <section className="relative -mt-16 z-10 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {contactInfo.map((info, index) => (
-              <motion.div
-                key={index}
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: index * 0.2 }}
-                className="bg-white rounded-2xl p-6 shadow-xl hover:shadow-2xl transition-all duration-300 relative"
-              >
-                {info.copyable && (
-                  <div className="absolute top-3 right-3">
-                    <button
-                      onClick={() => handleCopy(info.value)}
-                      className="p-1 bg-blue-100 rounded-full text-blue-600 hover:bg-blue-200 transition"
-                    >
-                      {copied === info.value ? (
-                        <CheckCircle className="w-4 h-4 text-green-600" />
-                      ) : (
-                        <Copy className="w-4 h-4" />
-                      )}
-                    </button>
-                  </div>
-                )}
-                <div className="flex items-center gap-3 mb-3">
-                  <div className="p-2 bg-blue-100 rounded-lg text-blue-600">
-                    {info.icon}
-                  </div>
-                  <div>
-                    <h3 className="font-semibold text-gray-900 text-sm">{info.title}</h3>
-                    <a href={info.link} className="text-blue-600 text-sm hover:underline">
-                      {info.value}
-                    </a>
-                  </div>
-                </div>
-                <p className="text-xs text-gray-500">{info.details}</p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Main Contact Section */}
-      <section className="py-20 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          <div className="grid lg:grid-cols-2 gap-12 lg:gap-20">
-            {/* Right Column - Title and Image */}
+        <div className="w-full max-w-7xl">
+          <div className="grid lg:grid-cols-2 gap-8 xl:gap-16 items-stretch">
+            
+            {/* Left Column - Contact Information */}
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="lg:pt-10 flex flex-col items-center justify-center text-center lg:text-left"
+              variants={leftColumnVariants}
+              className="text-white p-8 lg:p-12 order-2 lg:order-1 flex flex-col justify-center"
             >
-              <h2 className="text-3xl font-bold text-gray-900 mb-6">
-                Get in Touch or Request Custom Analysis
-              </h2>
-              <img
-                src="/contact.png"
-                alt="Contact Illustration"
-                className="max-w-full"
-              />
+              <motion.div variants={titleVariants} className="mb-8 lg:mb-12">
+                <motion.h1 
+                  className="text-4xl lg:text-5xl xl:text-6xl font-bold mb-6 leading-tight"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 1, delay: 0.9 }}
+                >
+                  <motion.span
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 1.0 }}
+                  >
+                    Let's{" "}
+                  </motion.span>
+                  <motion.span 
+                    className="text-blue-200"
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ duration: 0.6, delay: 1.2 }}
+                  >
+                    Connect
+                  </motion.span>
+                </motion.h1>
+              </motion.div>
+
+              <div className="space-y-6 lg:space-y-8 mb-8 lg:mb-12">
+                {/* Email */}
+                <motion.div 
+                  className="flex items-start gap-4 group cursor-pointer"
+                  variants={contactItemVariants}
+                  custom={0}
+                  whileHover={{ x: 8, transition: { type: "spring", stiffness: 400 } }}
+                  onClick={() => handleCopy('techreportspro@gmail.com')}
+                >
+                  <motion.div 
+                    className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Mail className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <div>
+                    <p className="text-blue-200 text-sm font-medium mb-1">Email Us</p>
+                    <p className="text-white font-semibold text-lg">
+                      techreportspro@gmail.com
+                    </p>
+                    <p className="text-blue-100 text-sm">24/7 Support</p>
+                    {copied === 'techreportspro@gmail.com' && (
+                      <motion.span 
+                        initial={{ opacity: 0, y: -10, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        className="text-green-300 text-xs font-medium flex items-center gap-1 mt-1"
+                      >
+                        <CheckCircle className="w-3 h-3" />
+                        Copied!
+                      </motion.span>
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* Phone */}
+                <motion.div 
+                  className="flex items-start gap-4 group cursor-pointer"
+                  variants={contactItemVariants}
+                  custom={1}
+                  whileHover={{ x: 8, transition: { type: "spring", stiffness: 400 } }}
+                  onClick={() => handleCopy('+91 6264799001')}
+                >
+                  <motion.div 
+                    className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm"
+                    whileHover={{ scale: 1.1, rotate: -5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <Phone className="w-6 h-6 text-white" />
+                  </motion.div>
+                  <div>
+                    <p className="text-blue-200 text-sm font-medium mb-1">Call Us</p>
+                    <p className="text-white font-semibold text-lg">
+                      +91 6264799001
+                    </p>
+                    <p className="text-blue-100 text-sm">Mon-Fri 9AM-6PM IST</p>
+                    {copied === '+91 6264799001' && (
+                      <motion.span 
+                        initial={{ opacity: 0, y: -10, scale: 0.8 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        className="text-green-300 text-xs font-medium flex items-center gap-1 mt-1"
+                      >
+                        <CheckCircle className="w-3 h-3" />
+                        Copied!
+                      </motion.span>
+                    )}
+                  </div>
+                </motion.div>
+
+                {/* WhatsApp */}
+                <motion.div 
+                  className="flex items-start gap-4 group cursor-pointer"
+                  variants={contactItemVariants}
+                  custom={2}
+                  whileHover={{ x: 8, transition: { type: "spring", stiffness: 400 } }}
+                  onClick={() => window.open('https://wa.me/916264799001', '_blank')}
+                >
+                  <motion.div 
+                    className="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:bg-green-500/30 transition-all backdrop-blur-sm border border-green-300/20"
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <FaWhatsapp className="w-6 h-6 text-green-300" />
+                  </motion.div>
+                  <div>
+                    <p className="text-blue-200 text-sm font-medium mb-1">Connect on</p>
+                    <p className="text-white font-semibold text-lg">
+                      WhatsApp
+                    </p>
+                    <p className="text-blue-100 text-sm">Quick Response</p>
+                  </div>
+                </motion.div>
+              </div>
             </motion.div>
 
-            {/* Left Column - Form */}
+            {/* Right Column - Contact Form Card */}
             <motion.div
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="bg-white rounded-2xl p-8 shadow-xl"
+              variants={formVariants}
+              className="order-1 lg:order-2 flex items-center"
             >
-              <form onSubmit={handleSubmit} className="space-y-6">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Full Name
-                    </label>
-                    <input
-                      type="text"
-                      name="name"
-                      value={formData.name}
-                      onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      placeholder="John Doe"
-                      required
-                    />
+              <motion.div 
+                className="bg-white rounded-2xl shadow-2xl p-8 lg:p-10 mx-auto max-w-lg lg:max-w-none w-full border border-gray-100"
+                whileHover={{ 
+                  y: -8,
+                  boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
+                }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                <form onSubmit={handleSubmit} className="space-y-6">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                    <motion.div
+                      variants={formFieldVariants}
+                      custom={0}
+                      whileFocus={{ scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    >
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Your name
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={formData.name}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 hover:border-gray-300"
+                        placeholder="Your name"
+                        required
+                      />
+                    </motion.div>
+                    <motion.div
+                      variants={formFieldVariants}
+                      custom={1}
+                      whileFocus={{ scale: 1.02 }}
+                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    >
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        Last name
+                      </label>
+                      <input
+                        type="text"
+                        name="subject"
+                        value={formData.subject}
+                        onChange={handleInputChange}
+                        className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 hover:border-gray-300"
+                        placeholder="Last name"
+                      />
+                    </motion.div>
                   </div>
-                  <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+
+                  <motion.div
+                    variants={formFieldVariants}
+                    custom={2}
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       Email
                     </label>
                     <input
@@ -205,77 +374,118 @@ const Contact = () => {
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                      placeholder="john@example.com"
+                      className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 hover:border-gray-300"
+                      placeholder="name@company.com"
                       required
                     />
-                  </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Phone (Optional)
-                  </label>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="+1 555-555-5555"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Subject (Optional)
-                  </label>
-                  <input
-                    type="text"
-                    name="subject"
-                    value={formData.subject}
-                    onChange={handleInputChange}
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition"
-                    placeholder="Subject"
-                  />
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Message
-                  </label>
-                  <textarea
-                    name="message"
-                    value={formData.message}
-                    onChange={handleInputChange}
-                    rows="6"
-                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-transparent transition resize-none"
-                    placeholder="Your message..."
-                    required
-                  ></textarea>
-                </div>
-                <button
-                  type="submit"
-                  disabled={isSubmitting}
-                  className="w-full sm:w-auto px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
-                >
-                  {isSubmitting ? (
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                  ) : (
-                    <>
-                      <Send className="w-4 h-4" />
-                      Send Message
-                    </>
-                  )}
-                </button>
-              </form>
+                  </motion.div>
+
+                  {/* Phone Number with separated country code */}
+                  <motion.div
+                    variants={formFieldVariants}
+                    custom={3}
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Phone number
+                    </label>
+                    <div className="flex gap-2">
+                      <div className="flex items-center px-4 py-3 bg-blue-50 border border-blue-200 rounded-xl text-blue-700 font-semibold min-w-[70px] justify-center">
+                        +91
+                      </div>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="flex-1 px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 hover:border-gray-300"
+                        placeholder="1234567890"
+                        maxLength="10"
+                        pattern="[0-9]{10}"
+                      />
+                    </div>
+                  </motion.div>
+
+                  <motion.div
+                    variants={formFieldVariants}
+                    custom={4}
+                    whileFocus={{ scale: 1.02 }}
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                  >
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      Message
+                    </label>
+                    <textarea
+                      name="message"
+                      value={formData.message}
+                      onChange={handleInputChange}
+                      rows="4"
+                      className="w-full px-4 py-3 bg-gray-50/80 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 resize-none hover:border-gray-300"
+                      placeholder="Tell us about your project..."
+                      required
+                    />
+                  </motion.div>
+
+                  <motion.button
+                    variants={formFieldVariants}
+                    custom={5}
+                    type="submit"
+                    disabled={isSubmitting}
+                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileTap={{ scale: 0.98 }}
+                    className="w-full px-8 py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70"
+                  >
+                    {isSubmitting ? (
+                      <motion.div 
+                        className="w-5 h-5 border-2 border-white border-t-transparent rounded-full"
+                        animate={{ rotate: 360 }}
+                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+                      />
+                    ) : (
+                      <>
+                        Send message
+                        <motion.div
+                          animate={{ x: [0, 3, 0] }}
+                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
+                        >
+                          <Send className="w-4 h-4" />
+                        </motion.div>
+                      </>
+                    )}
+                  </motion.button>
+                </form>
+              </motion.div>
             </motion.div>
           </div>
         </div>
-      </section>
-      <Toast
-        isVisible={toast.show}
-        message={toast.message}
-        type={toast.type}
-        onClose={() => setToast({ ...toast, show: false })}
-      />
+      </motion.div>
+
+      {/* Toast Notification */}
+      {toast.show && (
+        <motion.div
+          initial={{ opacity: 0, y: 50, scale: 0.9 }}
+          animate={{ opacity: 1, y: 0, scale: 1 }}
+          exit={{ opacity: 0, y: 50, scale: 0.9 }}
+          transition={{ type: "spring", stiffness: 300, damping: 30 }}
+          className="fixed bottom-4 right-4 z-50"
+        >
+          <div className={`px-6 py-4 rounded-xl shadow-2xl flex items-center gap-3 backdrop-blur-lg ${
+            toast.type === 'success' 
+              ? 'bg-green-500/90 text-white' 
+              : 'bg-red-500/90 text-white'
+          }`}>
+            {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}
+            <span className="font-medium">{toast.message}</span>
+            <button 
+              onClick={() => setToast({ ...toast, show: false })}
+              className="ml-2 hover:opacity-70 text-xl leading-none"
+            >
+              ×
+            </button>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 };

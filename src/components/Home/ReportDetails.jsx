@@ -1,42 +1,45 @@
 import React from "react";
 import { motion } from "framer-motion";
-import { FileText, BarChart, Activity, Shield, TrendingUp, ArrowRight } from "lucide-react";
+import { FileText, BarChart, Activity, Shield, TrendingUp } from "lucide-react";
+import { useTranslation } from "../../contexts/TranslationContext";
 
 const ReportDetails = () => {
+  const { translate } = useTranslation();
+
   const rightDetails = [
     { 
       id: 1,
       icon: <FileText className="w-5 h-5 sm:w-6 sm:h-6 text-white" />, 
-      title: "Executive Summary",
-      text: "Concise overview of key findings and recommendations for quick decision-making.",
+      title: translate("executiveSummary"),
+      text: translate("executiveSummaryDescription"),
       color: "from-blue-400 to-blue-600"
     },
     { 
       id: 2,
       icon: <BarChart className="w-5 h-5 sm:w-6 sm:h-6 text-white" />, 
-      title: "Financial Analysis",
-      text: "Comprehensive financial modeling, ratio analysis, and performance metrics.",
+      title: translate("financialAnalysis"),
+      text: translate("financialAnalysisDescription"),
       color: "from-indigo-400 to-indigo-600"
     },
     { 
       id: 3,
       icon: <Activity className="w-5 h-5 sm:w-6 sm:h-6 text-white" />, 
-      title: "Performance Metrics",
-      text: "Key operational indicators benchmarked against industry standards.",
+      title: translate("performanceMetrics"),
+      text: translate("performanceMetricsDescription"),
       color: "from-purple-400 to-purple-600"
     },
     { 
       id: 4,
       icon: <Shield className="w-5 h-5 sm:w-6 sm:h-6 text-white" />, 
-      title: "SWOT Analysis",
-      text: "Detailed strengths, weaknesses, opportunities, and threats assessment.",
+      title: translate("swotAnalysis"),
+      text: translate("swotAnalysisDescription"),
       color: "from-green-400 to-teal-500"
     },
     { 
       id: 5,
       icon: <TrendingUp className="w-5 h-5 sm:w-6 sm:h-6 text-white" />, 
-      title: "Future Projections",
-      text: "Data-driven forecasts and scenario planning backed by industry expertise.",
+      title: translate("futureProjections"),
+      text: translate("futureProjectionsDescription"),
       color: "from-orange-400 to-pink-500"
     }
   ];
@@ -139,18 +142,18 @@ const ReportDetails = () => {
           >
             <div className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 mb-6">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-semibold">
-                Comprehensive Reports
+                {translate("comprehensiveReports")}
               </span>
             </div>
             
             <h3 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900">
-              What's Included in
+              {translate("whatsIncluded")}
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 mt-2">
-                Each Report
+                {translate("eachReport")}
               </span>
             </h3>
             <p className="mt-6 text-slate-600 text-lg max-w-2xl mx-auto">
-              Every report is crafted by our team of financial analysts and industry experts to provide comprehensive insights.
+              {translate("craftedByExperts")}
             </p>
           </motion.div>
           
@@ -442,7 +445,7 @@ const ReportDetails = () => {
           >
             <motion.div variants={fadeInUp} className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 mb-4">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-semibold">
-                Ready to Dive Deeper?
+                {translate("readyToDive")}
               </span>
             </motion.div>
             
@@ -450,19 +453,19 @@ const ReportDetails = () => {
               variants={fadeInUp} 
               className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-gray-900 leading-tight mb-4"
             >
-              Unlock the Full Potential of Your Data
+              {translate("unlockPotential")}
             </motion.h2>
             
             <motion.p 
               variants={fadeInUp}
               className="text-base sm:text-lg text-slate-600 leading-relaxed max-w-3xl mx-auto mb-6"
             >
-              Our comprehensive reports are designed to provide you with actionable insights and strategic recommendations.
+              {translate("actionableInsights")}
             </motion.p>
             
             <motion.div variants={fadeInUp} className="flex justify-center">
               <button className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:shadow-lg transition-all duration-300">
-                <span>Get Started with a Free Consultation</span>
+                <span>{translate("getStarted")}</span>
               </button>
             </motion.div>
           </motion.div>

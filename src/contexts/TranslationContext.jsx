@@ -12,23 +12,26 @@ export const TranslationProvider = ({ children }) => {
     localStorage.setItem('language', language);
   }, [language]);
 
-  const translate = (key, fallback = null) => {
+  const translate = (key, values = {}, fallback = null) => {
     try {
-      const translation = translations[language]?.[key];
-      if (translation) {
-        return translation;
+      let translation = translations[language]?.[key];
+      if (!translation) {
+        // Fallback to English if current language doesn't have the key
+        translation = translations['en']?.[key];
+        if (!translation) {
+          console.warn(`Translation key "${key}" not found in any language`);
+          return fallback || key;
+        }
       }
-      
-      // Fallback to English if current language doesn't have the key
-      const englishTranslation = translations['en']?.[key];
-      if (englishTranslation) {
-        console.warn(`Translation key "${key}" not found in ${language}, using English fallback`);
-        return englishTranslation;
+
+      // Replace placeholders with dynamic values
+      if (values && typeof values === 'object') {
+        Object.keys(values).forEach((placeholder) => {
+          translation = translation.replace(`{${placeholder}}`, values[placeholder]);
+        });
       }
-      
-      // If no translation found, return fallback or key
-      console.warn(`Translation key "${key}" not found in any language`);
-      return fallback || key;
+
+      return translation;
     } catch (error) {
       console.error(`Translation error for key "${key}":`, error);
       return fallback || key;
