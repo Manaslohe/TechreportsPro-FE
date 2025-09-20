@@ -1,247 +1,299 @@
-import React, { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, User } from 'lucide-react';
-import { useLocation } from 'react-router-dom';
-import About from '../About/About';
-import Toast from '../common/Toast'; // Import Toast
+import React, { useState, useEffect } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Menu, X, User, Globe } from "lucide-react";
+import { useLocation } from "react-router-dom";
+import About from "../About/About";
+import Toast from "../common/Toast";
+import { useTranslation } from "../../contexts/TranslationContext";
 
-const NavButton = ({ children, variant = 'secondary', onClick, isActive }) => (
-  <button
+const NavButton = ({ children, variant = "secondary", onClick, isActive, isDark }) => (
+  <motion.button
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
     onClick={onClick}
     className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
       isActive
-        ? 'bg-blue-600 text-white shadow-md'
-        : variant === 'primary'
-        ? 'bg-gradient-to-r from-blue-600 to-blue-700 text-white hover:shadow-blue-500/25 hover:shadow-lg'
-        : 'text-gray-600 hover:text-blue-600 hover:bg-blue-50'
+        ? `${isDark ? "text-white bg-white/10" : "text-blue-600 bg-blue-100"} border border-transparent`
+        : variant === "primary"
+        ? `${isDark ? "bg-white/20 text-white" : "bg-blue-600 text-white hover:bg-blue-700"}`
+        : `${isDark ? "text-white/90 hover:text-white" : "text-blue-600 hover:text-blue-700"}`
     }`}
   >
     {children}
-  </button>
+  </motion.button>
+);
+
+const LanguageButton = ({ language, currentLang, onClick, isDark }) => (
+  <motion.button
+    onClick={() => onClick(language)}
+    className={`px-3 py-1 rounded-md text-sm font-medium relative ${
+      isDark
+        ? "text-white hover:text-white"
+        : "text-blue-600 hover:text-blue-700"
+    }`}
+    whileHover={{ scale: 1.05 }}
+    whileTap={{ scale: 0.95 }}
+    animate={{
+      color: currentLang === language 
+        ? (isDark ? "rgb(255, 255, 255)" : "rgb(37, 99, 235)") 
+        : (isDark ? "rgba(255, 255, 255, 0.8)" : "rgb(37, 99, 235)")
+    }}
+    transition={{ duration: 0.2 }}
+  >
+    {language.toUpperCase()}
+    {currentLang === language && (
+      <motion.div
+        layoutId="langHighlight"
+        className={`absolute inset-0 rounded-md -z-10 ${
+          isDark ? "bg-white/20" : "bg-blue-100"
+        }`}
+        transition={{ type: "spring", stiffness: 400, damping: 30 }}
+      />
+    )}
+  </motion.button>
 );
 
 const Header = ({ handleNavigation }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isAboutOpen, setIsAboutOpen] = useState(false);
   const [user, setUser] = useState(null);
-  const [toast, setToast] = useState({ show: false, message: '', type: 'success' }); // Toast state
+  const [toast, setToast] = useState({ show: false, message: "", type: "success" });
+  const [isDarkBackground, setIsDarkBackground] = useState(true);
   const location = useLocation();
+  const { language, setLanguage, translate } = useTranslation();
 
   useEffect(() => {
-    // Function to update user state from localStorage
     const updateUser = () => {
-      const storedUser = localStorage.getItem('user');
+      const storedUser = localStorage.getItem("user");
       setUser(storedUser ? JSON.parse(storedUser) : null);
     };
-
-    // Initial user state setup
     updateUser();
 
-    // Listen for custom "authChange" events
     const handleAuthChange = () => updateUser();
-    window.addEventListener('authChange', handleAuthChange);
+    window.addEventListener("authChange", handleAuthChange);
 
-    return () => {
-      window.removeEventListener('authChange', handleAuthChange);
-    };
+    return () => window.removeEventListener("authChange", handleAuthChange);
   }, []);
 
-  const toggleMenu = () => {
-    setIsMenuOpen(!isMenuOpen);
-  };
+  useEffect(() => {
+    const handleScroll = () => {
+      setIsDarkBackground(window.scrollY < 80);
+    };
+    window.addEventListener("scroll", handleScroll);
+    handleScroll();
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
 
   const handleLogout = () => {
-    localStorage.removeItem('authToken');
-    localStorage.removeItem('user');
+    localStorage.removeItem("authToken");
+    localStorage.removeItem("user");
     setUser(null);
-    handleNavigation('/');
-    // Dispatch custom event to notify other components
-    window.dispatchEvent(new Event('authChange'));
-
-    // Show logout success toast
-    setToast({
-      show: true,
-      message: 'Successfully logged out!',
-      type: 'success',
-    });
+    handleNavigation("/");
+    window.dispatchEvent(new Event("authChange"));
+    setToast({ show: true, message: "Successfully logged out!", type: "success" });
   };
 
   return (
     <>
-      <nav
-        className={`px-6 lg:px-8 py-4 flex justify-between items-center fixed w-full top-0 z-50 border-b border-blue-100 transition-all duration-300 ${
-          isAboutOpen ? 'bg-white/70 backdrop-blur-sm' : 'bg-white/70'
+      {/* Header */}
+      <motion.nav
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className={`px-6 lg:px-8 py-4 flex justify-between items-center fixed w-full top-0 z-50 transition-all duration-300 backdrop-blur-sm ${
+          isDarkBackground ? "bg-black/10" : "bg-white/90"
         }`}
       >
+        {/* Logo */}
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           className="flex items-center gap-3"
         >
-          <div className="w-9 h-9 bg-gradient-to-tr from-blue-600 to-blue-500 rounded-lg flex items-center justify-center shadow-md shadow-blue-500/20">
+          <div
+            className={`w-9 h-9 rounded-lg flex items-center justify-center ${
+              isDarkBackground ? "bg-blue-700" : "bg-blue-600"
+            }`}
+          >
             <span className="text-white text-lg font-bold">T</span>
           </div>
           <div className="flex flex-col">
-            <span className="text-lg font-bold bg-gradient-to-r from-blue-600 to-blue-500 bg-clip-text text-transparent">
-              Techreportspro
+            <span className={`text-lg font-bold ${isDarkBackground ? "text-white" : "text-blue-700"}`}>
+              MarketMinds
             </span>
-            <span className="text-xs text-blue-600/80">Investment Insights & Reports</span>
+            <span className={`text-xs ${isDarkBackground ? "text-white/80" : "text-gray-600"}`}>
+              Investment Insights & Reports
+            </span>
           </div>
         </motion.div>
 
-        {/* Desktop Navigation */}
+        {/* Desktop Menu */}
         <div className="hidden lg:flex items-center gap-8">
           <div className="flex items-center gap-6">
+            {/* Language Switcher */}
+            <motion.div 
+              className="flex items-center gap-2 mr-4"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <motion.div
+                whileHover={{ rotate: 180 }}
+                transition={{ duration: 0.6, ease: "easeInOut" }}
+              >
+                <Globe size={18} className={isDarkBackground ? "text-white/80" : "text-blue-600"} />
+              </motion.div>
+              <motion.div 
+                className="flex gap-1 p-1 rounded-lg"
+                style={{
+                  background: isDarkBackground ? "rgba(255, 255, 255, 0.05)" : "rgba(37, 99, 235, 0.05)"
+                }}
+                whileHover={{ scale: 1.02 }}
+                transition={{ duration: 0.2 }}
+              >
+                <LanguageButton
+                  language="en"
+                  currentLang={language}
+                  onClick={setLanguage}
+                  isDark={isDarkBackground}
+                />
+                <LanguageButton
+                  language="hi"
+                  currentLang={language}
+                  onClick={setLanguage}
+                  isDark={isDarkBackground}
+                />
+              </motion.div>
+            </motion.div>
+
             <AnimatePresence>
-              {location.pathname !== '/' && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.3 }}
-                >
+              {location.pathname !== "/" && (
+                <motion.div initial={{ opacity: 0, x: -10 }} animate={{ opacity: 1, x: 0 }}>
                   <NavButton
-                    onClick={() => handleNavigation('/')}
-                    isActive={location.pathname === '/'}
+                    onClick={() => handleNavigation("/")}
+                    isActive={location.pathname === "/"}
+                    isDark={isDarkBackground}
                   >
-                    Home
+                    {translate('home')}
                   </NavButton>
                 </motion.div>
               )}
             </AnimatePresence>
-            <NavButton
-              onClick={() => setIsAboutOpen(true)}
-              isActive={isAboutOpen}
-            >
-              About
+            <NavButton onClick={() => setIsAboutOpen(true)} isActive={isAboutOpen} isDark={isDarkBackground}>
+              {translate('about')}
             </NavButton>
             <NavButton
-              onClick={() => handleNavigation('/catalog')}
-              isActive={location.pathname === '/catalog'}
+              onClick={() => handleNavigation("/catalog")}
+              isActive={location.pathname === "/catalog"}
+              isDark={isDarkBackground}
             >
-              Reports
+              {translate('reports')}
             </NavButton>
             <NavButton
-              onClick={() => handleNavigation('/contact')}
-              isActive={location.pathname === '/contact'}
+              onClick={() => handleNavigation("/contact")}
+              isActive={location.pathname === "/contact"}
+              isDark={isDarkBackground}
             >
-              Contact
+              {translate('contact')}
             </NavButton>
           </div>
-          <div className="flex items-center gap-4 ml-4 pl-4 border-l border-gray-200">
+
+          {/* Auth Buttons */}
+          <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
             {user ? (
               <>
-                <button
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
-                  className="px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-red-500/25 hover:shadow-lg"
+                  className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
+                    isDarkBackground
+                      ? "bg-red-600/80 text-white"
+                      : "bg-red-600 text-white hover:bg-red-700"
+                  }`}
                 >
-                  Logout
-                </button>
-                <User className="text-gray-600" />
+                  {translate('logout')}
+                </motion.button>
+                <User className={isDarkBackground ? "text-white" : "text-blue-600"} />
               </>
             ) : (
               <>
-                <NavButton onClick={() => handleNavigation('/signin')}>Sign in</NavButton>
-                <NavButton variant="primary" onClick={() => handleNavigation('/signup')}>
-                  Get Started
+                <NavButton onClick={() => handleNavigation("/signin")} isDark={isDarkBackground}>
+                  {translate('signin')}
+                </NavButton>
+                <NavButton variant="primary" onClick={() => handleNavigation("/signup")} isDark={isDarkBackground}>
+                  {translate('getStarted')}
                 </NavButton>
               </>
             )}
           </div>
         </div>
 
-        {/* Mobile Navigation */}
+        {/* Mobile Menu Button */}
         <div className="lg:hidden">
-          <button onClick={toggleMenu} className="text-gray-600 hover:text-blue-600">
+          <motion.button
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={toggleMenu}
+            className={`${isDarkBackground ? "text-white" : "text-blue-600"} p-2 rounded-lg`}
+          >
             {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
+          </motion.button>
         </div>
+      </motion.nav>
 
+      {/* Mobile Menu Overlay */}
+      <AnimatePresence>
         {isMenuOpen && (
-          <div className="absolute top-full left-0 w-full bg-white shadow-lg border-t border-gray-200 lg:hidden">
-            <div className="flex flex-col items-center gap-4 py-4">
-              <AnimatePresence>
-                {location.pathname !== '/' && (
-                  <motion.div
-                    initial={{ opacity: 0, x: -10 }}
-                    animate={{ opacity: 1, x: 0 }}
-                    exit={{ opacity: 0, x: -10 }}
-                    transition={{ duration: 0.3 }}
-                  >
-                    <NavButton
-                      onClick={() => {
-                        handleNavigation('/');
-                        toggleMenu();
-                      }}
-                      isActive={location.pathname === '/'}
-                    >
-                      Home
-                    </NavButton>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-              <NavButton
-                onClick={() => setIsAboutOpen(true)}
-                isActive={isAboutOpen}
-              >
-                About
-              </NavButton>
-              <NavButton
-                onClick={() => {
-                  handleNavigation('/catalog');
-                  toggleMenu();
-                }}
-                isActive={location.pathname === '/catalog'}
-              >
-                Reports
-              </NavButton>
-              <NavButton
-                onClick={() => {
-                  handleNavigation('/contact');
-                  toggleMenu();
-                }}
-                isActive={location.pathname === '/contact'}
-              >
-                Contact
-              </NavButton>
-              <div className="flex flex-col items-center gap-4 mt-4 border-t border-gray-200 pt-4">
-                {user ? (
-                  <button
-                    onClick={handleLogout}
-                    className="px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 bg-gradient-to-r from-red-600 to-red-700 text-white hover:shadow-red-500/25 hover:shadow-lg"
-                  >
-                    Logout
-                  </button>
-                ) : (
-                  <>
-                    <NavButton
-                      onClick={() => {
-                        handleNavigation('/signin');
-                        toggleMenu();
-                      }}
-                    >
-                      Sign in
-                    </NavButton>
-                    <NavButton
-                      variant="primary"
-                      onClick={() => {
-                        handleNavigation('/signup');
-                        toggleMenu();
-                      }}
-                    >
-                      Get Started
-                    </NavButton>
-                  </>
-                )}
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ type: "spring", stiffness: 80 }}
+            className="fixed top-0 right-0 w-3/4 h-full bg-white shadow-lg z-50 p-6 flex flex-col gap-6"
+          >
+            <button onClick={toggleMenu} className="self-end">
+              <X size={28} className="text-blue-600" />
+            </button>
+
+            {/* Mobile Language Switcher */}
+            <div className="flex items-center gap-2 pb-4 border-b border-gray-100">
+              <Globe size={18} className="text-blue-600" />
+              <div className="flex gap-1 p-1 rounded-lg bg-blue-50">
+                <LanguageButton
+                  language="en"
+                  currentLang={language}
+                  onClick={setLanguage}
+                  isDark={false}
+                />
+                <LanguageButton
+                  language="hi"
+                  currentLang={language}
+                  onClick={setLanguage}
+                  isDark={false}
+                />
               </div>
             </div>
-          </div>
+
+            <NavButton onClick={() => { handleNavigation("/"); toggleMenu(); }}>{translate('home')}</NavButton>
+            <NavButton onClick={() => { setIsAboutOpen(true); toggleMenu(); }}>{translate('about')}</NavButton>
+            <NavButton onClick={() => { handleNavigation("/catalog"); toggleMenu(); }}>{translate('reports')}</NavButton>
+            <NavButton onClick={() => { handleNavigation("/contact"); toggleMenu(); }}>{translate('contact')}</NavButton>
+            {user ? (
+              <NavButton variant="primary" onClick={handleLogout}>{translate('logout')}</NavButton>
+            ) : (
+              <>
+                <NavButton onClick={() => { handleNavigation("/signin"); toggleMenu(); }}>{translate('signin')}</NavButton>
+                <NavButton variant="primary" onClick={() => { handleNavigation("/signup"); toggleMenu(); }}>{translate('getStarted')}</NavButton>
+              </>
+            )}
+          </motion.div>
         )}
-      </nav>
+      </AnimatePresence>
 
       <About isOpen={isAboutOpen} onClose={() => setIsAboutOpen(false)} />
-
-      {/* Toast Notification */}
       <Toast
         isVisible={toast.show}
         message={toast.message}
@@ -253,4 +305,3 @@ const Header = ({ handleNavigation }) => {
 };
 
 export default Header;
-

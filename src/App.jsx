@@ -18,6 +18,7 @@ import axios from 'axios';
 import AdminRequest from './components/Admin/AdminRequest';
 import AdminContact from './components/Admin/AdminContact';
 import AdminUser from './components/Admin/AdminUser';
+import { TranslationProvider } from './contexts/TranslationContext';
 
 axios.defaults.baseURL = 'https://techbe-zeta.vercel.app'; // Update with your backend URL
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -64,60 +65,62 @@ function App() {
   }
 
   return (
-    <>
-      <ScrollToTop />
-      {!isAdminRoute && <Header handleNavigation={handleNavigation} />}
-      <AnimatePresence mode="wait">
-        <div className="min-h-screen flex flex-col">
-          <Routes>
-            <Route path="/" element={<LandingPage />} />
-            <Route path="/contact" element={<Contact />} />
-            <Route path="/signup" element={<SignupForm />} />
-            <Route path="/signin" element={<SignInForm />} />
-            <Route path="/catalog" element={<Catalog />} />
-            <Route
-              path="/admin/login"
-              element={
-                <AdminLoginRoute>
-                  <AdminLogin />
-                </AdminLoginRoute>
-              }
-            />
-            <Route
-              path="/admin"
-              element={
-                <ProtectedRoute>
-                  <AdminLayout />
-                </ProtectedRoute>
-              }
-            >
-              <Route index element={<AdminDashboard />} />
-              <Route path="dashboard" element={<AdminDashboard />} />
-              <Route path="reports" element={<AdminReport />} />
-              <Route path="requests" element={<AdminRequest />} />
-              <Route path="contacts" element={<AdminContact />} /> {/* New route */}
-              <Route path="users" element={<AdminUser />} /> {/* New route for AdminUser */}
-            </Route>
-            <Route 
-              path="/payment/:reportId" 
-              element={
-                <UserProtectedRoute>
-                  <PaymentForm />
-                </UserProtectedRoute>
-              } 
-            />
-            <Route
-              path="/report/view/:reportId"
-              element={
-                <UserProtectedRoute>
-                  <PdfViewer />
-                </UserProtectedRoute>
-              }
-            />
-          </Routes>
-        </div>
-      </AnimatePresence>
-    </>
+    <TranslationProvider>
+      <>
+        <ScrollToTop />
+        {!isAdminRoute && <Header handleNavigation={handleNavigation} />}
+        <AnimatePresence mode="wait">
+          <div className="min-h-screen flex flex-col">
+            <Routes>
+              <Route path="/" element={<LandingPage />} />
+              <Route path="/contact" element={<Contact />} />
+              <Route path="/signup" element={<SignupForm />} />
+              <Route path="/signin" element={<SignInForm />} />
+              <Route path="/catalog" element={<Catalog />} />
+              <Route
+                path="/admin/login"
+                element={
+                  <AdminLoginRoute>
+                    <AdminLogin />
+                  </AdminLoginRoute>
+                }
+              />
+              <Route
+                path="/admin"
+                element={
+                  <ProtectedRoute>
+                    <AdminLayout />
+                  </ProtectedRoute>
+                }
+              >
+                <Route index element={<AdminDashboard />} />
+                <Route path="dashboard" element={<AdminDashboard />} />
+                <Route path="reports" element={<AdminReport />} />
+                <Route path="requests" element={<AdminRequest />} />
+                <Route path="contacts" element={<AdminContact />} /> {/* New route */}
+                <Route path="users" element={<AdminUser />} /> {/* New route for AdminUser */}
+              </Route>
+              <Route 
+                path="/payment/:reportId" 
+                element={
+                  <UserProtectedRoute>
+                    <PaymentForm />
+                  </UserProtectedRoute>
+                } 
+              />
+              <Route
+                path="/report/view/:reportId"
+                element={
+                  <UserProtectedRoute>
+                    <PdfViewer />
+                  </UserProtectedRoute>
+                }
+              />
+            </Routes>
+          </div>
+        </AnimatePresence>
+      </>
+    </TranslationProvider>
   );
 }
 
