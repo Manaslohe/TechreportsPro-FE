@@ -2,9 +2,11 @@ import React from "react";
 import { motion } from "framer-motion";
 import { FileText, BarChart, Activity, Shield, TrendingUp } from "lucide-react";
 import { useTranslation } from "../../contexts/TranslationContext";
+import { useNavigate } from "react-router-dom";
 
 const ReportDetails = () => {
   const { translate } = useTranslation();
+  const navigate = useNavigate();
 
   const rightDetails = [
     { 
@@ -464,7 +466,10 @@ const ReportDetails = () => {
             </motion.p>
             
             <motion.div variants={fadeInUp} className="flex justify-center">
-              <button className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:shadow-lg transition-all duration-300">
+              <button
+                onClick={() => navigate("/contact")}
+                className="group inline-flex items-center justify-center gap-3 px-8 py-4 text-base font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-xl hover:shadow-lg transition-all duration-300"
+              >
                 <span>{translate("getStarted")}</span>
               </button>
             </motion.div>

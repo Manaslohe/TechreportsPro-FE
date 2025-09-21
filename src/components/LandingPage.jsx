@@ -4,6 +4,7 @@ import Home from './Home/Hero';
 import WhyChooseUs from './Home/WhyChooseUs';
 import ExpertAnalysis from './Home/ExpertAnalysis';
 import ReportDetails from './Home/ReportDetails';
+import Pricing from './Home/Pricing';
 import Footer from './Home/Footer';
 
 export default function LandingPage() {
@@ -27,6 +28,7 @@ export default function LandingPage() {
       <WhyChooseUs />
       <ExpertAnalysis />
       <ReportDetails />
+      <Pricing />
       <Footer />
       <div
         className={`fixed bottom-6 right-6 transition-opacity duration-300 ${

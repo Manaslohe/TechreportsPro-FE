@@ -5,6 +5,7 @@ import { useLocation } from "react-router-dom";
 import About from "../About/About";
 import Toast from "../common/Toast";
 import { useTranslation } from "../../contexts/TranslationContext";
+import logo from "../../../public/logo.png"; // Import the logo
 
 const NavButton = ({ children, variant = "secondary", onClick, isActive, isDark }) => (
   <motion.button
@@ -121,12 +122,8 @@ const Header = ({ handleNavigation }) => {
           className="flex items-center gap-3 cursor-pointer"
           onClick={() => handleNavigation("/")}
         >
-          <div
-            className={`w-9 h-9 rounded-lg flex items-center justify-center ${
-              isDarkBackground && !isAuthPage ? "bg-blue-700" : "bg-blue-600"
-            }`}
-          >
-            <span className="text-white text-lg font-bold">T</span>
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center bg-white shadow-md">
+            <img src={logo} alt="MarketMinds Logo" className="w-7 h-7" /> {/* Use logo */}
           </div>
           <div className="flex flex-col">
             <span className={`text-lg font-bold ${isDarkBackground && !isAuthPage ? "text-white" : "text-blue-700"}`}>

@@ -2,8 +2,10 @@ import React, { useState } from "react";
 import { motion } from "framer-motion";
 import { Mail, Phone, CheckCircle, Send } from "lucide-react";
 import { FaWhatsapp } from "react-icons/fa";
+import { useTranslation } from "../../contexts/TranslationContext";
 
 const Contact = () => {
+  const { translate } = useTranslation();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -198,7 +200,7 @@ const Contact = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: 1.0 }}
                   >
-                    Let's{" "}
+                    {translate("lets")}{" "}
                   </motion.span>
                   <motion.span 
                     className="text-blue-200"
@@ -206,7 +208,7 @@ const Contact = () => {
                     animate={{ opacity: 1, x: 0 }}
                     transition={{ duration: 0.6, delay: 1.2 }}
                   >
-                    Connect
+                    {translate("connect")}
                   </motion.span>
                 </motion.h1>
               </motion.div>
@@ -228,11 +230,10 @@ const Contact = () => {
                     <Mail className="w-6 h-6 text-white" />
                   </motion.div>
                   <div>
-                    <p className="text-blue-200 text-sm font-medium mb-1">Email Us</p>
+                    <p className="text-blue-200 text-sm font-medium mb-1">{translate("emailUs")}</p>
                     <p className="text-white font-semibold text-lg">
                       techreportspro@gmail.com
                     </p>
-                    <p className="text-blue-100 text-sm">24/7 Support</p>
                     {copied === 'techreportspro@gmail.com' && (
                       <motion.span 
                         initial={{ opacity: 0, y: -10, scale: 0.8 }}
@@ -240,7 +241,7 @@ const Contact = () => {
                         className="text-green-300 text-xs font-medium flex items-center gap-1 mt-1"
                       >
                         <CheckCircle className="w-3 h-3" />
-                        Copied!
+                        {translate("copied")}
                       </motion.span>
                     )}
                   </div>
@@ -262,11 +263,11 @@ const Contact = () => {
                     <Phone className="w-6 h-6 text-white" />
                   </motion.div>
                   <div>
-                    <p className="text-blue-200 text-sm font-medium mb-1">Call Us</p>
+                    <p className="text-blue-200 text-sm font-medium mb-1">{translate("callUs")}</p>
                     <p className="text-white font-semibold text-lg">
                       +91 6264799001
                     </p>
-                    <p className="text-blue-100 text-sm">Mon-Fri 9AM-6PM IST</p>
+                    <p className="text-blue-100 text-sm">{translate("workingHours")}</p>
                     {copied === '+91 6264799001' && (
                       <motion.span 
                         initial={{ opacity: 0, y: -10, scale: 0.8 }}
@@ -274,7 +275,7 @@ const Contact = () => {
                         className="text-green-300 text-xs font-medium flex items-center gap-1 mt-1"
                       >
                         <CheckCircle className="w-3 h-3" />
-                        Copied!
+                        {translate("copied")}
                       </motion.span>
                     )}
                   </div>
@@ -296,11 +297,11 @@ const Contact = () => {
                     <FaWhatsapp className="w-6 h-6 text-green-300" />
                   </motion.div>
                   <div>
-                    <p className="text-blue-200 text-sm font-medium mb-1">Connect on</p>
+                    <p className="text-blue-200 text-sm font-medium mb-1">{translate("connectOn")}</p>
                     <p className="text-white font-semibold text-lg">
                       WhatsApp
                     </p>
-                    <p className="text-blue-100 text-sm">Quick Response</p>
+                    <p className="text-blue-100 text-sm">{translate("quickResponse")}</p>
                   </div>
                 </motion.div>
               </div>
@@ -444,7 +445,7 @@ const Contact = () => {
                       />
                     ) : (
                       <>
-                        Send message
+                        {translate("sendMessage")}
                         <motion.div
                           animate={{ x: [0, 3, 0] }}
                           transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
@@ -476,7 +477,7 @@ const Contact = () => {
               : 'bg-red-500/90 text-white'
           }`}>
             {toast.type === 'success' && <CheckCircle className="w-5 h-5" />}
-            <span className="font-medium">{toast.message}</span>
+            <span className="font-medium">{translate(toast.message)}</span>
             <button 
               onClick={() => setToast({ ...toast, show: false })}
               className="ml-2 hover:opacity-70 text-xl leading-none"

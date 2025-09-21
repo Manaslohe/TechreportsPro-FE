@@ -2,9 +2,11 @@ import React from "react";
 import { motion } from "framer-motion";
 import { Shield, Info, AlertTriangle } from "lucide-react";
 import { useTranslation } from "../../contexts/TranslationContext";
+import { formatDateHi } from "../../contexts/translations";
+import logo from "../../../public/logo.png"; // Import the logo
 
 const Footer = () => {
-  const { translate } = useTranslation();
+  const { translate, language } = useTranslation();
 
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -28,6 +30,9 @@ const Footer = () => {
     }
   };
 
+  const now = new Date();
+  const yearText = language === "hi" ? formatDateHi(now, { year: "numeric" }) : String(now.getFullYear());
+
   return (
     <footer className="bg-gradient-to-b from-slate-900 to-slate-950 text-white relative overflow-hidden">
       {/* Background Pattern */}
@@ -48,8 +53,8 @@ const Footer = () => {
           {/* Company Info */}
           <motion.div variants={itemVariants} className="lg:col-span-4 space-y-4">
             <div className="flex items-center gap-3 mb-4">
-              <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center">
-                <span className="text-white text-xl font-bold">M</span>
+              <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-md">
+                <img src={logo} alt="MarketMinds Logo" className="w-8 h-8" /> {/* Use logo */}
               </div>
               <div>
                 <h3 className="text-xl font-bold text-white">MarketMinds</h3>
@@ -119,7 +124,7 @@ const Footer = () => {
           <div className="flex flex-col sm:flex-row justify-between items-center gap-4">
             <div className="text-center sm:text-left">
               <p className="text-sm text-slate-400">
-                © 2025 MarketMinds Research. {translate("allRightsReserved")}
+                © {yearText} MarketMinds Research. {translate("allRightsReserved")}
               </p>
               <p className="text-xs text-slate-500 mt-1">
                 {translate("workingHours")}
@@ -132,10 +137,10 @@ const Footer = () => {
                 href="/privacy-policy" 
                 className="text-sm text-blue-400 hover:text-blue-300 transition-colors duration-300 underline"
               >
-                Privacy Policy
+                {translate("privacyPolicyTitle")}
               </a>
               <p className="text-xs text-slate-500 mt-1">
-                Your data protection matters to us
+                {translate("privacyPolicySubtitle")}
               </p>
             </div>
           </div>

@@ -6,6 +6,7 @@ import Header from "./Home/Header";
 import axios from 'axios';
 import Toast from './common/Toast';
 import { useTranslation } from "../contexts/TranslationContext";
+import TermsAndConditions from './Legal/TermsAndConditions';
 
 export default function SignupForm() {
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function SignupForm() {
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [showSuccess, setShowSuccess] = useState(false);
+  const [showTerms, setShowTerms] = useState(false);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -152,8 +154,8 @@ export default function SignupForm() {
                 </div>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div>
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-black mb-2">
                   {translate("phoneNumber")}
                 </label>
@@ -167,13 +169,13 @@ export default function SignupForm() {
                     name="phone"
                     value={formData.phone}
                     onChange={handleInputChange}
-                    className="flex-1 px-4 py-3 rounded-r-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    placeholder="9876543210"
+                    className="flex-1 xl:w-35 px-4 py-3 rounded-r-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                    placeholder="000-000-0000"
                     required
                   />
                 </div>
               </div>
-              <div>
+              <div className="sm:col-span-1">
                 <label className="block text-sm font-medium text-black mb-2">
                   {translate("email")}
                 </label>
@@ -247,9 +249,13 @@ export default function SignupForm() {
                   required
                 />
                 {translate("agreeToTerms")}{" "}
-                <a href="#" className="text-blue-600 hover:underline mx-1">
+                <button
+                  type="button"
+                  onClick={() => setShowTerms(true)}
+                  className="text-blue-600 hover:text-blue-700 hover:underline mx-1 font-medium"
+                >
                   {translate("termsAndConditions")}
-                </a>
+                </button>
               </label>
             </div>
           </div>
@@ -310,6 +316,10 @@ export default function SignupForm() {
         message={toast.message}
         type={toast.type}
         onClose={() => setToast({ ...toast, show: false })}
+      />
+      <TermsAndConditions 
+        isOpen={showTerms} 
+        onClose={() => setShowTerms(false)} 
       />
       <div 
         className="min-h-screen relative flex items-center justify-center p-4 pt-24 overflow-hidden"

@@ -20,6 +20,7 @@ import AdminContact from './components/Admin/AdminContact';
 import AdminUser from './components/Admin/AdminUser';
 import { TranslationProvider } from './contexts/TranslationContext';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
+import TermsAndConditions from './components/Legal/TermsAndConditions';
 
 axios.defaults.baseURL = 'https://techbe-zeta.vercel.app'; // Update with your backend URL
 axios.defaults.headers.post['Content-Type'] = 'application/json';
@@ -76,6 +77,13 @@ function App() {
               <Route path="/" element={<LandingPage />} />
               <Route path="/contact" element={<Contact />} />
               <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+              <Route path="/terms-and-conditions" element={
+                <div className="min-h-screen bg-gray-50 py-12">
+                  <div className="max-w-4xl mx-auto p-4">
+                    <TermsAndConditions isOpen={true} onClose={() => window.history.back()} />
+                  </div>
+                </div>
+              } />
               <Route path="/signup" element={<SignupForm />} />
               <Route path="/signin" element={<SignInForm />} />
               <Route path="/catalog" element={<Catalog />} />
