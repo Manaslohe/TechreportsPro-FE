@@ -47,7 +47,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
                 <BarChart3 className="text-white" size={20} />
               </div>
               <div>
-                <p className="text-sm font-bold text-slate-900">TechReports</p>
+                <p className="text-sm font-bold text-slate-900">MarketMinds</p>
                 <p className="text-xs text-slate-500">Admin</p>
               </div>
             </motion.div>
@@ -103,7 +103,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-slate-900">Admin</p>
-                <p className="text-xs text-slate-500 truncate">admin@techreports.pro</p>
+                <p className="text-xs text-slate-500 truncate">admin@MarketMinds.pro</p>
               </div>
             </div>
           </div>
@@ -124,7 +124,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               <BarChart3 className="text-white" size={20} />
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-bold text-slate-900">TechReports</p>
+              <p className="text-sm font-bold text-slate-900">MarketMinds</p>
               <p className="text-xs text-slate-500">Admin Portal</p>
             </div>
           </div>
@@ -208,7 +208,7 @@ const AdminSidebar = ({ isOpen, onClose }) => {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-xs font-semibold text-slate-900">Administrator</p>
-                <p className="text-xs text-slate-600 truncate">admin@techreports.pro</p>
+                <p className="text-xs text-slate-600 truncate">admin@MarketMinds.pro</p>
               </div>
             </div>
           </div>

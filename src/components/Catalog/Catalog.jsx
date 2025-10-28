@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   CheckCircle,
@@ -16,10 +16,8 @@ import Toast from '../common/Toast';
 import CatalogHeader from './CatalogHeader';
 import ReportCard from './ReportCard';
 import PaymentChoiceModal from './PaymentChoiceModal';
-import { useTranslation } from '../../contexts/TranslationContext';
 
 const Catalog = () => {
-  const { translate } = useTranslation();
   const [reports, setReports] = useState([]);
   const [purchasedReports, setPurchasedReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -102,7 +100,7 @@ const Catalog = () => {
     }
   };
 
-  const handlePurchase = useCallback((reportId, reportTitle) => {
+  const handlePurchase = (reportId, reportTitle) => {
     const token = localStorage.getItem('authToken');
     if (!token) {
       setToast({
@@ -114,6 +112,7 @@ const Catalog = () => {
       return;
     }
 
+    // Check if user has active subscription with available reports
     if (subscriptionStatus?.hasActive && subscriptionStatus?.availableReports?.total > 0) {
       setPaymentChoiceModal({
         isOpen: true,
@@ -121,18 +120,19 @@ const Catalog = () => {
         reportTitle
       });
     } else {
+      // No active subscription or no reports left, go directly to payment
       navigate(`/payment/report/${reportId}`);
     }
-  }, [subscriptionStatus, navigate]);
+  };
 
-  const handleSampleDownload = useCallback((reportId) => {
+  const handleSampleDownload = (reportId) => {
     window.open(`${axios.defaults.baseURL}/api/reports/${reportId}/pdf`, '_blank');
     setToast({
       show: true,
       message: 'Opening sample report...',
       type: 'success'
     });
-  }, []);
+  };
 
   const handleUseSubscription = async () => {
     setProcessingSubscription(true);
@@ -194,7 +194,7 @@ const Catalog = () => {
     navigate(`/payment/report/${paymentChoiceModal.reportId}`);
   };
 
-  const filterAndSortReports = useCallback((reportsList) => {
+  const filterAndSortReports = (reportsList) => {
     let filtered = reportsList.filter(report => {
       const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            report.description.toLowerCase().includes(searchTerm.toLowerCase());
@@ -202,6 +202,7 @@ const Catalog = () => {
       return matchesSearch && matchesSector;
     });
 
+    // Sort reports
     filtered.sort((a, b) => {
       switch (sortBy) {
         case 'recent':
@@ -216,29 +217,27 @@ const Catalog = () => {
     });
 
     return filtered;
-  }, [searchTerm, selectedSector, sortBy, sortOrder]);
+  };
 
-  const { freeReports, paidReports } = useMemo(() => {
-    const free = filterAndSortReports(reports.filter(r => r.isFree === true));
-    const paid = filterAndSortReports(reports.filter(r => !r.isFree).map(report => ({
-      ...report,
-      isPurchased: purchasedReports.some(purchased => purchased._id === report._id)
-    })));
-    return { freeReports: free, paidReports: paid };
-  }, [reports, purchasedReports, filterAndSortReports]);
+  // Separate free and paid reports
+  const freeReports = filterAndSortReports(reports.filter(r => r.isFree === true));
+  const paidReports = filterAndSortReports(reports.filter(r => !r.isFree).map(report => ({
+    ...report,
+    isPurchased: purchasedReports.some(purchased => purchased._id === report._id)
+  })));
 
-  const clearFilters = useCallback(() => {
+  const clearFilters = () => {
     setSearchTerm('');
     setSelectedSector('all');
     setSortBy('recent');
     setSortOrder('desc');
-  }, []);
+  };
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
-      transition: { staggerChildren: 0.05 }
+      transition: { staggerChildren: 0.1 }
     }
   };
 
@@ -246,40 +245,31 @@ const Catalog = () => {
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="text-center py-20 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border border-gray-200"
+      className="text-center py-16 bg-gray-50 rounded-xl"
     >
-      <motion.div 
-        initial={{ scale: 0.8 }}
-        animate={{ scale: 1 }}
-        transition={{ delay: 0.1 }}
-        className="mb-6"
-      >
+      <div className="mb-4">
         {type === 'free' ? (
-          <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto">
-            <Gift className="h-10 w-10 text-green-500" />
-          </div>
+          <Gift className="h-16 w-16 text-gray-300 mx-auto" />
         ) : (
-          <div className="w-20 h-20 bg-blue-100 rounded-full flex items-center justify-center mx-auto">
-            <FileText className="h-10 w-10 text-blue-500" />
-          </div>
+          <FileText className="h-16 w-16 text-gray-300 mx-auto" />
         )}
-      </motion.div>
-      <h3 className="text-2xl font-bold text-gray-900 mb-3">
-        {type === 'free' ? translate('noSampleReportsFound') : translate('noPremiumReportsFound')}
+      </div>
+      <h3 className="text-xl font-semibold text-gray-900 mb-2">
+        No {type === 'free' ? 'sample' : 'premium'} reports found
       </h3>
-      <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
+      <p className="text-gray-500 mb-6 max-w-md mx-auto">
         {searchTerm || selectedSector !== 'all' ? (
-          <>{translate('tryAdjustingFilters')}</>
+          <>Try adjusting your search terms or filters to find what you're looking for.</>
         ) : (
-          <>{translate('checkBackSoon', { type: type === 'free' ? 'sample' : 'premium' })}</>
+          <>Check back later for new {type === 'free' ? 'sample' : 'premium'} reports.</>
         )}
       </p>
       {(searchTerm || selectedSector !== 'all') && (
         <button
           onClick={clearFilters}
-          className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium"
+          className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
         >
-          {translate('clearAllFilters')}
+          Clear Filters
         </button>
       )}
     </motion.div>
@@ -293,8 +283,10 @@ const Catalog = () => {
     });
   };
 
+  const isMobile = window.innerWidth <= 768; // Check if the screen size is mobile
+
   return (
-    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+    <div className="min-h-screen bg-gray-50">
       <CatalogHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
@@ -305,14 +297,14 @@ const Catalog = () => {
         sortOrder={sortOrder}
         setSortOrder={setSortOrder}
         viewMode={viewMode}
-        setViewMode={setViewMode}
+        setViewMode={!isMobile ? setViewMode : undefined}
         clearFilters={clearFilters}
         totalReports={reports.length}
         sampleReportsCount={freeReports.length}
         filteredResults={freeReports.length + paidReports.length}
       />
 
-      {/* Purchased Reports Section */}
+      {/* Purchased Reports Section - only show if user has purchased reports */}
       <AnimatePresence>
         {purchasedReports.length > 0 && (
           <motion.section
@@ -321,16 +313,12 @@ const Catalog = () => {
             exit={{ opacity: 0, height: 0 }}
             className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12"
           >
-            <div className="bg-gradient-to-br from-green-50 via-emerald-50 to-teal-50 rounded-2xl p-6 lg:p-8 border-2 border-green-200 shadow-lg">
+            <div className="bg-green-50 rounded-2xl p-8 border border-green-100">
               <div className="flex items-center gap-3 mb-6">
-                <div className="p-2.5 bg-green-600 rounded-xl shadow-md">
-                  <CheckCircle className="h-6 w-6 text-white" />
-                </div>
+                <CheckCircle className="h-6 w-6 text-green-600" />
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">{translate('yourLibrary')}</h2>
-                  <p className="text-green-700 text-sm">
-                    {purchasedReports.length} {purchasedReports.length === 1 ? translate('result') : translate('results')} • {translate('fullAccessAnytime')}
-                  </p>
+                  <h2 className="text-2xl font-bold text-gray-900">Your Purchased Reports</h2>
+                  <p className="text-green-700">Access your premium content anytime</p>
                 </div>
               </div>
               
@@ -338,45 +326,42 @@ const Catalog = () => {
                 variants={containerVariants}
                 initial="hidden"
                 animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 lg:gap-6"
+                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {purchasedReports.map((report) => (
                   <motion.div
                     key={report._id}
-                    variants={{
-                      hidden: { opacity: 0, y: 20 },
-                      visible: { opacity: 1, y: 0 }
-                    }}
-                    className="bg-white rounded-xl p-5 border-2 border-green-200 hover:border-green-300 transition-all shadow-sm hover:shadow-md group"
+                    className="bg-white rounded-xl p-6 border border-green-200 relative"
                   >
+                    <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">
+                      OWNED
+                    </div>
+                    
                     <div className="flex items-start gap-3 mb-4">
-                      <div className="p-2 bg-green-50 rounded-lg text-green-600 group-hover:bg-green-100 transition-colors">
+                      <div className="p-2 bg-green-100 rounded-lg text-green-600">
                         <FileText className="w-5 h-5" />
                       </div>
-                      <div className="flex-1 min-w-0">
-                        <span className="inline-block px-2 py-0.5 bg-green-600 text-white rounded-full text-xs font-semibold mb-2">
-                          {translate('owned')}
-                        </span>
-                        <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-green-700 transition-colors">
+                      <div className="flex-1">
+                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
                           {report.title}
                         </h3>
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Calendar className="h-3.5 w-3.5 mr-1" />
+                        <div className="flex items-center text-sm text-gray-500 mb-3">
+                          <Calendar className="h-4 w-4 mr-1" />
                           {formatDate(report.uploadDate)}
                         </div>
                       </div>
                     </div>
 
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2 leading-relaxed">
+                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
                       {report.description}
                     </p>
 
                     <Link
                       to={`/report/view/${report._id}`}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all font-medium shadow-sm hover:shadow-md"
+                      className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
                     >
                       <Eye className="h-4 w-4" />
-                      {translate('readReport')}
+                      Read Report
                     </Link>
                   </motion.div>
                 ))}
@@ -386,43 +371,34 @@ const Catalog = () => {
         )}
       </AnimatePresence>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {loading ? (
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            className="flex flex-col items-center justify-center min-h-[500px] bg-white rounded-2xl shadow-sm border border-gray-100"
+            className="flex flex-col items-center justify-center min-h-[400px] bg-white rounded-2xl shadow-sm"
           >
-            <div className="relative">
-              <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-              <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style={{ animationDuration: '1.5s' }} />
-            </div>
-            <p className="text-gray-600 text-lg mt-6 font-medium">{translate('loadingReports')}</p>
+            <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4" />
+            <p className="text-gray-500 text-lg">Loading reports...</p>
           </motion.div>
         ) : (
           <>
             {/* Sample Reports Section */}
             <section className="mb-16">
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between mb-8"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl shadow-lg">
-                    <Sparkles className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{translate('freeSampleReports')}</h2>
-                    <p className="text-gray-600">{translate('experiencePremiumAnalysis')}</p>
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-green-100 rounded-xl">
+                  <Sparkles className="h-6 w-6 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl lg:text-3xl font-bold text-gray-900">Free Sample Reports</h2>
+                  <p className="text-gray-600">Get a taste of our premium analysis at no cost</p>
+                </div>
+                <div className="ml-auto">
+                  <div className="bg-green-100 text-green-800 text-nowrap px-4 py-2 rounded-full text-sm font-medium">
+                    {freeReports.length} Available
                   </div>
                 </div>
-                <div className="hidden sm:block">
-                  <div className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm border border-green-200">
-                    {freeReports.length} {translate('available')}
-                  </div>
-                </div>
-              </motion.div>
+              </div>
 
               {freeReports.length === 0 ? (
                 <NoResultsFound type="free" />
@@ -431,7 +407,7 @@ const Catalog = () => {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6' : 'space-y-4'}
+                  className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}
                 >
                   {freeReports.map((report) => (
                     <ReportCard 
@@ -446,28 +422,22 @@ const Catalog = () => {
               )}
             </section>
 
-            {/* One-Time Reports Section */}
-            <section>
-              <motion.div 
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="flex items-center justify-between mb-8"
-              >
-                <div className="flex items-center gap-4">
-                  <div className="p-3 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-xl shadow-lg">
-                    <Crown className="h-6 w-6 text-white" />
-                  </div>
-                  <div>
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{translate('oneTimeReports')}</h2>
-                    <p className="text-gray-600">{translate('inDepthResearch')}</p>
+            {/* Premium Reports Section */}
+            <section className="pb-16">
+              <div className="flex items-center gap-3 mb-8">
+                <div className="p-3 bg-blue-100 rounded-xl">
+                  <Crown className="h-6 w-6 text-blue-600" />
+                </div>
+                <div>
+                  <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">One Time Reports</h2>
+                  <p className="text-gray-600">In-depth analysis and expert insights for serious investors</p>
+                </div>
+                <div className="ml-auto">
+                  <div className="bg-blue-100 text-blue-800 text-nowrap px-4 py-2 rounded-full text-sm font-medium">
+                    {paidReports.length} Available
                   </div>
                 </div>
-                <div className="hidden sm:block">
-                  <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm border border-blue-200">
-                    {paidReports.length} {translate('available')}
-                  </div>
-                </div>
-              </motion.div>
+              </div>
 
               {paidReports.length === 0 ? (
                 <NoResultsFound type="premium" />
@@ -476,7 +446,7 @@ const Catalog = () => {
                   variants={containerVariants}
                   initial="hidden"
                   animate="visible"
-                  className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 lg:gap-6' : 'space-y-4'}
+                  className={viewMode === 'grid' ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6' : 'space-y-4'}
                 >
                   {paidReports.map((report) => (
                     <ReportCard 

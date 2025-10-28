@@ -66,10 +66,15 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      // Prefer production URL when not on localhost
+      const apiBase =
+        (window.location.hostname === 'localhost'
+          ? import.meta.env.VITE_REACT_APP_API_BASE_URL
+          : import.meta.env.VITE_REACT_APP_API_BASE_URL_PRODUCTION) || axios.defaults.baseURL;
+
       const fullPhone = `${selectedCountry.value}${formData.phone}`;
       
-      await axios.post(`${baseURL}/api/contact`, {
+      await axios.post(`${apiBase}/api/contacts`, {
         ...formData,
         phone: fullPhone,
         country: selectedCountry.country
