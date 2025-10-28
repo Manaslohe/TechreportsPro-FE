@@ -24,10 +24,18 @@ import TermsAndConditions from './components/Legal/TermsAndConditions';
 import Dashboard from './components/Dashboard';
 import PlanSelection from './components/PlanSelection'; // If you have this component
 
-// Use environment variable for backend URL
-axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
-axios.defaults.headers.post['Content-Type'] = 'application/json';
+// Use environment variable for backend URL (standardize)
+const envBase =
+  import.meta.env.VITE_REACT_APP_API_BASE_URL // primary (used in other components)
+  || import.meta.env.VITE_API_BASE_URL;       // legacy fallback
 
+const isLocal = typeof window !== 'undefined' && window.location.hostname === 'localhost';
+const defaultBase = isLocal ? 'http://localhost:5000' : 'https://techbe-zeta.vercel.app';
+
+// Always resolve to a non-localhost base on production
+axios.defaults.baseURL = envBase || defaultBase;
+axios.defaults.headers.post['Content-Type'] = 'application/json';
+// axios.defaults.withCredentials = true; // Uncomment only if you use cookies
 
 function ScrollToTop() {
   const { pathname } = useLocation();
