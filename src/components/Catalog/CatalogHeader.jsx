@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { 
   Search, 
@@ -10,10 +10,11 @@ import {
   List,
   FileText,
   Gift,
-  Star
+  Star,
+  Sparkles
 } from 'lucide-react';
 
-const CatalogHeader = ({
+const CatalogHeader = React.memo(({
   searchTerm,
   setSearchTerm,
   selectedSector,
@@ -29,162 +30,239 @@ const CatalogHeader = ({
   sampleReportsCount,
   filteredResults
 }) => {
-  const sectors = ['all', 'Technology', 'Banking', 'Healthcare', 'Energy', 'Market Analysis', 'FMCG', 'Auto'];
-  const sortOptions = [
+  const sectors = useMemo(() => ['all', 'Technology', 'Banking', 'Healthcare', 'Energy', 'Market Analysis', 'FMCG', 'Auto'], []);
+  const sortOptions = useMemo(() => [
     { value: 'recent', label: 'Most Recent' },
     { value: 'old', label: 'Oldest First' },
     { value: 'name', label: 'Company Name' },
     { value: 'popular', label: 'Most Popular' }
-  ];
+  ], []);
 
-  const isMobile = window.innerWidth <= 768; // Check if the screen size is mobile
+  const isMobile = useMemo(() => window.innerWidth <= 768, []);
+  const hasActiveFilters = searchTerm || selectedSector !== 'all' || sortBy !== 'recent';
 
   return (
     <>
-      {/* Hero Section */}
+      {/* Hero Section - Redesigned */}
       <motion.section
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-blue-800 text-white py-16 lg:py-20"
+        className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 overflow-hidden"
       >
-        <div className="absolute inset-0 bg-black/10"></div>
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        {/* Animated Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+            backgroundSize: '40px 40px'
+          }} />
+        </div>
+        
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 py-12 lg:py-16">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
             className="text-center"
           >
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-              Reports Catalog
+            {/* Badge */}
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-white text-sm font-medium mb-6 border border-white/20 mt-8"
+            >
+              <Sparkles className="h-4 w-4" />
+              Premium Investment Research
+            </motion.div>
+
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold text-white mb-4 tracking-tight">
+              Research Reports Catalog
             </h1>
-            <p className="text-xl text-blue-100 max-w-3xl mx-auto mb-8">
-              Discover premium investment insights, market analysis, and expert research reports
+            <p className="text-lg lg:text-xl text-blue-100 max-w-2xl mx-auto mb-8 leading-relaxed">
+              Access premium insights, expert analysis, and comprehensive market research
             </p>
             
-            {/* Quick Stats */}
-            <div className="flex items-center justify-center gap-8 text-sm flex-wrap">
-              <div className="flex items-center gap-2">
-                <FileText className="h-4 w-4" />
-                <span>{totalReports} Total Reports</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Gift className="h-4 w-4" />
-                <span>{sampleReportsCount} Free Samples</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <Star className="h-4 w-4" />
-                <span>Expert Analysis</span>
-              </div>
+            {/* Quick Stats - Redesigned */}
+            <div className="flex items-center justify-center gap-4 sm:gap-8 flex-wrap">
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.3 }}
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/20"
+              >
+                <div className="p-1.5 bg-white/20 rounded-lg">
+                  <FileText className="h-4 w-4 text-white" />
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-bold text-lg">{totalReports}</div>
+                  <div className="text-blue-100 text-xs">Total Reports</div>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.4 }}
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/20"
+              >
+                <div className="p-1.5 bg-white/20 rounded-lg">
+                  <Gift className="h-4 w-4 text-white" />
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-bold text-lg">{sampleReportsCount}</div>
+                  <div className="text-blue-100 text-xs">Free Samples</div>
+                </div>
+              </motion.div>
+              
+              <motion.div 
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: 0.5 }}
+                className="flex items-center gap-2 bg-white/10 backdrop-blur-sm px-4 py-2 rounded-xl border border-white/20"
+              >
+                <div className="p-1.5 bg-white/20 rounded-lg">
+                  <Star className="h-4 w-4 text-white" />
+                </div>
+                <div className="text-left">
+                  <div className="text-white font-bold text-lg">Expert</div>
+                  <div className="text-blue-100 text-xs">Analysis</div>
+                </div>
+              </motion.div>
             </div>
           </motion.div>
         </div>
       </motion.section>
 
-      {/* Search and Filter Section */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-8 relative z-20 mb-8">
-        <div className="bg-white rounded-2xl shadow-xl p-6 border border-gray-100">
-          {/* Search Bar */}
-          <div className="relative mb-6">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-            <input
-              type="text"
-              placeholder="Search reports by title, description, or company..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full pl-12 pr-4 py-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 text-lg"
-            />
-            {searchTerm && (
-              <button
-                onClick={() => setSearchTerm('')}
-                className="absolute right-4 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-          </div>
-
-          {/* Filters and Controls */}
-          <div className="flex flex-col lg:flex-row gap-4 items-center justify-between">
-            <div className="flex flex-wrap items-center gap-3">
-              {/* Sector Filter */}
-              <div className="relative">
-                <select
-                  value={selectedSector}
-                  onChange={(e) => setSelectedSector(e.target.value)}
-                  className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  <option value="all">All Sectors</option>
-                  {sectors.slice(1).map(sector => (
-                    <option key={sector} value={sector}>{sector}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              {/* Sort Options */}
-              <div className="relative">
-                <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
-                  className="appearance-none bg-gray-50 border border-gray-200 rounded-lg px-4 py-2 pr-8 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-                >
-                  {sortOptions.map(option => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400 pointer-events-none" />
-              </div>
-
-              {/* Sort Order */}
-              <button
-                onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
-                className="flex items-center gap-2 px-4 py-2 bg-gray-50 border border-gray-200 rounded-lg hover:bg-gray-100 transition-colors text-sm"
-              >
-                {sortOrder === 'desc' ? <SortDesc className="h-4 w-4" /> : <SortAsc className="h-4 w-4" />}
-                {sortOrder === 'desc' ? 'Descending' : 'Ascending'}
-              </button>
-            </div>
-
-            <div className="flex items-center gap-3">
-              {/* Clear Filters */}
-              {(searchTerm || selectedSector !== 'all' || sortBy !== 'recent') && (
+      {/* Search and Filter Section - Redesigned */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-20 mb-8">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+          className="bg-white rounded-2xl shadow-xl border border-gray-100 overflow-hidden"
+        >
+          <div className="p-4 sm:p-6">
+            {/* Search Bar - Enhanced */}
+            <div className="relative mb-4">
+              <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5 pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Search by title, company, or keywords..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-12 pr-12 py-3.5 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all bg-gray-50 text-base placeholder:text-gray-400 hover:border-gray-300"
+              />
+              {searchTerm && (
                 <button
-                  onClick={clearFilters}
-                  className="px-4 py-2 text-blue-600 hover:text-blue-700 text-sm font-medium"
+                  onClick={() => setSearchTerm('')}
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-lg transition-all"
                 >
-                  Clear All
+                  <X className="h-4 w-4" />
                 </button>
               )}
+            </div>
 
-              {/* View Mode Toggle */}
-              {!isMobile && (
-                <div className="flex items-center bg-gray-100 rounded-lg p-1">
-                  <button
-                    onClick={() => setViewMode('grid')}
-                    className={`p-2 rounded ${viewMode === 'grid' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+            {/* Filters Row - Redesigned */}
+            <div className="flex flex-col lg:flex-row gap-3 items-stretch lg:items-center justify-between">
+              {/* Left Side Filters */}
+              <div className="flex flex-wrap items-center gap-2">
+                {/* Sector Filter */}
+                <div className="relative flex-shrink-0">
+                  <select
+                    value={selectedSector}
+                    onChange={(e) => setSelectedSector(e.target.value)}
+                    className="appearance-none bg-white border-2 border-gray-200 rounded-xl px-4 py-2 pr-9 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-300 transition-all cursor-pointer"
                   >
-                    <Grid3X3 className="h-4 w-4" />
-                  </button>
-                  <button
-                    onClick={() => setViewMode('list')}
-                    className={`p-2 rounded ${viewMode === 'list' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
-                  >
-                    <List className="h-4 w-4" />
-                  </button>
+                    <option value="all">All Sectors</option>
+                    {sectors.slice(1).map(sector => (
+                      <option key={sector} value={sector}>{sector}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
                 </div>
-              )}
 
-              {/* Results Count */}
-              <div className="text-sm text-gray-600">
-                {filteredResults} results
+                {/* Sort Options */}
+                <div className="relative flex-shrink-0">
+                  <select
+                    value={sortBy}
+                    onChange={(e) => setSortBy(e.target.value)}
+                    className="appearance-none bg-white border-2 border-gray-200 rounded-xl px-4 py-2 pr-9 text-sm font-medium focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-gray-300 transition-all cursor-pointer"
+                  >
+                    {sortOptions.map(option => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
+                  </select>
+                  <ChevronDown className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-500 pointer-events-none" />
+                </div>
+
+                {/* Sort Order */}
+                <button
+                  onClick={() => setSortOrder(sortOrder === 'desc' ? 'asc' : 'desc')}
+                  className="flex items-center gap-2 px-4 py-2 bg-white border-2 border-gray-200 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all text-sm font-medium"
+                >
+                  {sortOrder === 'desc' ? <SortDesc className="h-4 w-4" /> : <SortAsc className="h-4 w-4" />}
+                  <span className="hidden sm:inline">{sortOrder === 'desc' ? 'Desc' : 'Asc'}</span>
+                </button>
+
+                {/* Clear Filters */}
+                {hasActiveFilters && (
+                  <motion.button
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    onClick={clearFilters}
+                    className="px-4 py-2 text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded-xl text-sm font-medium transition-all"
+                  >
+                    Clear All
+                  </motion.button>
+                )}
+              </div>
+
+              {/* Right Side Controls */}
+              <div className="flex items-center gap-3 justify-between lg:justify-end">
+                {/* Results Count */}
+                <div className="flex items-center gap-2 px-4 py-2 bg-gray-50 rounded-xl border border-gray-200">
+                  <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
+                  <span className="text-sm font-medium text-gray-700">
+                    {filteredResults} {filteredResults === 1 ? 'result' : 'results'}
+                  </span>
+                </div>
+
+                {/* View Mode Toggle */}
+                {!isMobile && setViewMode && (
+                  <div className="flex items-center bg-gray-50 rounded-xl p-1 border border-gray-200">
+                    <button
+                      onClick={() => setViewMode('grid')}
+                      className={`p-2 rounded-lg transition-all ${
+                        viewMode === 'grid' 
+                          ? 'bg-white shadow-sm text-blue-600' 
+                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                      }`}
+                      title="Grid View"
+                    >
+                      <Grid3X3 className="h-4 w-4" />
+                    </button>
+                    <button
+                      onClick={() => setViewMode('list')}
+                      className={`p-2 rounded-lg transition-all ${
+                        viewMode === 'list' 
+                          ? 'bg-white shadow-sm text-blue-600' 
+                          : 'text-gray-500 hover:text-gray-700 hover:bg-gray-100'
+                      }`}
+                      title="List View"
+                    >
+                      <List className="h-4 w-4" />
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           </div>
-        </div>
+        </motion.div>
       </div>
     </>
   );
-};
+});
+
+CatalogHeader.displayName = 'CatalogHeader';
 
 export default CatalogHeader;

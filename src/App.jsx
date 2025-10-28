@@ -21,8 +21,11 @@ import AdminUser from './components/Admin/AdminUser';
 import { TranslationProvider } from './contexts/TranslationContext';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsAndConditions from './components/Legal/TermsAndConditions';
+import Dashboard from './components/Dashboard';
+import PlanSelection from './components/PlanSelection'; // If you have this component
 
-axios.defaults.baseURL = 'https://techbe-zeta.vercel.app'; // Update with your backend URL
+// Use environment variable for backend URL
+axios.defaults.baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
 axios.defaults.headers.post['Content-Type'] = 'application/json';
 
 
@@ -87,6 +90,58 @@ function App() {
               <Route path="/signup" element={<SignupForm />} />
               <Route path="/signin" element={<SignInForm />} />
               <Route path="/catalog" element={<Catalog />} />
+
+              {/* User Dashboard */}
+              <Route
+                path="/dashboard"
+                element={
+                  <UserProtectedRoute>
+                    <Dashboard />
+                  </UserProtectedRoute>
+                }
+              />
+
+              {/* Plan Selection Page */}
+              <Route
+                path="/plans"
+                element={
+                  <UserProtectedRoute>
+                    <PlanSelection />
+                  </UserProtectedRoute>
+                }
+              />
+
+              {/* Payment for Plan or Report */}
+              <Route
+                path="/payment/:type/:id"
+                element={
+                  <UserProtectedRoute>
+                    <PaymentForm />
+                  </UserProtectedRoute>
+                }
+              />
+
+              {/* Payment for legacy route (single report) */}
+              <Route 
+                path="/payment/:reportId" 
+                element={
+                  <UserProtectedRoute>
+                    <PaymentForm />
+                  </UserProtectedRoute>
+                } 
+              />
+
+              {/* PDF Viewer */}
+              <Route
+                path="/report/view/:id"
+                element={
+                  <UserProtectedRoute>
+                    <PdfViewer />
+                  </UserProtectedRoute>
+                }
+              />
+
+              {/* Admin routes */}
               <Route
                 path="/admin/login"
                 element={
@@ -107,25 +162,9 @@ function App() {
                 <Route path="dashboard" element={<AdminDashboard />} />
                 <Route path="reports" element={<AdminReport />} />
                 <Route path="requests" element={<AdminRequest />} />
-                <Route path="contacts" element={<AdminContact />} /> {/* New route */}
-                <Route path="users" element={<AdminUser />} /> {/* New route for AdminUser */}
+                <Route path="contacts" element={<AdminContact />} />
+                <Route path="users" element={<AdminUser />} />
               </Route>
-              <Route 
-                path="/payment/:reportId" 
-                element={
-                  <UserProtectedRoute>
-                    <PaymentForm />
-                  </UserProtectedRoute>
-                } 
-              />
-              <Route
-                path="/report/view/:reportId"
-                element={
-                  <UserProtectedRoute>
-                    <PdfViewer />
-                  </UserProtectedRoute>
-                }
-              />
             </Routes>
           </div>
         </AnimatePresence>

@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Menu, X, User, Globe } from "lucide-react";
+import { Menu, X, User, Globe, ChevronDown, LogOut, Settings } from "lucide-react";
 import { useLocation } from "react-router-dom";
 import About from "../About/About";
 import Toast from "../common/Toast";
@@ -53,6 +53,124 @@ const LanguageButton = ({ language, currentLang, onClick, isDark }) => (
     )}
   </motion.button>
 );
+
+const UserDropdown = ({ user, onLogout, onNavigate, isDark }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const getUserInitials = () => {
+    if (!user?.firstName || !user?.lastName) return 'U';
+    return `${user.firstName.charAt(0)}${user.lastName.charAt(0)}`.toUpperCase();
+  };
+
+  const handleDashboardClick = () => {
+    onNavigate('/dashboard');
+    setIsOpen(false);
+  };
+
+  const handleLogoutClick = () => {
+    onLogout();
+    setIsOpen(false);
+  };
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      {/* User Avatar Button */}
+      <motion.button
+        whileHover={{ scale: 1.05 }}
+        whileTap={{ scale: 0.95 }}
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2 px-3 py-2 rounded-lg transition-all duration-300 ${
+          isDark
+            ? "bg-white/10 text-white hover:bg-white/20"
+            : "bg-blue-50 text-blue-600 hover:bg-blue-100"
+        }`}
+      >
+        {/* Avatar Circle */}
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+          isDark
+            ? "bg-white text-blue-600"
+            : "bg-blue-600 text-white"
+        }`}>
+          {getUserInitials()}
+        </div>
+        
+        {/* User Name (hidden on mobile) */}
+        <span className="hidden md:block text-sm font-medium truncate max-w-24">
+          {user?.firstName || 'User'}
+        </span>
+        
+        {/* Dropdown Arrow */}
+        <motion.div
+          animate={{ rotate: isOpen ? 180 : 0 }}
+          transition={{ duration: 0.2 }}
+        >
+          <ChevronDown size={16} />
+        </motion.div>
+      </motion.button>
+
+      {/* Dropdown Menu */}
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0, y: -10, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -10, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className={`absolute right-0 top-full mt-2 w-48 rounded-xl shadow-lg border backdrop-blur-sm z-50 ${
+              isDark
+                ? "bg-white/95 border-white/20"
+                : "bg-white/95 border-gray-200"
+            }`}
+          >
+            {/* User Info */}
+            <div className="px-4 py-3 border-b border-gray-100">
+              <p className="text-sm font-medium text-gray-900">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-xs text-gray-500 truncate">
+                {user?.email}
+              </p>
+            </div>
+
+            {/* Menu Items */}
+            <div className="py-2">
+              <motion.button
+                whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.05)" }}
+                onClick={handleDashboardClick}
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:text-blue-600 flex items-center gap-3 transition-colors"
+              >
+                <Settings size={16} />
+                Dashboard
+              </motion.button>
+              
+              <motion.button
+                whileHover={{ backgroundColor: "rgba(239, 68, 68, 0.05)" }}
+                onClick={handleLogoutClick}
+                className="w-full px-4 py-3 text-left text-sm text-gray-700 hover:text-red-600 flex items-center gap-3 transition-colors"
+              >
+                <LogOut size={16} />
+                Logout
+              </motion.button>
+            </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+};
 
 const Header = ({ handleNavigation }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -209,21 +327,12 @@ const Header = ({ handleNavigation }) => {
           {/* Auth Buttons */}
           <div className="flex items-center gap-4 ml-4 pl-4 border-l border-white/20">
             {user ? (
-              <>
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleLogout}
-                  className={`px-5 py-2 text-sm font-medium rounded-lg transition-all duration-300 ${
-                    isDarkBackground && !isAuthPage
-                      ? "bg-red-600/80 text-white"
-                      : "bg-red-600 text-white hover:bg-red-700"
-                  }`}
-                >
-                  {translate("logout")}
-                </motion.button>
-                <User className={isDarkBackground && !isAuthPage ? "text-white" : "text-blue-600"} />
-              </>
+              <UserDropdown
+                user={user}
+                onLogout={handleLogout}
+                onNavigate={handleNavigation}
+                isDark={isDarkBackground && !isAuthPage}
+              />
             ) : (
               <>
                 <NavButton onClick={() => handleNavigation("/signin")} isDark={isDarkBackground && !isAuthPage}>
@@ -264,6 +373,23 @@ const Header = ({ handleNavigation }) => {
               <X size={28} className="text-blue-600" />
             </button>
 
+            {/* Mobile User Info (if logged in) */}
+            {user && (
+              <div className="flex items-center gap-3 pb-4 border-b border-gray-100">
+                <div className="w-10 h-10 rounded-full bg-blue-600 text-white flex items-center justify-center text-sm font-bold">
+                  {user?.firstName?.charAt(0)}{user?.lastName?.charAt(0)}
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {user?.firstName} {user?.lastName}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {user?.email}
+                  </p>
+                </div>
+              </div>
+            )}
+
             {/* Mobile Language Switcher */}
             <div className="flex items-center gap-2 pb-4 border-b border-gray-100">
               <Globe size={18} className="text-blue-600" />
@@ -287,8 +413,16 @@ const Header = ({ handleNavigation }) => {
             <NavButton onClick={() => { setIsAboutOpen(true); toggleMenu(); }}>{translate("about")}</NavButton>
             <NavButton onClick={() => { handleNavigation("/catalog"); toggleMenu(); }}>{translate("reports")}</NavButton>
             <NavButton onClick={() => { handleNavigation("/contact"); toggleMenu(); }}>{translate("contact")}</NavButton>
+            
             {user ? (
-              <NavButton variant="primary" onClick={handleLogout}>{translate("logout")}</NavButton>
+              <>
+                <NavButton onClick={() => { handleNavigation("/dashboard"); toggleMenu(); }}>
+                  Dashboard
+                </NavButton>
+                <NavButton variant="primary" onClick={handleLogout}>
+                  {translate("logout")}
+                </NavButton>
+              </>
             ) : (
               <>
                 <NavButton onClick={() => { handleNavigation("/signin"); toggleMenu(); }}>

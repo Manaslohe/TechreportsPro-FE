@@ -8,6 +8,10 @@ import Toast from './common/Toast';
 import { useTranslation } from "../contexts/TranslationContext";
 import TermsAndConditions from './Legal/TermsAndConditions';
 
+const apiBaseUrl = import.meta.env.MODE === 'production' 
+  ? import.meta.env.VITE_REACT_APP_API_BASE_URL_PRODUCTION 
+  : import.meta.env.VITE_REACT_APP_API_BASE_URL;
+
 export default function SignupForm() {
   const navigate = useNavigate();
   const { translate } = useTranslation();
@@ -60,12 +64,12 @@ export default function SignupForm() {
     }
     setIsLoading(true);
     try {
-      await axios.post('/api/signup', {
-        firstName: formData.firstName,
-        lastName: formData.lastName,
-        email: formData.email,
-        password: formData.password,
-      });
+        await axios.post(`${apiBaseUrl}/api/users/signup`, { // Corrected route
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            email: formData.email,
+            password: formData.password,
+        });
       
       setShowSuccess(true);
       setToast({

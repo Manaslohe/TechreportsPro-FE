@@ -13,13 +13,17 @@ import {
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
-const ReportCard = ({ report, type = 'paid', onPurchase, onSampleDownload, viewMode = 'grid' }) => {
+const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDownload, viewMode = 'grid' }) => {
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
-    visible: { opacity: 1, y: 0 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { duration: 0.4, ease: "easeOut" }
+    },
     hover: { 
-      y: -3,
-      boxShadow: "0 10px 30px rgba(0,0,0,0.08)",
+      y: -4,
+      boxShadow: "0 20px 40px rgba(0,0,0,0.1)",
       transition: { duration: 0.3, ease: "easeOut" }
     }
   };
@@ -37,63 +41,81 @@ const ReportCard = ({ report, type = 'paid', onPurchase, onSampleDownload, viewM
       <motion.div
         variants={cardVariants}
         whileHover="hover"
-        className="group bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300"
+        className="group bg-white rounded-xl border-2 border-gray-100 overflow-hidden shadow-sm hover:border-gray-200 transition-all duration-300"
       >
-        <div className="p-6">
-          <div className="flex items-center gap-4">
-            {/* Icon */}
-            <div className={`p-3 rounded-xl flex-shrink-0 ${type === 'free' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
-              {type === 'free' ? <Gift className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+        <div className="p-5 lg:p-6">
+          <div className="flex items-start gap-4">
+            {/* Icon with gradient background */}
+            <div className={`p-3 rounded-xl flex-shrink-0 shadow-sm ${
+              type === 'free' 
+                ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                : 'bg-gradient-to-br from-blue-600 to-indigo-700'
+            }`}>
+              {type === 'free' ? (
+                <Gift className="w-5 h-5 text-white" />
+              ) : (
+                <FileText className="w-5 h-5 text-white" />
+              )}
             </div>
 
             {/* Content */}
             <div className="flex-1 min-w-0">
               <div className="flex items-start justify-between mb-3">
-                <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition-colors line-clamp-1">
-                  {report.title}
-                </h3>
+                <div className="flex-1 min-w-0 pr-4">
+                  <h3 className="font-bold text-gray-900 text-lg group-hover:text-blue-600 transition-colors line-clamp-2 mb-2 leading-snug">
+                    {report.title}
+                  </h3>
+                  <div className="flex items-center gap-3 flex-wrap mb-3">
+                    <span className={`px-3 py-1 rounded-lg text-xs font-semibold shadow-sm ${
+                      type === 'free' 
+                        ? 'bg-green-100 text-green-700 border border-green-200' 
+                        : 'bg-blue-100 text-blue-700 border border-blue-200'
+                    }`}>
+                      {report.sector}
+                    </span>
+                    {type === 'free' && (
+                      <span className="px-3 py-1 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm">
+                        FREE
+                      </span>
+                    )}
+                  </div>
+                </div>
                 {type === 'paid' && (
-                  <div className="text-right ml-4 flex-shrink-0">
-                    <div className="text-xl font-bold text-gray-900">₹{report.price || 500}</div>
-                    <div className="text-xs text-gray-500">one-time</div>
+                  <div className="text-right flex-shrink-0">
+                    <div className="text-2xl font-bold text-gray-900">₹{report.price || 500}</div>
+                    <div className="text-xs text-gray-500 font-medium">one-time</div>
                   </div>
                 )}
               </div>
 
-              <p className="text-gray-600 text-sm line-clamp-2 mb-4 leading-relaxed">
+              <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed mb-4">
                 {report.description}
               </p>
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-4 text-xs text-gray-500">
-                  <div className="flex items-center gap-1">
+                  <div className="flex items-center gap-1.5">
                     <Calendar className="h-4 w-4" />
-                    {formatDate(report.uploadDate)}
+                    <span className="font-medium">{formatDate(report.uploadDate)}</span>
                   </div>
                   {report.downloadCount && (
-                    <div className="flex items-center gap-1">
+                    <div className="flex items-center gap-1.5">
                       <Users className="h-4 w-4" />
-                      {report.downloadCount}
+                      <span className="font-medium">{report.downloadCount}</span>
                     </div>
                   )}
-                  <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                    type === 'free' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
-                  }`}>
-                    {report.sector}
-                  </span>
-                  {type === 'free' && (
-                    <span className="px-3 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
-                      FREE
-                    </span>
-                  )}
+                  <div className="flex items-center gap-1.5">
+                    <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
+                    <span className="font-medium">Expert</span>
+                  </div>
                 </div>
 
                 {/* Action Button */}
-                <div className="flex-shrink-0 ml-4">
+                <div className="flex-shrink-0">
                   {type === 'free' ? (
                     <button
                       onClick={() => onSampleDownload(report._id)}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                     >
                       <Download className="h-4 w-4" />
                       Download
@@ -101,15 +123,15 @@ const ReportCard = ({ report, type = 'paid', onPurchase, onSampleDownload, viewM
                   ) : report.isPurchased ? (
                     <Link
                       to={`/report/view/${report._id}`}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
+                      className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                     >
                       <Eye className="h-4 w-4" />
                       Read
                     </Link>
                   ) : (
                     <button
-                      onClick={() => onPurchase(report._id)}
-                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 text-sm font-medium shadow-sm hover:shadow-md transform hover:scale-105"
+                      onClick={() => onPurchase(report._id, report.title)}
+                      className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                     >
                       <ShoppingCart className="h-4 w-4" />
                       Purchase
@@ -124,87 +146,97 @@ const ReportCard = ({ report, type = 'paid', onPurchase, onSampleDownload, viewM
     );
   }
 
-  // Grid view - with flex layout to push button to bottom
+  // Grid view - Enhanced design
   return (
     <motion.div
       variants={cardVariants}
       whileHover="hover"
-      className="group bg-white rounded-xl border border-gray-100 overflow-hidden shadow-sm hover:shadow-lg transition-all duration-300 h-full"
+      className="group bg-white rounded-xl border-2 border-gray-100 overflow-hidden shadow-sm hover:border-gray-200 transition-all duration-300 h-full flex flex-col"
     >
-      <div className="p-6 flex flex-col h-full">
-        {/* Header */}
+      <div className="p-5 lg:p-6 flex flex-col h-full">
+        {/* Header with gradient icon */}
         <div className="flex items-start justify-between mb-4">
           <div className="flex items-start gap-3 flex-1 min-w-0">
-            <div className={`p-3 rounded-xl flex-shrink-0 ${type === 'free' ? 'bg-green-50 text-green-600' : 'bg-blue-50 text-blue-600'}`}>
-              {type === 'free' ? <Gift className="w-5 h-5" /> : <FileText className="w-5 h-5" />}
+            <div className={`p-3 rounded-xl flex-shrink-0 shadow-md ${
+              type === 'free' 
+                ? 'bg-gradient-to-br from-green-500 to-emerald-600' 
+                : 'bg-gradient-to-br from-blue-600 to-indigo-700'
+            }`}>
+              {type === 'free' ? (
+                <Gift className="w-5 h-5 text-white" />
+              ) : (
+                <FileText className="w-5 h-5 text-white" />
+              )}
             </div>
             <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-gray-900 text-lg mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors leading-6">
+              <h3 className="font-bold text-gray-900 text-base lg:text-lg mb-2 line-clamp-2 group-hover:text-blue-600 transition-colors leading-snug">
                 {report.title}
               </h3>
             </div>
           </div>
           {type === 'paid' && (
-            <div className="text-right flex-shrink-0 ml-4">
-              <div className="text-xl font-bold text-gray-900">₹{report.price || 500}</div>
-              <div className="text-xs text-gray-500">one-time</div>
+            <div className="text-right flex-shrink-0 ml-3">
+              <div className="text-xl lg:text-2xl font-bold text-gray-900">₹{report.price || 500}</div>
+              <div className="text-xs text-gray-500 font-medium">one-time</div>
             </div>
           )}
         </div>
         
         {/* Meta Info */}
-        <div className="flex items-center gap-4 text-sm text-gray-500 mb-3">
-          <div className="flex items-center gap-1">
+        <div className="flex items-center gap-3 text-xs text-gray-500 mb-4">
+          <div className="flex items-center gap-1.5">
             <Calendar className="h-4 w-4" />
-            {formatDate(report.uploadDate)}
+            <span className="font-medium">{formatDate(report.uploadDate)}</span>
           </div>
           {report.downloadCount && (
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1.5">
               <Users className="h-4 w-4" />
-              {report.downloadCount}
+              <span className="font-medium">{report.downloadCount}</span>
             </div>
           )}
         </div>
 
         {/* Tags */}
-        <div className="flex items-center gap-2 mb-4">
-          <span className={`px-3 py-1.5 rounded-full text-xs font-medium ${
-            type === 'free' ? 'bg-green-100 text-green-700' : 'bg-blue-100 text-blue-700'
+        <div className="flex items-center gap-2 mb-4 flex-wrap">
+          <span className={`px-3 py-1.5 rounded-lg text-xs font-semibold shadow-sm ${
+            type === 'free' 
+              ? 'bg-green-100 text-green-700 border border-green-200' 
+              : 'bg-blue-100 text-blue-700 border border-blue-200'
           }`}>
             {report.sector}
           </span>
           {type === 'free' && (
-            <span className="px-3 py-1.5 rounded-full text-xs font-medium bg-amber-100 text-amber-700">
+            <span className="px-3 py-1.5 rounded-lg text-xs font-semibold bg-amber-100 text-amber-700 border border-amber-200 shadow-sm">
               FREE
             </span>
           )}
         </div>
 
-        {/* Description - flex-grow to take available space */}
-        <div className="flex-grow">
+        {/* Description - takes available space */}
+        <div className="flex-grow mb-5">
           <p className="text-gray-600 text-sm line-clamp-3 leading-relaxed mb-4">
             {report.description}
           </p>
 
           {/* Features */}
-          <div className="flex items-center gap-4 text-xs text-gray-500 mb-6">
-            <div className="flex items-center gap-1">
-              <Star className="h-3 w-3 text-amber-400" />
-              <span>Expert Analysis</span>
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-1.5 text-gray-600">
+              <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
+              <span className="font-medium">Expert Analysis</span>
             </div>
-            <div className="flex items-center gap-1">
-              <BarChart3 className="h-3 w-3 text-blue-400" />
-              <span>Data Insights</span>
+            <div className="flex items-center gap-1.5 text-gray-600">
+              <BarChart3 className="h-3.5 w-3.5 text-blue-500" />
+              <span className="font-medium">Data Insights</span>
             </div>
           </div>
         </div>
 
-        {/* Action Button - pushed to bottom with mt-auto */}
+        {/* Action Button - pushed to bottom */}
         <div className="mt-auto">
           {type === 'free' ? (
             <button
               onClick={() => onSampleDownload(report._id)}
-              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 font-medium shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
             >
               <Download className="h-4 w-4" />
               Download Free
@@ -212,15 +244,15 @@ const ReportCard = ({ report, type = 'paid', onPurchase, onSampleDownload, viewM
           ) : report.isPurchased ? (
             <Link
               to={`/report/view/${report._id}`}
-              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-xl hover:from-green-600 hover:to-green-700 transition-all duration-300 font-medium shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
             >
               <Eye className="h-4 w-4" />
               Read Report
             </Link>
           ) : (
             <button
-              onClick={() => onPurchase(report._id)}
-              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-xl hover:from-blue-600 hover:to-blue-700 transition-all duration-300 font-medium shadow-sm hover:shadow-md transform hover:scale-[1.02]"
+              onClick={() => onPurchase(report._id, report.title)}
+              className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
             >
               <ShoppingCart className="h-4 w-4" />
               Purchase Report
@@ -230,6 +262,8 @@ const ReportCard = ({ report, type = 'paid', onPurchase, onSampleDownload, viewM
       </div>
     </motion.div>
   );
-};
+});
+
+ReportCard.displayName = 'ReportCard';
 
 export default ReportCard;

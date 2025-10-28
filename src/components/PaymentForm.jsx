@@ -1,41 +1,87 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Upload, FileText, QrCode, Smartphone, Info, Copy, CheckCircle2, ArrowLeftRight } from 'lucide-react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { Upload, FileText, QrCode, Smartphone, Info, Copy, CheckCircle2, ArrowLeftRight, Calendar, Star } from 'lucide-react';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Toast from './common/Toast';
 
 const PaymentForm = () => {
-  const { reportId } = useParams();
+  const { type, id } = useParams(); // type: 'report' or 'plan', id: reportId or planId
   const navigate = useNavigate();
+  const location = useLocation();
+  
   const [report, setReport] = useState(null);
+  const [plan, setPlan] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [isDragging, setIsDragging] = useState(false);
   const [copiedUPI, setCopiedUPI] = useState(false);
-  const [viewMode, setViewMode] = useState('qr'); // 'qr' or 'upload'
+  const [viewMode, setViewMode] = useState('qr');
   
-  const UPI_ID = "maxx05@ibl";
-  const AMOUNT = 500;
-  const DESCRIPTION = "TechReportsPro Report Payment";
-  
+  const UPI_ID = "marketmindsresearch@ibl";
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
 
+  // Plan definitions (should match PlanSelection.jsx)
+  const planDefinitions = {
+    basic: {
+      id: 'basic',
+      name: 'Basic',
+      price: 355,
+      period: 'month',
+      duration: 1,
+      totalReports: 7,
+      premiumReports: 6,
+      bluechipReports: 1
+    },
+    plus: {
+      id: 'plus',
+      name: 'Plus',
+      price: 855,
+      period: '3 months',
+      duration: 3,
+      totalReports: 21,
+      premiumReports: 18,
+      bluechipReports: 3
+    },
+    pro: {
+      id: 'pro',
+      name: 'Pro',
+      price: 1255,
+      period: '6 months',
+      duration: 6,
+      totalReports: 42,
+      premiumReports: 36,
+      bluechipReports: 6
+    },
+    elite: {
+      id: 'elite',
+      name: 'Elite',
+      price: 2555,
+      period: 'yearly',
+      duration: 12,
+      totalReports: 84,
+      premiumReports: 72,
+      bluechipReports: 12
+    }
+  };
+
   useEffect(() => {
-    if (reportId) {
+    if (type === 'report' && id) {
       fetchReportDetails();
+    } else if (type === 'plan' && id) {
+      setPlanDetails();
     } else {
       setToast({
         show: true,
-        message: 'Invalid report ID',
+        message: 'Invalid payment request',
         type: 'error',
       });
       navigate('/catalog');
     }
-  }, [reportId]);
-  
+  }, [type, id]);
+
   // Reset copied state after 2 seconds
   useEffect(() => {
     if (copiedUPI) {
@@ -46,7 +92,7 @@ const PaymentForm = () => {
 
   const fetchReportDetails = async () => {
     try {
-      const response = await axios.get(`/api/reports/${reportId}`);
+      const response = await axios.get(`/api/reports/${id}`);
       setReport(response.data);
     } catch (error) {
       console.error('Error fetching report:', error);
@@ -59,6 +105,33 @@ const PaymentForm = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const setPlanDetails = () => {
+    const selectedPlan = location.state?.plan || planDefinitions[id];
+    if (selectedPlan) {
+      setPlan(selectedPlan);
+    } else {
+      setToast({
+        show: true,
+        message: 'Plan not found',
+        type: 'error',
+      });
+      navigate('/plans');
+    }
+    setLoading(false);
+  };
+
+  const getAmount = () => {
+    if (type === 'report') return 555;
+    if (type === 'plan' && plan) return plan.price;
+    return 0;
+  };
+
+  const getDescription = () => {
+    if (type === 'report') return "TechReportsPro Individual Report";
+    if (type === 'plan' && plan) return `TechReportsPro ${plan.name} Plan Purchase`;
+    return "TechReportsPro Payment";
   };
 
   const handleDragOver = (e) => {
@@ -110,7 +183,7 @@ const PaymentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (!reportId || !screenshot) {
+    if (!screenshot) {
       setToast({
         show: true,
         message: 'Please select a screenshot to upload',
@@ -122,31 +195,55 @@ const PaymentForm = () => {
     setSubmitting(true);
 
     try {
-      await axios.post('/api/payment-requests', {
-        reportId,
+      // Map 'plan' type to 'subscription' for backend
+      const backendPaymentType = type === 'plan' ? 'subscription' : type;
+      
+      const payloadData = {
+        paymentType: backendPaymentType, // Changed from: paymentType: type
+        amount: getAmount(),
         screenshotData: screenshot
-      }, {
+      };
+
+      if (type === 'report') {
+        payloadData.reportId = id;
+      } else if (type === 'plan') {
+        payloadData.subscriptionPlan = {
+          planId: plan.id,
+          planName: plan.name,
+          duration: plan.duration,
+          reportsIncluded: plan.totalReports,
+          premiumReports: plan.premiumReports,
+          bluechipReports: plan.bluechipReports
+        };
+      }
+
+      await axios.post('/api/payment-requests', payloadData, {
         headers: {
           'Content-Type': 'application/json',
           Authorization: `Bearer ${localStorage.getItem('authToken')}`,
         },
       });
 
+      const successMessage = type === 'plan' 
+        ? `${plan.name} plan payment submitted successfully! Awaiting verification.`
+        : 'Report payment submitted successfully! Awaiting verification.';
+
       setToast({
         show: true,
-        message: 'Payment proof submitted successfully! Awaiting verification.',
+        message: successMessage,
         type: 'success',
       });
 
-      setTimeout(() => navigate('/catalog'), 2000);
+      setTimeout(() => navigate('/dashboard'), 2000);
     } catch (error) {
       const errorMessage = {
         'SCREENSHOT_REQUIRED': 'Payment screenshot is required',
         'AUTH_REQUIRED': 'Please login to continue',
         'TOKEN_EXPIRED': 'Session expired. Please login again',
-        'DUPLICATE_REQUEST': 'You already have a pending request for this report',
-        'ALREADY_PURCHASED': 'You have already purchased this report',
-        'REPORT_NOT_FOUND': 'Report not found',
+        'DUPLICATE_REQUEST': 'You already have a pending request for this item',
+        'ALREADY_PURCHASED': 'You have already purchased this item',
+        'ITEM_NOT_FOUND': 'Item not found',
+        'ACTIVE_SUBSCRIPTION': 'You already have an active subscription'
       }[error.response?.data?.code] || 'Error submitting payment';
 
       setToast({
@@ -175,7 +272,7 @@ const PaymentForm = () => {
   
   const openUpiApp = () => {
     // Format UPI deep link
-    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=TechReportsPro&am=${AMOUNT}&cu=INR&tn=${encodeURIComponent(DESCRIPTION)}`;
+    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=TechReportsPro&am=${getAmount()}&cu=INR&tn=${encodeURIComponent(getDescription())}`;
     window.location.href = upiUrl;
   };
   
@@ -185,18 +282,18 @@ const PaymentForm = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center pt-20">
         <div className="w-8 h-8 border-4 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  if (!report) {
+  if (!report && !plan) {
     return null;
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 pt-16 pb-16">
+    <div className="min-h-screen bg-gradient-to-b from-white to-blue-50 pt-24 pb-16">
       <div className="max-w-4xl mx-auto px-4">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -207,18 +304,32 @@ const PaymentForm = () => {
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
             <h2 className="text-xl md:text-2xl font-bold">Complete Your Purchase</h2>
-            <p className="mt-1 text-blue-100 text-sm md:text-base">Simple 2-step process to access your report</p>
+            <p className="mt-1 text-blue-100 text-sm md:text-base">
+              {type === 'plan' ? 'Subscription Plan Payment' : 'Individual Report Payment'}
+            </p>
           </div>
           
-          {/* Report Details */}
+          {/* Item Details */}
           <div className="p-6 border-b border-gray-100">
             <div className="flex items-start gap-4">
               <div className="p-3 bg-blue-50 rounded-xl text-blue-600 flex-shrink-0">
-                <FileText className="w-6 h-6" />
+                {type === 'plan' ? <Star className="w-6 h-6" /> : <FileText className="w-6 h-6" />}
               </div>
-              <div>
-                <h3 className="font-semibold text-gray-900">{report?.title}</h3>
-                <p className="text-sm text-gray-500 mt-1">Price: ₹{AMOUNT}</p>
+              <div className="flex-1">
+                <h3 className="font-semibold text-gray-900">
+                  {type === 'plan' ? `${plan?.name} Plan` : report?.title}
+                </h3>
+                <p className="text-sm text-gray-500 mt-1">
+                  Price: ₹{getAmount()}
+                  {type === 'plan' && (
+                    <span className="ml-2">• {plan?.totalReports} reports included • Valid for {plan?.period}</span>
+                  )}
+                </p>
+                {type === 'plan' && (
+                  <div className="mt-2 text-sm text-blue-600">
+                    {plan?.premiumReports} Premium Reports + {plan?.bluechipReports} Bluechip Reports
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -291,7 +402,7 @@ const PaymentForm = () => {
                     <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                       <div>
                         <p className="text-sm text-gray-500">Amount to Pay</p>
-                        <p className="font-semibold text-lg text-gray-900">₹{AMOUNT}</p>
+                        <p className="font-semibold text-lg text-gray-900">₹{getAmount()}</p>
                       </div>
                       
                       <div>
@@ -330,7 +441,7 @@ const PaymentForm = () => {
                         <p className="font-medium text-gray-700">Simple Steps:</p>
                         <ol className="list-decimal ml-4 mt-1 space-y-1">
                           <li>Scan QR code with any UPI app</li>
-                          <li>Pay ₹{AMOUNT}</li>
+                          <li>Pay ₹{getAmount()}</li>
                           <li>Take a screenshot of payment confirmation</li>
                         </ol>
                       </div>

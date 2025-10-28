@@ -61,8 +61,22 @@ const ExpertAnalysis = () => {
   };
 
   return (
-    <section className="relative py-12 sm:py-16 md:py-20 lg:py-24 overflow-hidden bg-gradient-to-b from-slate-50 via-blue-50/30 to-indigo-50/40">
-      {/* Unified Background Elements */}
+    <section className="relative py-12 sm:py-16 md:py-24 lg:py-36 overflow-visible bg-gradient-to-b from-indigo-50/40 via-purple-50/30 to-blue-50/40">
+      {/* Background image - match WhyChooseUs and extend beyond section */}
+      <div
+        className="absolute top-0 left-0 right-0 -z-10 pointer-events-none bg-cover bg-center"
+        style={{
+          height: "160%",
+          backgroundImage: "url('/sd.png')",
+          backgroundRepeat: "no-repeat",
+          backgroundSize: "cover",
+          opacity: 0.45
+        }}
+      />
+      {/* Soft fade so the background doesn't end abruptly */}
+      <div className="pointer-events-none absolute bottom-0 left-0 right-0 h-24 sm:h-28 md:h-32 bg-gradient-to-b from-transparent to-white/90 -z-0"></div>
+
+      {/* Unified decorative elements */}
       <div className="absolute inset-0 pointer-events-none">
         {/* Primary gradient blobs */}
         <div className="absolute top-0 -left-4 w-72 h-72 bg-blue-200/40 rounded-full mix-blend-multiply filter blur-3xl opacity-60"></div>
@@ -70,9 +84,9 @@ const ExpertAnalysis = () => {
         <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-purple-200/30 rounded-full mix-blend-multiply filter blur-3xl opacity-40"></div>
         
         {/* Additional seamless gradient elements */}
-        <div className="absolute top-1/4 -right-64 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute bottom-1/4 -left-64 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl"></div>
-        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-indigo-100/15 rounded-full blur-3xl"></div>
+        <div className="absolute top-1/4 -right-64 w-96 h-96 bg-blue-200/20 rounded-full blur-3xl" />
+        <div className="absolute bottom-1/4 -left-64 w-96 h-96 bg-purple-200/20 rounded-full blur-3xl" />
+        <div className="absolute top-1/2 left-1/3 w-64 h-64 bg-indigo-100/15 rounded-full blur-3xl" />
         
         {/* Floating decorative elements */}
         <motion.div 
@@ -122,24 +136,26 @@ const ExpertAnalysis = () => {
           variants={containerVariants}
           className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 md:gap-12 lg:gap-20 items-center"
         >
-          {/* Left Content with Enhanced Animation */}
+          {/* Left Content */}
           <motion.div 
             variants={containerVariants}
             className="space-y-4 sm:space-y-6 md:space-y-8 order-2 lg:order-1 text-center lg:text-left"
           >
+            {/* Badge text same as WhyChooseUs */}
             <motion.div variants={fadeInUp} className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-100 justify-center lg:justify-start">
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600 text-sm font-semibold">
-                {translate("industryLeadingAnalysis")}
+                {translate("whyChooseUs")}
               </span>
             </motion.div>
-            
+
+            {/* Heading same as WhyChooseUs */}
             <motion.h2 
               variants={fadeInUp} 
               className="text-3xl sm:text-4xl lg:text-5xl font-bold text-gray-900 leading-tight"
             >
-              {translate("expertAnalysis")}
+              <span className="block text-slate-900">{translate("expertInsights")}</span>
               <span className="block text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                {translate("youCanTrust")}
+                {translate("strategicDecisions")}
               </span>
             </motion.h2>
             
@@ -172,10 +188,10 @@ const ExpertAnalysis = () => {
             </motion.div>
           </motion.div>
 
-          {/* Right Content with Image - Enhanced with Animation */}
+          {/* Right Content with Image - overlap next section */}
           <motion.div 
             variants={itemVariants}
-            className="relative order-1 lg:order-2"
+            className="relative order-1 lg:order-2 lg:-mb-24 xl:-mb-32"
           >
             <motion.div 
               initial={{ scale: 0.95, opacity: 0.5 }}

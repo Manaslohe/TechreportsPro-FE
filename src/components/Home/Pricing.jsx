@@ -1,9 +1,11 @@
 import { useState, useEffect, useRef } from 'react';
 import { Check, Star, Calendar, TrendingUp } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function Pricing() {
   const [isVisible, setIsVisible] = useState(false);
   const sectionRef = useRef(null);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -24,47 +26,59 @@ export default function Pricing() {
 
   const plans = [
     {
-      name: 'Monthly',
-      price: '₹399',
+      name: 'Basic',
+      price: '₹355',
       period: '/month',
       popular: false,
       gradient: 'from-blue-500 to-blue-600',
-      delay: 0
+      delay: 0,
+      totalReports: 7,
+      premiumReports: 6,
+      bluechipReports: 1
     },
     {
-      name: 'Quarterly',
-      price: '₹499',
+      name: 'Plus',
+      price: '₹855',
       period: '/3 months',
       popular: false,
       gradient: 'from-blue-600 to-blue-700',
-      delay: 100
+      delay: 100,
+      totalReports: 21,
+      premiumReports: 18,
+      bluechipReports: 3
     },
     {
-      name: '6 Months',
-      price: '₹899',
+      name: 'Pro',
+      price: '₹1255',
       period: '/6 months',
       popular: true,
       gradient: 'from-blue-700 to-blue-800',
-      delay: 200
+      delay: 200,
+      totalReports: 42,
+      premiumReports: 36,
+      bluechipReports: 6
     },
     {
-      name: 'Yearly',
-      price: '₹1,399',
-      period: '/year',
+      name: 'Elite',
+      price: '₹2555',
+      period: '/yearly',
       popular: false,
       gradient: 'from-blue-800 to-blue-900',
       delay: 300,
-      badge: 'Best Value'
+      badge: 'Best Value',
+      totalReports: 84,
+      premiumReports: 72,
+      bluechipReports: 12
     }
   ];
 
   const features = [
-    '5 Premium Reports per month',
-    '1 Bluechip/Large Cap Report',
-    'Expert Market Analysis',
-    'Weekly Market Updates',
-    'Priority Support',
-    'Mobile & Desktop Access'
+    'Premium Market Analysis',
+    'Expert Stock Recommendations',
+    'Weekly Report Updates',
+    'Risk Assessment Reports',
+    'Sector Analysis',
+    'Portfolio Guidance'
   ];
 
   return (
@@ -92,7 +106,7 @@ export default function Pricing() {
         </div>
 
         {/* Subscription Plans */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
           {plans.map((plan, index) => (
             <div
               key={plan.name}
@@ -101,11 +115,11 @@ export default function Pricing() {
               }`}
               style={{ transitionDelay: `${plan.delay}ms` }}
             >
-              <div className={`relative h-full bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 transform hover:-translate-y-2 ${plan.popular ? 'ring-2 ring-blue-500 scale-105' : ''}`}>
+              <div className={`relative h-full bg-white rounded-2xl shadow-xl hover:shadow-2xl transition-all duration-300 ${plan.popular ? 'ring-2 ring-blue-500 scale-105' : ''}`}>
                 {plan.popular && (
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
                     <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-6 py-2 rounded-full text-sm font-bold flex items-center space-x-1">
-                      <Star className="w-4 h-4  text-nowrap fill-current" />
+                      <Star className="w-4 h-4 fill-current" />
                       <span className='text-nowrap'>Most Popular</span>
                     </div>
                   </div>
@@ -136,18 +150,24 @@ export default function Pricing() {
                       </li>
                     ))}
                   </ul>
-                  
-                  <button className={`w-full bg-gradient-to-r ${plan.gradient} text-white py-3 px-6 rounded-xl font-semibold hover:shadow-lg transition-all duration-300 transform hover:scale-105`}>
-                    Get Started
-                  </button>
                 </div>
               </div>
             </div>
           ))}
         </div>
 
+        {/* Universal Buy Plans Button */}
+        <div className={`text-center mb-12 transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+          <button 
+            onClick={() => navigate('/plans')}
+            className="px-12 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-lg font-bold rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl"
+          >
+            View & Select Plans
+          </button>
+        </div>
+
         {/* Individual Report Section */}
-        <div className={`transition-all duration-1000 delay-500 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
+        <div className={`transition-all duration-1000 delay-700 ${isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'}`}>
           <div className="bg-white rounded-3xl shadow-2xl p-8 md:p-12 border border-gray-100">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
               <div>
@@ -162,7 +182,7 @@ export default function Pricing() {
                   Need just one report? Get premium market analysis and expert insights for a single stock or sector.
                 </p>
                 <ul className="space-y-4">
-                  {['Comprehensive Stock Analysis', 'Market Trend Insights', 'Risk Assessment', 'Price Target Recommendations'].map((feature, idx) => (
+                  {['Comprehensive Stock Analysis', 'Market Trend Insights', 'Risk Assessment'].map((feature, idx) => (
                     <li key={idx} className="flex items-center space-x-3">
                       <Check className="w-5 h-5 text-blue-600 flex-shrink-0" />
                       <span className="text-gray-700">{feature}</span>
@@ -173,10 +193,13 @@ export default function Pricing() {
               
               <div className="text-center">
                 <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-3xl p-8 text-white transform hover:scale-105 transition-all duration-300">
-                  <div className="text-5xl font-bold mb-2">₹299</div>
+                  <div className="text-5xl font-bold mb-2">₹555</div>
                   <div className="text-xl opacity-90 mb-6">per report</div>
-                  <button className="w-full bg-white text-blue-700 py-4 px-8 rounded-xl font-bold text-lg hover:bg-gray-50 transition-colors duration-300">
-                    Buy Single Report
+                  <button 
+                    onClick={() => navigate('/catalog')}
+                    className="w-full bg-white text-blue-700 py-4 px-8 rounded-xl font-bold text-lg hover:bg-gray-50 transition-colors duration-300"
+                  >
+                    Browse Reports
                   </button>
                 </div>
               </div>
@@ -189,7 +212,7 @@ export default function Pricing() {
           <div className="inline-flex items-center space-x-2 bg-blue-100 text-blue-800 px-6 py-3 rounded-full">
             <Calendar className="w-5 h-5" />
             <span className="font-medium">
-              📊 Reports are uploaded every Saturday night
+              📊 Reports are uploaded weekly
             </span>
           </div>
         </div>

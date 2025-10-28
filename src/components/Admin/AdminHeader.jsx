@@ -1,8 +1,9 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { LogOut, Menu, Search } from 'lucide-react';
+import { LogOut, Menu } from 'lucide-react';
+import { motion } from 'framer-motion';
 
-const AdminHeader = ({ onMenuClick }) => {
+const AdminHeader = ({ onMenuClick, title, subtitle }) => {
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -11,39 +12,35 @@ const AdminHeader = ({ onMenuClick }) => {
   };
 
   return (
-    <header className="bg-white border-b border-gray-100 sticky top-0 z-30">
-      <div className="mx-auto px-4">
-        <div className="flex h-16 items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
-            <button
+    <header className="sticky top-0 z-30 backdrop-blur-lg bg-white/50 border-b border-slate-200/30">
+      <div className="px-4 sm:px-6 py-3">
+        <div className="flex h-12 items-center justify-between gap-4">
+          <div className="flex items-center gap-3 flex-1 min-w-0">
+            <motion.button
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
               onClick={onMenuClick}
-              className="p-2 -ml-2 text-gray-400 hover:text-gray-600 lg:hidden"
+              className="p-1.5 text-slate-600 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-colors lg:hidden flex-shrink-0"
             >
-              <Menu size={20} />
-            </button>
-
-            <div className="flex items-center gap-3">
-           
-           
+              <Menu size={18} />
+            </motion.button>
+            <div className="min-w-0">
+              <h1 className="text-lg font-bold text-slate-900 truncate">{title}</h1>
+              <p className="text-xs text-slate-500 truncate">{subtitle}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-6">
-            <div className="relative max-w-xs hidden md:block">
-              <Search className="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                placeholder="Quick search..."
-                className="w-full pl-9 pr-4 py-1.5 text-sm bg-gray-50/80 border-0 rounded-lg ring-1 ring-gray-200 focus:ring-2 focus:ring-blue-500/20 focus:outline-none"
-              />
-            </div>
-            <button
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            {/* Logout Button */}
+            <motion.button
+              whileHover={{ scale: 1.02 }}
+              whileTap={{ scale: 0.98 }}
               onClick={handleLogout}
-              className="flex items-center gap-2 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-50 rounded-lg transition-colors"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs sm:text-sm font-medium text-slate-700 hover:text-slate-900 hover:bg-slate-100 rounded-lg transition-all"
             >
-              <LogOut size={18} />
-              <span className="hidden sm:block">Sign out</span>
-            </button>
+              <LogOut size={16} />
+              <span className="hidden sm:block">Logout</span>
+            </motion.button>
           </div>
         </div>
       </div>
@@ -52,4 +49,3 @@ const AdminHeader = ({ onMenuClick }) => {
 };
 
 export default AdminHeader;
-   

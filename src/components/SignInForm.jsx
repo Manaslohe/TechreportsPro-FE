@@ -7,6 +7,10 @@ import axios from 'axios';
 import Toast from './common/Toast';
 import { useTranslation } from "../contexts/TranslationContext";
 
+const apiBaseUrl = import.meta.env.MODE === 'production' 
+  ? import.meta.env.VITE_REACT_APP_API_BASE_URL_PRODUCTION 
+  : import.meta.env.VITE_REACT_APP_API_BASE_URL;
+
 export default function SignInForm() {
   const navigate = useNavigate();
   const { translate } = useTranslation();
@@ -42,31 +46,31 @@ export default function SignInForm() {
     e.preventDefault();
     setIsLoading(true);
     try {
-      const response = await axios.post('/api/signin', {
-        email: formData.email,
-        password: formData.password,
-      });
-      const { token, user } = response.data;
-      localStorage.setItem('authToken', token);
-      localStorage.setItem('user', JSON.stringify(user));
+        const response = await axios.post(`${apiBaseUrl}/api/users/signin`, { // Corrected route
+            email: formData.email,
+            password: formData.password,
+        });
+        const { token, user } = response.data;
+        localStorage.setItem('authToken', token);
+        localStorage.setItem('user', JSON.stringify(user));
 
-      window.dispatchEvent(new Event('authChange'));
+        window.dispatchEvent(new Event('authChange'));
 
-      setToast({
-        show: true,
-        message: 'Successfully signed in!',
-        type: 'success'
-      });
+        setToast({
+            show: true,
+            message: 'Successfully signed in!',
+            type: 'success'
+        });
 
-      setTimeout(() => navigate('/'), 2000);
+        setTimeout(() => navigate('/'), 2000);
     } catch (error) {
-      setToast({
-        show: true,
-        message: error.response?.data?.error || 'Error signing in',
-        type: 'error'
-      });
+        setToast({
+            show: true,
+            message: error.response?.data?.error || 'Error signing in',
+            type: 'error'
+        });
     } finally {
-      setIsLoading(false);
+        setIsLoading(false);
     }
   };
 

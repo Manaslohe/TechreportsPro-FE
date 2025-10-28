@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { ChevronUp } from 'lucide-react';
 import Home from './Home/Hero';
-import WhyChooseUs from './Home/WhyChooseUs';
 import ExpertAnalysis from './Home/ExpertAnalysis';
 import ReportDetails from './Home/ReportDetails';
 import Pricing from './Home/Pricing';
@@ -25,7 +24,6 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Home />
-      <WhyChooseUs />
       <ExpertAnalysis />
       <ReportDetails />
       <Pricing />

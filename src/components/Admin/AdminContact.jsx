@@ -17,21 +17,22 @@ const AdminContact = () => {
 
   const fetchContacts = async () => {
     try {
-      const response = await axios.get('/api/admin/contacts', {
-        headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-          'x-admin-auth': localStorage.getItem('adminAuth') === 'true' ? 'true' : undefined
-        }
-      });
-      setContacts(response.data);
+        const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+        const response = await axios.get(`${baseURL}/api/admin/contacts`, {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+                'x-admin-auth': localStorage.getItem('adminAuth') === 'true' ? 'true' : undefined
+            }
+        });
+        setContacts(response.data);
     } catch (error) {
-      setToast({
-        show: true,
-        message: error.response?.data?.error || 'Error fetching contact submissions',
-        type: 'error'
-      });
+        setToast({
+            show: true,
+            message: error.response?.data?.error || 'Error fetching contact submissions',
+            type: 'error'
+        });
     } finally {
-      setLoading(false);
+        setLoading(false);
     }
   };
 
@@ -47,10 +48,6 @@ const AdminContact = () => {
       <div className="sticky top-0 z-10 bg-white border-b border-gray-100 p-6">
         <div className="max-w-7xl mx-auto">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">Contact Submissions</h1>
-              <p className="text-gray-600 mt-1">Manage customer inquiries and feedback</p>
-            </div>
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />

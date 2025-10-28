@@ -1,9 +1,10 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { 
   MessageSquare, User, Calendar, Clock, CheckCircle, XCircle, 
   Search, Filter, Eye, DollarSign, FileText, X, ArrowRight,
-  ChevronDown, ExternalLink, AlertCircle, Clipboard, Shield
+  ChevronDown, ExternalLink, AlertCircle, Clipboard, Shield,
+  TrendingUp
 } from 'lucide-react';
 import axios from 'axios';
 import Toast from '../common/Toast';
@@ -21,7 +22,8 @@ const AdminRequest = () => {
   const fetchRequests = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/payment-requests', {
+      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+      const response = await axios.get(`${baseURL}/api/payment-requests`, {
         headers: {
           Authorization: `Bearer ${localStorage.getItem('authToken')}`,
           'x-admin-auth': localStorage.getItem('adminAuth') === 'true' ? 'true' : undefined
@@ -58,8 +60,8 @@ const AdminRequest = () => {
       }
 
       setIsSubmitting(true);
-      
-      await axios.post(`/api/payment-requests/${id}/verify`, {
+      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+      await axios.post(`${baseURL}/api/payment-requests/${id}/verify`, {
         status,
         adminComment: comment.trim() || (status === 'approved' ? 'Payment approved' : '')
       }, {
@@ -102,38 +104,45 @@ const AdminRequest = () => {
     }
   };
 
-  // Update the filtering logic
-  const filteredRequests = requests.filter(request => {
-    // Apply filter
-    if (filter !== 'all') {
-      if (!request.status?.toLowerCase().includes(filter.toLowerCase())) {
+  const filteredRequests = useMemo(() => 
+    requests.filter(request => {
+      // Apply filter
+      if (filter !== 'all' && !request.status?.toLowerCase().includes(filter.toLowerCase())) {
         return false;
       }
-    }
-    
-    // Apply search
-    if (searchQuery.trim()) {
-      const searchLower = searchQuery.toLowerCase();
-      return (
-        request.user?.firstName?.toLowerCase().includes(searchLower) ||
-        request.user?.lastName?.toLowerCase().includes(searchLower) ||
-        request.report?.title?.toLowerCase().includes(searchLower)
-      );
-    }
-    
-    return true;
-  }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      
+      // Apply search
+      if (searchQuery.trim()) {
+        const searchLower = searchQuery.toLowerCase();
+        return (
+          request.user?.firstName?.toLowerCase().includes(searchLower) ||
+          request.user?.lastName?.toLowerCase().includes(searchLower) ||
+          request.report?.title?.toLowerCase().includes(searchLower)
+        );
+      }
+      
+      return true;
+    }).sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)),
+    [requests, searchQuery, filter]
+  );
 
-  const toggleRequestDetails = (id) => {
+  const stats = useMemo(() => ({
+    pending: requests.filter(r => r.status === 'pending').length,
+    approved: requests.filter(r => r.status === 'approved').length,
+    rejected: requests.filter(r => r.status === 'rejected').length,
+    totalAmount: requests.reduce((acc, r) => acc + (r.amount || 0), 0)
+  }), [requests]);
+
+  const toggleRequestDetails = useCallback((id) => {
     setSelectedRequestId((prevId) => (prevId === id ? null : id));
-  };
+  }, []);
 
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: { 
       opacity: 1,
       transition: { 
-        staggerChildren: 0.07,
+        staggerChildren: 0.05,
         delayChildren: 0.1
       }
     }
@@ -144,124 +153,106 @@ const AdminRequest = () => {
     visible: { 
       opacity: 1, 
       y: 0,
-      transition: { duration: 0.4, ease: "easeOut" }
+      transition: { duration: 0.3, ease: "easeOut" }
     }
   };
 
   return (
-    <div className="h-full flex flex-col bg-slate-50 min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50">
       {/* Header */}
       <motion.div 
         initial={{ opacity: 0, y: -10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4 }}
-        className="sticky top-0 z-10 bg-white border-b border-slate-200 shadow-sm"
+        className="sticky top-0 z-20 backdrop-blur-lg bg-white/80 border-b border-slate-200/50"
       >
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 py-5">
-          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5">
-            <div>
-              <h1 className="text-2xl font-bold text-slate-800">Payment Requests</h1>
-              <p className="text-slate-500 mt-1">Review and manage payment verifications</p>
+        <div className="px-4 sm:px-6 lg:px-8 py-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 sm:gap-6 mb-6">
             </div>
-            <div className="flex flex-wrap items-center gap-3">
-              <div className="flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg border border-slate-200 shadow-sm">
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-amber-100 text-amber-800">
-                  <Clock size={12} />
-                  {requests.filter(r => r.status === 'pending').length} Pending
-                </span>
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-emerald-100 text-emerald-800">
-                  <CheckCircle size={12} />
-                  {requests.filter(r => r.status === 'approved').length} Approved
-                </span>
-                <span className="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                  <XCircle size={12} />
-                  {requests.filter(r => r.status === 'rejected').length} Rejected
-                </span>
-              </div>
-            </div>
-          </div>
 
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-              <input 
-                type="text" 
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-10 pr-4 py-2.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 shadow-sm"
-                placeholder="Search by user or report title..."
+            {/* Stats Grid */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-6">
+              <StatCard
+                icon={Clock}
+                label="Pending"
+                value={stats.pending}
+                color="amber"
               />
-              {searchQuery && (
-                <button 
-                  onClick={() => setSearchQuery('')}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
-                >
-                  <X size={16} />
-                </button>
-              )}
+              <StatCard
+                icon={CheckCircle}
+                label="Approved"
+                value={stats.approved}
+                color="emerald"
+              />
+              <StatCard
+                icon={XCircle}
+                label="Rejected"
+                value={stats.rejected}
+                color="rose"
+              />
+              <StatCard
+                icon={DollarSign}
+                label="Total Amount"
+                value={`₹${stats.totalAmount.toLocaleString()}`}
+                color="indigo"
+              />
             </div>
-            <div className="flex items-center gap-2 w-full sm:w-auto sm:min-w-[200px]">
-              <Filter className="text-slate-400 w-4 h-4" />
-              <select 
-                value={filter} 
-                onChange={(e) => setFilter(e.target.value)}
-                className="flex-1 px-3 py-2.5 text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 shadow-sm"
-              >
-                <option value="all">All Requests</option>
-                <option value="pending">Pending Only</option>
-                <option value="approved">Approved</option>
-                <option value="rejected">Rejected</option>
-              </select>
+
+            {/* Search and Filter */}
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+                <input 
+                  type="text" 
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="w-full pl-9 pr-8 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 focus:bg-indigo-50/30 transition-all duration-200"
+                  placeholder="Search by user or report title..."
+                />
+                {searchQuery && (
+                  <button 
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors"
+                  >
+                    <X size={16} />
+                  </button>
+                )}
+              </div>
+              <div className="flex items-center gap-2 w-full sm:w-auto">
+                <Filter className="text-slate-400 w-4 h-4 flex-shrink-0" />
+                <select 
+                  value={filter} 
+                  onChange={(e) => setFilter(e.target.value)}
+                  className="flex-1 sm:flex-none px-3 py-2.5 text-sm border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 transition-all duration-200"
+                >
+                  <option value="all">All Requests</option>
+                  <option value="pending">Pending Only</option>
+                  <option value="approved">Approved</option>
+                  <option value="rejected">Rejected</option>
+                </select>
+              </div>
             </div>
           </div>
         </div>
       </motion.div>
 
       {/* Main Content */}
-      <div className="flex-1 p-4 sm:p-6">
+      <div className="px-4 sm:px-6 lg:px-8 py-6 sm:py-8">
         <div className="max-w-7xl mx-auto">
           {loading ? (
-            <div className="flex flex-col justify-center items-center h-64 mt-6">
-              <div className="w-12 h-12 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mb-4" />
-              <p className="text-slate-500">Loading payment requests...</p>
-            </div>
+            <LoadingState />
           ) : filteredRequests.length === 0 ? (
-            <motion.div 
-              initial={{ opacity: 0, scale: 0.95 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.4 }}
-              className="text-center py-12"
-            >
-              <div className="bg-white rounded-xl shadow-sm border border-slate-200 p-8 inline-block max-w-md">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                  <FileText className="w-8 h-8 text-slate-400" />
-                </div>
-                <h3 className="text-lg font-medium text-slate-800 mb-2">No Requests Found</h3>
-                <p className="text-slate-500 mb-6">
-                  {searchQuery 
-                    ? "No requests match your search criteria" 
-                    : filter !== 'all' 
-                      ? `No ${filter} requests available` 
-                      : "No payment requests have been submitted yet"}
-                </p>
-                <button 
-                  onClick={() => {
-                    setSearchQuery('');
-                    setFilter('all');
-                  }}
-                  className="inline-flex items-center justify-center px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100 transition-colors"
-                >
-                  <ArrowRight size={16} className="mr-2" />
-                  Reset Filters
-                </button>
-              </div>
-            </motion.div>
+            <EmptyState searchQuery={searchQuery} filter={filter} onReset={() => {
+              setSearchQuery('');
+              setFilter('all');
+            }} />
           ) : (
             <motion.div 
               variants={containerVariants}
               initial="hidden"
               animate="visible"
-              className="grid gap-4"
+              className="space-y-3 sm:space-y-4"
             >
               {filteredRequests.map((request) => (
                 <RequestCard
@@ -275,6 +266,7 @@ const AdminRequest = () => {
                   onCommentChange={setComment}
                   isSubmitting={isSubmitting}
                   variants={itemVariants}
+                  onToast={setToast}
                 />
               ))}
             </motion.div>
@@ -283,7 +275,7 @@ const AdminRequest = () => {
       </div>
 
       <Toast
-        show={toast.show}
+        isVisible={toast.show}
         message={toast.message}
         type={toast.type}
         onClose={() => setToast({ ...toast, show: false })}
@@ -292,7 +284,76 @@ const AdminRequest = () => {
   );
 };
 
-const RequestCard = ({ 
+const StatCard = ({ icon: Icon, label, value, color }) => {
+  const colorMap = {
+    amber: 'from-amber-500/10 to-amber-500/5 border-amber-200/30 hover:border-amber-300/50',
+    emerald: 'from-emerald-500/10 to-emerald-500/5 border-emerald-200/30 hover:border-emerald-300/50',
+    rose: 'from-rose-500/10 to-rose-500/5 border-rose-200/30 hover:border-rose-300/50',
+    indigo: 'from-indigo-500/10 to-indigo-500/5 border-indigo-200/30 hover:border-indigo-300/50'
+  };
+
+  const iconColorMap = {
+    amber: 'text-amber-600',
+    emerald: 'text-emerald-600',
+    rose: 'text-rose-600',
+    indigo: 'text-indigo-600'
+  };
+
+  return (
+    <motion.div
+      whileHover={{ y: -2 }}
+      className={`bg-gradient-to-br ${colorMap[color]} border rounded-xl p-4 sm:p-5 transition-all duration-200 cursor-default group`}
+    >
+      <div className="flex items-start justify-between">
+        <div>
+          <p className="text-slate-600 text-xs sm:text-sm font-medium mb-1">{label}</p>
+          <p className="text-2xl sm:text-3xl font-bold text-slate-900">{value}</p>
+        </div>
+        <Icon className={`${iconColorMap[color]} w-5 h-5 sm:w-6 sm:h-6 opacity-60 group-hover:opacity-100 transition-opacity`} />
+      </div>
+    </motion.div>
+  );
+};
+
+const LoadingState = () => (
+  <div className="flex justify-center items-center py-20">
+    <div className="relative">
+      <div className="w-10 h-10 border-4 border-indigo-200 rounded-full animate-spin" />
+      <div className="absolute inset-0 w-10 h-10 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin" />
+    </div>
+  </div>
+);
+
+const EmptyState = ({ searchQuery, filter, onReset }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 10 }}
+    animate={{ opacity: 1, y: 0 }}
+    className="flex justify-center items-center py-16 sm:py-20"
+  >
+    <div className="text-center">
+      <div className="w-16 h-16 bg-slate-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+        <FileText className="w-8 h-8 text-slate-400" />
+      </div>
+      <h3 className="text-slate-700 font-semibold text-lg mb-1">No Requests Found</h3>
+      <p className="text-slate-500 text-sm mb-6">
+        {searchQuery 
+          ? "No requests match your search criteria" 
+          : filter !== 'all' 
+            ? `No ${filter} requests available` 
+            : "No payment requests have been submitted yet"}
+      </p>
+      <button 
+        onClick={onReset}
+        className="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-indigo-600 bg-indigo-50 rounded-lg hover:bg-indigo-100 transition-colors"
+      >
+        <ArrowRight size={16} />
+        Reset Filters
+      </button>
+    </div>
+  </motion.div>
+);
+
+const RequestCard = React.memo(({ 
   request, 
   isSelected, 
   onToggle, 
@@ -301,7 +362,8 @@ const RequestCard = ({
   comment, 
   onCommentChange, 
   isSubmitting,
-  variants
+  variants,
+  onToast
 }) => {
   // Format date and time for better display
   const formatDate = (dateString) => {
@@ -326,31 +388,35 @@ const RequestCard = ({
     switch(status) {
       case 'pending':
         return {
-          borderColor: 'border-amber-400',
+          borderColor: 'border-amber-200',
           bgColor: 'bg-amber-50',
-          badgeClass: 'bg-amber-100 text-amber-800',
-          icon: Clock
+          badgeClass: 'bg-amber-100 text-amber-700 border-amber-200/50',
+          icon: Clock,
+          accentColor: 'text-amber-600'
         };
       case 'approved':
         return {
-          borderColor: 'border-emerald-400',
+          borderColor: 'border-emerald-200',
           bgColor: 'bg-emerald-50',
-          badgeClass: 'bg-emerald-100 text-emerald-800',
-          icon: CheckCircle
+          badgeClass: 'bg-emerald-100 text-emerald-700 border-emerald-200/50',
+          icon: CheckCircle,
+          accentColor: 'text-emerald-600'
         };
       case 'rejected':
         return {
-          borderColor: 'border-red-400',
-          bgColor: 'bg-red-50',
-          badgeClass: 'bg-red-100 text-red-800',
-          icon: XCircle
+          borderColor: 'border-rose-200',
+          bgColor: 'bg-rose-50',
+          badgeClass: 'bg-rose-100 text-rose-700 border-rose-200/50',
+          icon: XCircle,
+          accentColor: 'text-rose-600'
         };
       default:
         return {
           borderColor: 'border-slate-200',
-          bgColor: 'bg-white',
-          badgeClass: 'bg-slate-100 text-slate-800',
-          icon: AlertCircle
+          bgColor: 'bg-slate-50',
+          badgeClass: 'bg-slate-100 text-slate-700 border-slate-200/50',
+          icon: AlertCircle,
+          accentColor: 'text-slate-600'
         };
     }
   };
@@ -361,49 +427,47 @@ const RequestCard = ({
     <motion.div
       variants={variants}
       layout
-      className={`bg-white rounded-xl shadow-sm border ${statusConfig.borderColor} overflow-hidden transition-all duration-200 hover:shadow-md`}
+      className={`bg-white rounded-xl border ${statusConfig.borderColor} shadow-sm hover:shadow-md transition-all duration-200 overflow-hidden`}
     >
-      <div className="p-5 cursor-pointer" onClick={onToggle}>
+      <div className="p-4 sm:p-6 cursor-pointer" onClick={onToggle}>
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex items-start gap-4">
-            <div className="flex-shrink-0">
-              <div className={`w-12 h-12 rounded-lg flex items-center justify-center ${statusConfig.bgColor}`}>
-                <DollarSign className={`w-6 h-6 ${request.status === 'pending' ? 'text-amber-600' : request.status === 'approved' ? 'text-emerald-600' : 'text-red-600'}`} />
-              </div>
+          <div className="flex items-start gap-3 sm:gap-4 flex-1 min-w-0">
+            <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-lg flex items-center justify-center flex-shrink-0 ${statusConfig.bgColor}`}>
+              <DollarSign className={`w-5 h-5 sm:w-6 sm:h-6 ${statusConfig.accentColor}`} />
             </div>
             <div className="flex-1 min-w-0">
-              <div className="flex flex-wrap items-center gap-2 mb-1.5">
-                <h3 className="font-medium text-slate-800 truncate max-w-md">
-                  {request.report?.title || "Report Payment Request"}
+              <div className="flex flex-wrap items-center gap-2 mb-2">
+                <h3 className="font-semibold text-slate-900 line-clamp-1 max-w-xs">
+                  {request.report?.title || "Payment Request"}
                 </h3>
-                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium ${statusConfig.badgeClass}`}>
+                <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.badgeClass}`}>
                   <statusConfig.icon size={12} />
                   {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                 </span>
               </div>
-              <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm text-slate-500">
-                <div className="flex items-center gap-1.5">
-                  <User className="w-3.5 h-3.5" />
-                  <span className="truncate max-w-[150px]">
+              <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-slate-600">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <User className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
+                  <span className="truncate">
                     {request.user?.firstName} {request.user?.lastName}
                   </span>
                 </div>
                 <div className="flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
+                  <Calendar className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
                   <span>{formatDate(request.createdAt)}</span>
                 </div>
-                <div className="flex items-center gap-1.5">
-                  <Clock className="w-3.5 h-3.5" />
+                <div className="hidden sm:flex items-center gap-1.5">
+                  <Clock className="w-3.5 h-3.5 flex-shrink-0 text-slate-400" />
                   <span>{formatTime(request.createdAt)}</span>
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {request.status === 'pending' && (
-              <div className="hidden sm:block">
-                <span className="inline-flex h-2 w-2 bg-amber-500 rounded-full animate-pulse mr-2"></span>
-                <span className="text-xs font-medium text-amber-600">Awaiting Review</span>
+              <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-amber-50 rounded-full">
+                <span className="inline-flex h-1.5 w-1.5 bg-amber-500 rounded-full animate-pulse" />
+                <span className="text-xs font-medium text-amber-700">Pending</span>
               </div>
             )}
             <button
@@ -411,23 +475,14 @@ const RequestCard = ({
                 e.stopPropagation();
                 onToggle();
               }}
-              className={`inline-flex items-center gap-1.5 px-3.5 py-2 text-sm font-medium rounded-lg transition-colors ${
+              className={`inline-flex items-center gap-1.5 px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium rounded-lg transition-all ${
                 isSelected 
-                  ? 'bg-slate-200 text-slate-700 hover:bg-slate-300'
-                  : 'bg-blue-50 text-blue-600 hover:bg-blue-100'
+                  ? 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                  : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'
               }`}
             >
-              {isSelected ? (
-                <>
-                  <ChevronDown size={16} />
-                  Hide Details
-                </>
-              ) : (
-                <>
-                  <Eye size={16} />
-                  View Details
-                </>
-              )}
+              <Eye size={16} />
+              <ChevronDown className={`w-4 h-4 transition-transform duration-200 ${isSelected ? 'rotate-180' : ''}`} />
             </button>
           </div>
         </div>
@@ -439,39 +494,44 @@ const RequestCard = ({
             initial={{ opacity: 0, height: 0 }}
             animate={{ opacity: 1, height: 'auto' }}
             exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.2 }}
             className="border-t border-slate-100"
           >
-            <div className="p-5 space-y-6">
+            <div className="p-4 sm:p-6 space-y-6 bg-slate-50/50">
               {/* Request Details */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Request Information */}
                 <div>
-                  <h4 className="text-sm font-medium text-slate-500 mb-3 flex items-center gap-2">
-                    <Shield size={14} />
+                  <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <Shield size={16} className="text-indigo-600" />
                     Request Information
                   </h4>
-                  <div className="bg-slate-50 rounded-lg p-4 space-y-3">
+                  <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-3">
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">Report Title</p>
-                      <p className="text-sm font-medium text-slate-800">{request.report?.title || "Unnamed Report"}</p>
+                      <p className="text-xs text-slate-500 font-medium mb-1">Report Title</p>
+                      <p className="text-sm text-slate-900">{request.report?.title || "Unnamed Report"}</p>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">Requested by</p>
-                      <p className="text-sm font-medium text-slate-800">
-                        {request.user?.firstName} {request.user?.lastName}
-                        <span className="ml-2 text-xs text-slate-500">({request.user?.email})</span>
-                      </p>
+                      <p className="text-xs text-slate-500 font-medium mb-1">Requested By</p>
+                      <div>
+                        <p className="text-sm font-medium text-slate-900">{request.user?.firstName} {request.user?.lastName}</p>
+                        <p className="text-xs text-slate-500 mt-0.5">{request.user?.email}</p>
+                      </div>
                     </div>
                     <div>
-                      <p className="text-xs text-slate-500 mb-1">Request ID</p>
+                      <p className="text-xs text-slate-500 font-medium mb-1">Amount</p>
+                      <p className="text-lg font-semibold text-indigo-600">₹{request.amount?.toLocaleString()}</p>
+                    </div>
+                    <div>
+                      <p className="text-xs text-slate-500 font-medium mb-2">Request ID</p>
                       <div className="flex items-center gap-2">
-                        <p className="text-xs font-mono bg-slate-100 p-1 rounded text-slate-600">{request._id}</p>
+                        <p className="text-xs font-mono bg-slate-100 px-2 py-1 rounded text-slate-600 truncate">{request._id}</p>
                         <button 
                           onClick={() => {
                             navigator.clipboard.writeText(request._id);
-                            setToast({ show: true, message: 'ID copied to clipboard', type: 'success' });
+                            onToast({ show: true, message: 'ID copied', type: 'success' });
                           }}
-                          className="text-blue-500 hover:text-blue-700"
+                          className="text-indigo-600 hover:text-indigo-700 p-1 hover:bg-indigo-50 rounded transition-colors flex-shrink-0"
                         >
                           <Clipboard size={14} />
                         </button>
@@ -480,66 +540,71 @@ const RequestCard = ({
                   </div>
                 </div>
 
-                {/* Payment Screenshot */}
+                {/* Payment Proof */}
                 <div>
-                  <h4 className="text-sm font-medium text-slate-500 mb-3 flex items-center gap-2">
-                    <DollarSign size={14} />
+                  <h4 className="text-sm font-semibold text-slate-900 mb-4 flex items-center gap-2">
+                    <DollarSign size={16} className="text-indigo-600" />
                     Payment Proof
                   </h4>
-                  <div className="bg-slate-50 rounded-lg overflow-hidden">
-                    <div className="relative">
+                  <div className="bg-white rounded-lg border border-slate-200 overflow-hidden">
+                    <div className="relative bg-slate-50">
                       <img
                         src={request.screenshotData}
                         alt="Payment Screenshot"
                         className="w-full max-h-[300px] object-contain"
                       />
-                      <div className="absolute top-2 right-2">
-                        <a 
-                          href={request.screenshotData} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-center w-8 h-8 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-                        >
-                          <ExternalLink size={14} />
-                        </a>
-                      </div>
+                      <a 
+                        href={request.screenshotData} 
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="absolute top-2 right-2 inline-flex items-center justify-center w-8 h-8 rounded-full bg-black/50 hover:bg-black/70 text-white transition-colors"
+                      >
+                        <ExternalLink size={14} />
+                      </a>
                     </div>
                   </div>
                 </div>
               </div>
 
-              {/* Show admin response for processed requests */}
+              {/* Admin Response or Action Buttons */}
               {request.status !== 'pending' ? (
-                <div className={`p-4 rounded-lg ${
-                  request.status === 'approved' ? 'bg-emerald-50 border border-emerald-100' : 'bg-red-50 border border-red-100'
+                <div className={`p-4 rounded-lg border ${
+                  request.status === 'approved' 
+                    ? 'bg-emerald-50 border-emerald-200' 
+                    : 'bg-rose-50 border-rose-200'
                 }`}>
-                  <h4 className="font-medium text-slate-800 mb-2 flex items-center gap-2">
-                    <MessageSquare size={16} className={request.status === 'approved' ? 'text-emerald-500' : 'text-red-500'} />
+                  <h4 className={`font-medium mb-2 flex items-center gap-2 ${
+                    request.status === 'approved' 
+                      ? 'text-emerald-900' 
+                      : 'text-rose-900'
+                  }`}>
+                    <MessageSquare size={16} />
                     Admin Response
                   </h4>
                   <p className={`text-sm ${
-                    request.status === 'approved' ? 'text-emerald-700' : 'text-red-700'
+                    request.status === 'approved' 
+                      ? 'text-emerald-700' 
+                      : 'text-rose-700'
                   }`}>
                     {request.adminComment || `Request ${request.status}`}
                   </p>
                   {request.reviewedAt && (
                     <div className="mt-3 text-xs text-slate-500 flex items-center gap-1.5">
                       <Clock size={12} />
-                      Processed on: {new Date(request.reviewedAt).toLocaleString()}
+                      {new Date(request.reviewedAt).toLocaleString()}
                     </div>
                   )}
                 </div>
               ) : (
-                /* Action buttons for pending requests */
                 <div className="space-y-4">
                   <div>
-                    <label className="block text-sm font-medium text-slate-700 mb-2">
-                      Admin Comment {request.status === 'rejected' && <span className="text-red-500">*</span>}
+                    <label className="block text-sm font-medium text-slate-900 mb-2">
+                      Admin Comment {request.status === 'rejected' && <span className="text-rose-500">*</span>}
                     </label>
                     <textarea
                       value={comment}
                       onChange={(e) => onCommentChange(e.target.value)}
-                      className="w-full px-4 py-3 border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 resize-none shadow-sm"
+                      className="w-full px-4 py-3 text-sm border border-slate-200 rounded-lg bg-white focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-500 resize-none transition-all"
                       rows="3"
                       placeholder="Add a comment about this payment request..."
                     />
@@ -549,18 +614,18 @@ const RequestCard = ({
                     <button
                       onClick={onReject}
                       disabled={isSubmitting}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                      className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 border border-rose-200 text-rose-600 rounded-lg hover:bg-rose-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
                     >
-                      <XCircle className="w-4 h-4" />
-                      Reject Payment
+                      <XCircle size={16} />
+                      Reject
                     </button>
                     <button
                       onClick={onApprove}
                       disabled={isSubmitting}
-                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-sm"
+                      className="inline-flex items-center justify-center gap-2 px-4 sm:px-5 py-2.5 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm"
                     >
-                      <CheckCircle className="w-4 h-4" />
-                      Approve Payment
+                      <CheckCircle size={16} />
+                      Approve
                     </button>
                   </div>
                 </div>
@@ -571,6 +636,8 @@ const RequestCard = ({
       </AnimatePresence>
     </motion.div>
   );
-};
+});
+
+RequestCard.displayName = 'RequestCard';
 
 export default AdminRequest;
