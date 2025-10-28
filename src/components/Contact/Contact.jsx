@@ -1,9 +1,11 @@
 import React, { useState } from "react";
-import { motion } from "framer-motion";
-import { Mail, Phone, CheckCircle, Send, ChevronDown } from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, Phone, CheckCircle, Send, ChevronDown, Clock, Sparkles } from "lucide-react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
 import ReactCountryFlag from "react-country-flag";
 import { useTranslation } from "../../contexts/TranslationContext";
+import axios from "axios";
+import Toast from "../common/Toast";
 
 const Contact = () => {
   const { translate } = useTranslation();
@@ -24,116 +26,28 @@ const Contact = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
 
-  // Enhanced animation variants
+  // Animation variants
   const containerVariants = {
     hidden: { opacity: 0 },
     visible: {
       opacity: 1,
       transition: {
-        duration: 0.3,
-        staggerChildren: 0.4
+        duration: 0.5,
+        staggerChildren: 0.12
       }
     }
   };
 
-  const formVariants = {
-    hidden: { 
-      opacity: 0, 
-      scale: 0.95,
-      y: 30
-    },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      y: 0,
-      transition: { 
-        duration: 0.8, 
-        ease: [0.22, 1, 0.36, 1],
-        type: "spring",
-        stiffness: 100
-      }
-    }
-  };
-
-  const leftColumnVariants = {
-    hidden: { opacity: 0, x: -60 },
-    visible: {
-      opacity: 1,
-      x: 0,
-      transition: { 
-        duration: 1,
-        ease: [0.22, 1, 0.36, 1],
-        delay: 0.6
-      }
-    }
-  };
-
-  const titleVariants = {
-    hidden: { opacity: 0, y: 30 },
-    visible: {
-      opacity: 1,
-      y: 0,
-      transition: { 
-        duration: 0.8,
-        ease: [0.22, 1, 0.36, 1],
-        delay: 0.8
-      }
-    }
-  };
-
-  const contactItemVariants = {
-    hidden: { opacity: 0, x: -20, scale: 0.95 },
-    visible: (i) => ({
-      opacity: 1,
-      x: 0,
-      scale: 1,
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-        delay: 1.0 + (i * 0.15)
-      }
-    })
-  };
-
-  const socialLinksVariants = {
+  const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: {
       opacity: 1,
       y: 0,
-      transition: {
-        duration: 0.6,
-        ease: [0.22, 1, 0.36, 1],
-        delay: 1.8,
-        staggerChildren: 0.1
-      }
-    }
-  };
-
-  const socialItemVariants = {
-    hidden: { opacity: 0, scale: 0, rotate: -180 },
-    visible: {
-      opacity: 1,
-      scale: 1,
-      rotate: 0,
       transition: {
         duration: 0.5,
-        type: "spring",
-        stiffness: 150
+        ease: [0.25, 0.1, 0.25, 1]
       }
     }
-  };
-
-  const formFieldVariants = {
-    hidden: { opacity: 0, y: 20 },
-    visible: (i) => ({
-      opacity: 1,
-      y: 0,
-      transition: {
-        duration: 0.4,
-        ease: [0.22, 1, 0.36, 1],
-        delay: 0.2 + (i * 0.05)
-      }
-    })
   };
 
   const handleCopy = (value) => {
@@ -152,12 +66,18 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 2000));
+      const baseURL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:5000';
+      const fullPhone = `${selectedCountry.value}${formData.phone}`;
+      
+      await axios.post(`${baseURL}/api/contact`, {
+        ...formData,
+        phone: fullPhone,
+        country: selectedCountry.country
+      });
       
       setToast({
         show: true,
-        message: 'Your message has been sent successfully!',
+        message: translate('messageSentSuccess'),
         type: 'success'
       });
 
@@ -171,7 +91,7 @@ const Contact = () => {
     } catch (error) {
       setToast({
         show: true,
-        message: 'Error submitting the form',
+        message: translate('errorSubmittingForm'),
         type: 'error'
       });
     } finally {
@@ -179,7 +99,6 @@ const Contact = () => {
     }
   };
 
-  // Country codes data
   const countryCodes = [
     { value: '+91', label: 'IN', country: 'India' },
     { value: '+1', label: 'US', country: 'United States' },
@@ -220,42 +139,40 @@ const Contact = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-800 via-blue-700 to-blue-700 p-2 sm:p-4 lg:p-8">
+    <div className="min-h-screen bg-blue-600 p-4 sm:p-6 lg:p-8 pt-4">
       <motion.div
-        className="min-h-screen flex items-center justify-center py-4 sm:py-8"
+        className="min-h-screen flex items-center justify-center py-8 sm:py-12"
         variants={containerVariants}
         initial="hidden"
         animate="visible"
       >
         <div className="w-full max-w-7xl">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-8 xl:gap-16 items-stretch">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-stretch">
             
             {/* Left Column - Contact Information */}
             <motion.div
-              variants={leftColumnVariants}
-              // Add responsive order and spacing for mobile
-              className="text-white p-4 sm:p-6 lg:p-12 flex flex-col justify-center
-                order-1 lg:order-1
-                mt-16 sm:mt-0
-              "
+              variants={itemVariants}
+              className="text-white p-6 sm:p-8 lg:p-12 flex flex-col justify-center order-1 lg:order-1 mt-8"
             >
-              {/* Add top margin only on mobile to prevent overlap with header */}
               <motion.div
-                variants={titleVariants}
-                className="mb-6 sm:mb-8 lg:mb-12"
+                variants={itemVariants}
+                className="mb-8 lg:mb-12"
               >
-                <motion.h1 
-                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight"
-                  initial={{ opacity: 0 }}
-                  animate={{ opacity: 1 }}
-                  transition={{ duration: 1, delay: 0.9 }}
-                  // Add extra top margin on mobile
-                  style={{ marginTop: '0.5rem' }}
+                <motion.div
+                  initial={{ opacity: 0, scale: 0.9 }}
+                  animate={{ opacity: 1, scale: 1 }}
+                  transition={{ delay: 0.2 }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-6 border border-white/20"
                 >
+                  <Sparkles className="h-4 w-4" />
+                  {translate('getInTouch')}
+                </motion.div>
+
+                <h1 className="text-3xl sm:text-4xl lg:text-5xl xl:text-6xl font-bold mb-4 sm:mb-6 leading-tight">
                   <motion.span
                     initial={{ opacity: 0, x: -20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 1.0 }}
+                    transition={{ duration: 0.5, delay: 0.3 }}
                   >
                     {translate("lets")}{" "}
                   </motion.span>
@@ -263,39 +180,37 @@ const Contact = () => {
                     className="text-blue-200"
                     initial={{ opacity: 0, x: 20 }}
                     animate={{ opacity: 1, x: 0 }}
-                    transition={{ duration: 0.6, delay: 1.2 }}
+                    transition={{ duration: 0.5, delay: 0.4 }}
                   >
                     {translate("connect")}
                   </motion.span>
-                </motion.h1>
+                </h1>
               </motion.div>
 
-              <div className="space-y-4 sm:space-y-6 lg:space-y-8 mb-6 sm:mb-8 lg:mb-12">
+              <div className="space-y-6 mb-8 lg:mb-12">
                 {/* Email */}
                 <motion.div 
-                  className="flex items-start gap-3 sm:gap-4 group cursor-pointer"
-                  variants={contactItemVariants}
-                  custom={0}
-                  whileHover={{ x: 8, transition: { type: "spring", stiffness: 400 } }}
+                  variants={itemVariants}
+                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  whileHover={{ x: 8 }}
                   onClick={() => handleCopy('info.marketmindsresearch@gmail.com')}
                 >
                   <motion.div 
-                    className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm"
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10"
                   >
-                    <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    <Mail className="w-6 h-6 text-white" />
                   </motion.div>
                   <div className="min-w-0 flex-1">
-                    <p className="text-blue-200 text-xs sm:text-sm font-medium mb-1">{translate("emailUs")}</p>
-                    <p className="text-white font-semibold text-sm sm:text-lg break-all">
+                    <p className="text-blue-200 text-sm font-medium mb-1">{translate("emailUs")}</p>
+                    <p className="text-white font-semibold text-base lg:text-lg break-all">
                       info.marketmindsresearch@gmail.com
                     </p>
                     {copied === 'info.marketmindsresearch@gmail.com' && (
                       <motion.span 
-                        initial={{ opacity: 0, y: -10, scale: 0.8 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        className="text-green-300 text-xs font-medium flex items-center gap-1 mt-1"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-green-300 text-xs font-medium flex items-center gap-1 mt-2"
                       >
                         <CheckCircle className="w-3 h-3" />
                         {translate("copied")}
@@ -306,30 +221,31 @@ const Contact = () => {
 
                 {/* Phone */}
                 <motion.div 
-                  className="flex items-start gap-3 sm:gap-4 group cursor-pointer"
-                  variants={contactItemVariants}
-                  custom={1}
-                  whileHover={{ x: 8, transition: { type: "spring", stiffness: 400 } }}
+                  variants={itemVariants}
+                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  whileHover={{ x: 8 }}
                   onClick={() => handleCopy('+91 7987090461')}
                 >
                   <motion.div 
-                    className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-white/10 rounded-lg flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm"
                     whileHover={{ scale: 1.1, rotate: -5 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10"
                   >
-                    <Phone className="w-5 h-5 sm:w-6 sm:h-6 text-white" />
+                    <Phone className="w-6 h-6 text-white" />
                   </motion.div>
                   <div>
-                    <p className="text-blue-200 text-xs sm:text-sm font-medium mb-1">{translate("callUs")}</p>
-                    <p className="text-white font-semibold text-sm sm:text-lg">
+                    <p className="text-blue-200 text-sm font-medium mb-1">{translate("callUs")}</p>
+                    <p className="text-white font-semibold text-base lg:text-lg">
                       +91 7987090461
                     </p>
-                    <p className="text-blue-100 text-xs sm:text-sm">Mon – Sat 9am – 6pm IST</p>
+                    <div className="flex items-center gap-1 mt-2 text-sm text-blue-100">
+                      <Clock className="w-3 h-3" />
+                      <span>Mon-Fri 9AM-6PM IST</span>
+                    </div>
                     {copied === '+91 7987090461' && (
                       <motion.span 
-                        initial={{ opacity: 0, y: -10, scale: 0.8 }}
-                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                        className="text-green-300 text-xs font-medium flex items-center gap-1 mt-1"
+                        initial={{ opacity: 0, y: -10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="text-green-300 text-xs font-medium flex items-center gap-1 mt-2"
                       >
                         <CheckCircle className="w-3 h-3" />
                         {translate("copied")}
@@ -340,49 +256,43 @@ const Contact = () => {
 
                 {/* WhatsApp */}
                 <motion.div 
-                  className="flex items-start gap-3 sm:gap-4 group cursor-pointer"
-                  variants={contactItemVariants}
-                  custom={2}
-                  whileHover={{ x: 8, transition: { type: "spring", stiffness: 400 } }}
+                  variants={itemVariants}
+                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  whileHover={{ x: 8 }}
                   onClick={() => window.open('https://wa.me/917987090461', '_blank')}
                 >
                   <motion.div 
-                    className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-green-500/20 rounded-lg flex items-center justify-center group-hover:bg-green-500/30 transition-all backdrop-blur-sm border border-green-300/20"
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    className="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center group-hover:bg-green-500/30 transition-all backdrop-blur-sm border border-green-300/20"
                   >
-                    <FaWhatsapp className="w-5 h-5 sm:w-6 sm:h-6 text-green-300" />
+                    <FaWhatsapp className="w-6 h-6 text-green-300" />
                   </motion.div>
                   <div>
-                    <p className="text-blue-200 text-xs sm:text-sm font-medium mb-1">{translate("connectOn")}</p>
-                    <p className="text-white font-semibold text-sm sm:text-lg">
-                      WhatsApp
+                    <p className="text-blue-200 text-sm font-medium mb-1">WhatsApp</p>
+                    <p className="text-white font-semibold text-base lg:text-lg">
+                      {translate("quickResponse")}
                     </p>
-                    <p className="text-blue-100 text-xs sm:text-sm">Mon – Sat 9am – 6pm IST</p>
                   </div>
                 </motion.div>
 
                 {/* Instagram */}
                 <motion.div 
-                  className="flex items-start gap-3 sm:gap-4 group cursor-pointer"
-                  variants={contactItemVariants}
-                  custom={3}
-                  whileHover={{ x: 8, transition: { type: "spring", stiffness: 400 } }}
-                  onClick={() => window.open('https://www.instagram.com/marketmindsresearch/?igsh=MTN4NXNrbG5xNHRuOA%3D%3D#', '_blank')}
+                  variants={itemVariants}
+                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  whileHover={{ x: 8 }}
+                  onClick={() => window.open('https://www.instagram.com/marketmindsresearch/', '_blank')}
                 >
-                  <motion.div 
-                    className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-r from-pink-500/20 to-purple-500/20 rounded-lg flex items-center justify-center group-hover:from-pink-500/30 group-hover:to-purple-500/30 transition-all backdrop-blur-sm border border-pink-300/20"
+                   <motion.div 
                     whileHover={{ scale: 1.1, rotate: -5 }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                    className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-xl flex items-center justify-center group-hover:from-pink-500/30 group-hover:to-purple-500/30 transition-all backdrop-blur-sm border border-pink-300/20"
                   >
-                    <FaInstagram className="w-5 h-5 sm:w-6 sm:h-6 text-pink-300" />
+                    <FaInstagram className="w-6 h-6 text-pink-300" />
                   </motion.div>
                   <div>
-                    <p className="text-blue-200 text-xs sm:text-sm font-medium mb-1">Follow us on</p>
-                    <p className="text-white font-semibold text-sm sm:text-lg">
-                      Instagram
+                    <p className="text-blue-200 text-sm font-medium mb-1">Instagram</p>
+                    <p className="text-white font-semibold text-base lg:text-lg">
+                      @marketmindsresearch
                     </p>
-                    <p className="text-blue-100 text-xs sm:text-sm">@marketmindsresearch</p>
                   </div>
                 </motion.div>
               </div>
@@ -390,238 +300,157 @@ const Contact = () => {
 
             {/* Right Column - Contact Form Card */}
             <motion.div
-              variants={formVariants}
-              // Change order for mobile so form comes after left section
+              variants={itemVariants}
               className="order-2 lg:order-2 flex items-center"
             >
               <motion.div 
-                className="bg-white rounded-xl sm:rounded-2xl shadow-2xl p-4 sm:p-6 lg:p-10 mx-auto max-w-lg lg:max-w-none w-full border border-gray-100"
-                whileHover={{ 
-                  y: -8,
-                  boxShadow: "0 25px 50px rgba(0,0,0,0.15)"
-                }}
-                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                whileHover={{ y: -4 }}
+                transition={{ duration: 0.3 }}
+                className="bg-white rounded-2xl shadow-2xl p-6 sm:p-8 lg:p-10 mx-auto max-w-lg lg:max-w-none w-full border border-gray-100"
               >
-                <form onSubmit={handleSubmit} className="space-y-4 sm:space-y-6">
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-                    <motion.div
-                      variants={formFieldVariants}
-                      custom={0}
-                      whileFocus={{ scale: 1.02 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    >
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                        Your name
+                <form onSubmit={handleSubmit} className="space-y-5">
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                    <motion.div variants={itemVariants}>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        {translate('firstName')}
                       </label>
                       <input
                         type="text"
                         name="name"
                         value={formData.name}
                         onChange={handleInputChange}
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50/80 border border-gray-200 rounded-lg sm:rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 hover:border-gray-300 text-sm sm:text-base"
-                        placeholder="Your name"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
+                        placeholder={translate('firstName')}
                         required
                       />
                     </motion.div>
-                    <motion.div
-                      variants={formFieldVariants}
-                      custom={1}
-                      whileFocus={{ scale: 1.02 }}
-                      transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                    >
-                      <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                        Last name
+                    <motion.div variants={itemVariants}>
+                      <label className="block text-sm font-semibold text-gray-700 mb-2">
+                        {translate('lastName')}
                       </label>
                       <input
                         type="text"
                         name="subject"
                         value={formData.subject}
                         onChange={handleInputChange}
-                        className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50/80 border border-gray-200 rounded-lg sm:rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 hover:border-gray-300 text-sm sm:text-base"
-                        placeholder="Last name"
+                        className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
+                        placeholder={translate('lastName')}
                       />
                     </motion.div>
                   </div>
 
-                  <motion.div
-                    variants={formFieldVariants}
-                    custom={2}
-                    whileFocus={{ scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  >
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                      Email
+                  <motion.div variants={itemVariants}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      {translate('email')}
                     </label>
                     <input
                       type="email"
                       name="email"
                       value={formData.email}
                       onChange={handleInputChange}
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50/80 border border-gray-200 rounded-lg sm:rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 hover:border-gray-300 text-sm sm:text-base"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
                       placeholder="name@company.com"
                       required
                     />
                   </motion.div>
 
-                  {/* Enhanced Mobile-Responsive Phone Number Field */}
-                  <motion.div
-                    variants={formFieldVariants}
-                    custom={3}
-                    className="relative"
-                  >
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                      Phone number
+                  {/* Phone Number */}
+                  <motion.div variants={itemVariants} className="relative">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      {translate('phoneNumber')}
                     </label>
-                    <div className="relative">
-                      {/* Mobile-First Phone Input Container */}
-                      <div className="flex items-stretch bg-gray-50/80 border border-gray-200 rounded-lg sm:rounded-xl hover:border-gray-300 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 focus-within:bg-white transition-all duration-300">
-                        
-                        {/* Country Code Dropdown - Mobile Optimized */}
-                        <div className="relative flex-shrink-0">
-                          <motion.button
-                            type="button"
-                            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-                            className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-4 py-2.5 sm:py-3 hover:bg-gray-100/50 rounded-l-lg sm:rounded-l-xl transition-colors duration-200 border-r border-gray-200/80 min-w-[90px] sm:min-w-[120px] justify-center"
-                            whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.05)" }}
-                            whileTap={{ scale: 0.98 }}
-                          >
-                            <ReactCountryFlag
-                              countryCode={selectedCountry.label}
-                              svg
-                              style={{
-                                width: '16px',
-                                height: '12px',
-                                borderRadius: '2px'
-                              }}
-                              className="sm:w-5 sm:h-4"
-                            />
-                            <span className="font-semibold text-gray-700 text-xs sm:text-sm">
-                              {selectedCountry.value}
-                            </span>
-                            <ChevronDown 
-                              className={`w-3 h-3 sm:w-4 sm:h-4 text-gray-500 transition-transform duration-200 ${
-                                isDropdownOpen ? 'rotate-180' : ''
-                              }`}
-                            />
-                          </motion.button>
+                    <div className="flex items-stretch bg-gray-50 border border-gray-200 rounded-xl hover:border-gray-300 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 focus-within:bg-white transition-all">
+                      <div className="relative">
+                        <button
+                          type="button"
+                          onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                          className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100/50 rounded-l-xl transition-colors border-r border-gray-200"
+                        >
+                          <ReactCountryFlag
+                            countryCode={selectedCountry.label}
+                            svg
+                            style={{ width: '20px', height: '15px', borderRadius: '2px' }}
+                          />
+                          <span className="font-semibold text-gray-700 text-sm">
+                            {selectedCountry.value}
+                          </span>
+                          <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                        </button>
 
-                          {/* Mobile-Optimized Dropdown Menu */}
-                          {isDropdownOpen && (
-                            <>
-                              {/* Backdrop */}
-                              <div 
-                                className="fixed inset-0 z-40" 
-                                onClick={() => setIsDropdownOpen(false)}
-                              />
-                              
-                              {/* Dropdown Content - Mobile Responsive */}
-                              <motion.div
-                                initial={{ opacity: 0, y: -10, scale: 0.95 }}
-                                animate={{ opacity: 1, y: 0, scale: 1 }}
-                                exit={{ opacity: 0, y: -10, scale: 0.95 }}
-                                transition={{ duration: 0.15 }}
-                                className="absolute top-full left-0 mt-2 w-72 sm:w-80 bg-white border border-gray-200 rounded-lg sm:rounded-xl shadow-xl z-50 max-h-56 sm:max-h-64 overflow-y-auto"
-                              >
-                                <div className="p-1.5 sm:p-2">
-                                  {countryCodes.map((country) => (
-                                    <motion.button
-                                      key={country.label}
-                                      type="button"
-                                      onClick={() => handleCountrySelect(country)}
-                                      className="w-full flex items-center gap-2 sm:gap-3 px-2.5 sm:px-3 py-2 sm:py-2.5 hover:bg-blue-50 rounded-md sm:rounded-lg transition-colors duration-150 text-left"
-                                      whileHover={{ backgroundColor: "rgba(59, 130, 246, 0.05)" }}
-                                      whileTap={{ scale: 0.98 }}
-                                    >
-                                      <ReactCountryFlag
-                                        countryCode={country.label}
-                                        svg
-                                        style={{
-                                          width: '20px',
-                                          height: '15px',
-                                          borderRadius: '3px',
-                                          flexShrink: 0
-                                        }}
-                                        className="sm:w-6 sm:h-5"
-                                      />
-                                      <div className="flex-1 min-w-0">
-                                        <div className="flex items-center gap-1.5 sm:gap-2">
-                                          <span className="font-semibold text-gray-900 text-xs sm:text-sm">
-                                            {country.value}
-                                          </span>
-                                          <span className="text-gray-500 text-xs sm:text-sm truncate">
-                                            {country.country}
-                                          </span>
-                                        </div>
-                                      </div>
-                                      {selectedCountry.label === country.label && (
-                                        <CheckCircle className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-blue-600 flex-shrink-0" />
-                                      )}
-                                    </motion.button>
-                                  ))}
-                                </div>
-                              </motion.div>
-                            </>
-                          )}
-                        </div>
-
-                        {/* Phone Number Input */}
-                        <input
-                          type="tel"
-                          name="phone"
-                          value={formData.phone}
-                          onChange={handleInputChange}
-                          className="flex-1 px-3 sm:px-4 py-2.5 sm:py-3 bg-transparent border-none rounded-r-lg sm:rounded-r-xl text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-0 text-sm sm:text-base"
-                          placeholder="Enter phone number"
-                          maxLength="15"
-                        />
+                        {isDropdownOpen && (
+                          <>
+                            <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                            <motion.div
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="absolute top-full left-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto"
+                            >
+                              <div className="p-2">
+                                {countryCodes.map((country) => (
+                                  <button
+                                    key={country.label}
+                                    type="button"
+                                    onClick={() => handleCountrySelect(country)}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg transition-colors text-left"
+                                  >
+                                    <ReactCountryFlag
+                                      countryCode={country.label}
+                                      svg
+                                      style={{ width: '20px', height: '15px' }}
+                                    />
+                                    <span className="font-semibold text-gray-900 text-sm">{country.value}</span>
+                                    <span className="text-gray-500 text-sm flex-1 truncate">{country.country}</span>
+                                    {selectedCountry.label === country.label && (
+                                      <CheckCircle className="w-4 h-4 text-blue-600" />
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
+                            </motion.div>
+                          </>
+                        )}
                       </div>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="flex-1 px-4 py-3 bg-transparent border-none rounded-r-xl text-gray-900 placeholder-gray-400 focus:outline-none"
+                        placeholder={translate('enterPhoneNumber')}
+                        maxLength="15"
+                      />
                     </div>
                   </motion.div>
 
-                  <motion.div
-                    variants={formFieldVariants}
-                    custom={4}
-                    whileFocus={{ scale: 1.02 }}
-                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
-                  >
-                    <label className="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">
-                      Message
+                  <motion.div variants={itemVariants}>
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
+                      {translate('message')}
                     </label>
                     <textarea
                       name="message"
                       value={formData.message}
                       onChange={handleInputChange}
-                      rows="3"
-                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 bg-gray-50/80 border border-gray-200 rounded-lg sm:rounded-xl text-gray-900 placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all duration-300 resize-none hover:border-gray-300 text-sm sm:text-base"
-                      placeholder="Tell us about your project..."
+                      rows="4"
+                      className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all resize-none"
+                      placeholder={translate('tellUsAboutProject')}
                       required
                     />
                   </motion.div>
 
                   <motion.button
-                    variants={formFieldVariants}
-                    custom={5}
+                    variants={itemVariants}
                     type="submit"
                     disabled={isSubmitting}
-                    whileHover={{ scale: 1.03, y: -2 }}
+                    whileHover={{ scale: 1.02 }}
                     whileTap={{ scale: 0.98 }}
-                    className="w-full px-6 sm:px-8 py-3 sm:py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg sm:rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2 disabled:opacity-70 text-sm sm:text-base"
+                    className="w-full px-8 py-4 bg-blue-600 text-white rounded-xl font-semibold shadow-lg hover:shadow-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2 disabled:opacity-70"
                   >
                     {isSubmitting ? (
-                      <motion.div 
-                        className="w-4 h-4 sm:w-5 sm:h-5 border-2 border-white border-t-transparent rounded-full"
-                        animate={{ rotate: 360 }}
-                        transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
-                      />
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     ) : (
                       <>
-                        {translate("sendMessage")}
-                        <motion.div
-                          animate={{ x: [0, 3, 0] }}
-                          transition={{ duration: 1.5, repeat: Infinity, ease: "easeInOut" }}
-                        >
-                          <Send className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                        </motion.div>
+                        {translate('sendMessage')}
+                        <Send className="w-4 h-4" />
                       </>
                     )}
                   </motion.button>
@@ -632,31 +461,12 @@ const Contact = () => {
         </div>
       </motion.div>
 
-      {/* Mobile-Optimized Toast Notification */}
-      {toast.show && (
-        <motion.div
-          initial={{ opacity: 0, y: 50, scale: 0.9 }}
-          animate={{ opacity: 1, y: 0, scale: 1 }}
-          exit={{ opacity: 0, y: 50, scale: 0.9 }}
-          transition={{ type: "spring", stiffness: 300, damping: 30 }}
-          className="fixed bottom-2 sm:bottom-4 left-2 right-2 sm:left-auto sm:right-4 sm:max-w-sm z-50"
-        >
-          <div className={`px-4 sm:px-6 py-3 sm:py-4 rounded-lg sm:rounded-xl shadow-2xl flex items-center gap-2 sm:gap-3 backdrop-blur-lg ${
-            toast.type === 'success' 
-              ? 'bg-green-500/90 text-white' 
-              : 'bg-red-500/90 text-white'
-          }`}>
-            {toast.type === 'success' && <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5 flex-shrink-0" />}
-            <span className="font-medium text-sm sm:text-base flex-1">{translate(toast.message)}</span>
-            <button 
-              onClick={() => setToast({ ...toast, show: false })}
-              className="ml-2 hover:opacity-70 text-lg sm:text-xl leading-none flex-shrink-0"
-            >
-              ×
-            </button>
-          </div>
-        </motion.div>
-      )}
+      <Toast
+        isVisible={toast.show}
+        message={toast.message}
+        type={toast.type}
+        onClose={() => setToast({ ...toast, show: false })}
+      />
     </div>
   );
 };

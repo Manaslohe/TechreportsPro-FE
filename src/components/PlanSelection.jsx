@@ -2,86 +2,92 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Check, Star, ArrowRight, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { useTranslation } from '../contexts/TranslationContext';
 
 export default function PlanSelection() {
   const [selectedPlan, setSelectedPlan] = useState(null);
   const navigate = useNavigate();
+  const { translate } = useTranslation();
 
   const plans = [
     {
       id: 'basic',
-      name: 'Basic',
+      name: translate('planBasic'),
       price: 355,
-      period: 'month',
+      displayPrice: translate('priceBasic'),
+      period: translate('planPeriodMonth').replace('/', ''),
       duration: 1,
       popular: false,
-      gradient: 'from-blue-500 to-blue-600',
-      totalReports: 7,
-      premiumReports: 6,
-      bluechipReports: 1,
+      bgColor: 'bg-blue-500',
+      totalReports: translate('number7'),
+      premiumReports: translate('number6'),
+      bluechipReports: translate('number1'),
       features: [
-        'Access to 7 premium reports',
-        '6 Premium + 1 Bluechip report',
-        'Email support',
-        'Valid for 1 month'
+        `${translate('accessTo')} ${translate('number7')} ${translate('premiumReports')}`,
+        `${translate('number6')} ${translate('premium')} + ${translate('number1')} ${translate('bluechip')}`,
+        translate('emailSupport'),
+        `${translate('validFor')} ${translate('planDuration1m')}`
       ]
     },
     {
       id: 'plus',
-      name: 'Plus',
+      name: translate('planPlus'),
       price: 855,
-      period: '3 months',
+      displayPrice: translate('pricePlus'),
+      period: translate('planPeriod3m').replace('/', ''),
       duration: 3,
       popular: false,
-      gradient: 'from-blue-600 to-blue-700',
-      totalReports: 21,
-      premiumReports: 18,
-      bluechipReports: 3,
+      bgColor: 'bg-blue-600',
+      totalReports: translate('number21'),
+      premiumReports: translate('number18'),
+      bluechipReports: translate('number3'),
       features: [
-        'Access to 21 premium reports',
-        '18 Premium + 3 Bluechip reports',
-        'Priority email support',
-        'Valid for 3 months'
+        `${translate('accessTo')} ${translate('number21')} ${translate('premiumReports')}`,
+        `${translate('number18')} ${translate('premium')} + ${translate('number3')} ${translate('bluechip')}`,
+        translate('priorityEmailSupport'),
+        `${translate('validFor')} ${translate('planDuration3m')}`
       ]
     },
     {
       id: 'pro',
-      name: 'Pro',
+      name: translate('planPro'),
       price: 1255,
-      period: '6 months',
+      displayPrice: translate('pricePro'),
+      period: translate('planPeriod6m').replace('/', ''),
       duration: 6,
       popular: true,
-      gradient: 'from-blue-700 to-blue-800',
-      totalReports: 42,
-      premiumReports: 36,
-      bluechipReports: 6,
+      bgColor: 'bg-blue-700',
+      totalReports: translate('number42'),
+      premiumReports: translate('number36'),
+      bluechipReports: translate('number6'),
       features: [
-        'Access to 42 premium reports',
-        '36 Premium + 6 Bluechip reports',
-        'Priority support',
-        'Sector analysis reports',
-        'Valid for 6 months'
+        `${translate('accessTo')} ${translate('number42')} ${translate('premiumReports')}`,
+        `${translate('number36')} ${translate('premium')} + ${translate('number6')} ${translate('bluechip')}`,
+        translate('prioritySupport'),
+        translate('sectorAnalysisReports'),
+        `${translate('validFor')} ${translate('planDuration6m')}`
       ]
     },
     {
       id: 'elite',
-      name: 'Elite',
+      name: translate('planElite'),
       price: 2555,
-      period: 'yearly',
+      displayPrice: translate('priceElite'),
+      period: translate('planPeriod12m').replace('/', ''),
       duration: 12,
       popular: false,
-      gradient: 'from-blue-800 to-blue-900',
-      badge: 'Best Value',
-      totalReports: 84,
-      premiumReports: 72,
-      bluechipReports: 12,
+      bgColor: 'bg-blue-800',
+      badge: translate('planBestValue'),
+      totalReports: translate('number84'),
+      premiumReports: translate('number72'),
+      bluechipReports: translate('number12'),
       features: [
-        'Access to 84 premium reports',
-        '72 Premium + 12 Bluechip reports',
-        'Priority support',
-        'Sector analysis reports',
-        'Exclusive market insights',
-        'Valid for 12 months'
+        `${translate('accessTo')} ${translate('number84')} ${translate('premiumReports')}`,
+        `${translate('number72')} ${translate('premium')} + ${translate('number12')} ${translate('bluechip')}`,
+        translate('prioritySupport'),
+        translate('sectorAnalysisReports'),
+        translate('exclusiveMarketInsights'),
+        `${translate('validFor')} ${translate('planDuration12m')}`
       ]
     }
   ];
@@ -110,13 +116,13 @@ export default function PlanSelection() {
           >
             <div className="inline-flex items-center space-x-2 bg-white/20 px-4 py-2 rounded-full text-sm font-medium mb-4">
               <Sparkles className="w-4 h-4" />
-              <span>Choose Your Plan</span>
+              <span>{translate('chooseYour')} {translate('planBasic')}</span>
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              Select Your Investment Plan
+              {translate('selectYourPlan')}
             </h1>
             <p className="text-lg sm:text-xl text-blue-100 max-w-2xl mx-auto">
-              Pick the perfect plan for your investment journey
+              {translate('pickPerfectPlan')}
             </p>
           </motion.div>
         </div>
@@ -147,7 +153,7 @@ export default function PlanSelection() {
                   <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 z-10">
                     <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 py-1.5 rounded-full text-xs font-bold flex items-center space-x-1 shadow-lg">
                       <Star className="w-3 h-3 fill-current" />
-                      <span>Most Popular</span>
+                      <span>{translate('mostPopular')}</span>
                     </div>
                   </div>
                 )}
@@ -171,19 +177,31 @@ export default function PlanSelection() {
                 )}
 
                 {/* Plan Header */}
-                <div className={`bg-gradient-to-r ${plan.gradient} rounded-t-2xl p-6 text-white`}>
+                <div className={`${plan.bgColor} rounded-t-2xl p-6 text-white`}>
                   <h3 className="text-2xl font-bold mb-2">{plan.name}</h3>
                   <div className="flex items-baseline mb-2">
-                    <span className="text-4xl font-bold">₹{plan.price}</span>
+                    <span className="text-4xl font-bold">{plan.displayPrice}</span>
                   </div>
                   <p className="text-sm opacity-90">/{plan.period}</p>
                 </div>
 
                 {/* Plan Body */}
                 <div className="p-6">
-                  <div className="mb-4 text-center py-3 bg-blue-50 rounded-lg">
-                    <p className="text-2xl font-bold text-blue-600">{plan.totalReports}</p>
-                    <p className="text-xs text-gray-600">Total Reports</p>
+                  <div className="mb-4 p-4 bg-blue-50 rounded-xl border border-blue-100">
+                    <div className="text-center mb-3">
+                      <p className="text-3xl font-bold text-blue-600">{plan.totalReports}</p>
+                      <p className="text-xs text-gray-600 font-medium">{translate('totalReports')}</p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 text-xs">
+                      <div className="text-center p-2 bg-white rounded-lg">
+                        <div className="font-bold text-blue-600">{plan.premiumReports}</div>
+                        <div className="text-gray-600">{translate('premium')}</div>
+                      </div>
+                      <div className="text-center p-2 bg-white rounded-lg">
+                        <div className="font-bold text-purple-600">{plan.bluechipReports}</div>
+                        <div className="text-gray-600">{translate('bluechip')}</div>
+                      </div>
+                    </div>
                   </div>
 
                   <ul className="space-y-3">
@@ -216,15 +234,15 @@ export default function PlanSelection() {
                       <Check className="w-4 h-4 text-white" />
                     </div>
                     <h3 className="text-lg sm:text-xl font-bold text-gray-900">
-                      {selectedPlan.name} Plan Selected
+                      {selectedPlan.name} {translate('planSelected')}
                     </h3>
                   </div>
                   <div className="flex flex-wrap items-center gap-2 text-sm text-gray-600">
-                    <span className="font-semibold text-blue-600 text-lg">₹{selectedPlan.price}</span>
+                    <span className="font-semibold text-blue-600 text-lg">{selectedPlan.displayPrice}</span>
                     <span>•</span>
                     <span>{selectedPlan.period}</span>
                     <span>•</span>
-                    <span>{selectedPlan.totalReports} reports</span>
+                    <span>{selectedPlan.totalReports} {translate('totalReports').toLowerCase()}</span>
                   </div>
                 </div>
 
@@ -233,7 +251,7 @@ export default function PlanSelection() {
                   onClick={handleProceedToPayment}
                   className="w-full sm:w-auto px-6 sm:px-8 py-3 sm:py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold hover:from-green-700 hover:to-green-800 transition-all duration-300 transform hover:scale-105 shadow-lg hover:shadow-xl flex items-center justify-center gap-2"
                 >
-                  <span>Proceed to Payment</span>
+                  <span>{translate('proceedToPayment')}</span>
                   <ArrowRight className="w-5 h-5" />
                 </button>
               </div>
@@ -249,7 +267,7 @@ export default function PlanSelection() {
             className="text-center py-8"
           >
             <p className="text-gray-500 text-sm sm:text-base">
-              👆 Select a plan above to continue
+              {translate('selectPlanAbove')}
             </p>
           </motion.div>
         )}

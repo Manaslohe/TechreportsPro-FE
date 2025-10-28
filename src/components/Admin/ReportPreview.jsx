@@ -1,8 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { X, Download, ExternalLink, FileText, AlertTriangle, FileBadge } from 'lucide-react';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
+  const { translate } = useTranslation();
   const [previewError, setPreviewError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [previewMethod, setPreviewMethod] = useState('iframe'); // 'iframe', 'object', or 'embed'
@@ -51,9 +53,9 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
           <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
             <AlertTriangle size={32} className="text-amber-600" />
           </div>
-          <h3 className="text-xl font-medium text-slate-800 mb-2">Preview Blocked</h3>
+          <h3 className="text-xl font-medium text-slate-800 mb-2">{translate('previewBlocked')}</h3>
           <p className="text-slate-600 text-center mb-6 max-w-md">
-            Your browser has blocked the PDF preview for security reasons. You can still download the file or open it in a new tab.
+            {translate('previewBlockedMessage')}
           </p>
           <div className="flex flex-wrap gap-3 justify-center">
             {onDownload && (
@@ -65,7 +67,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
                 className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <Download size={18} />
-                Download PDF
+                {translate('downloadPdf')}
               </button>
             )}
             <a 
@@ -75,7 +77,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
               className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
             >
               <ExternalLink size={18} />
-              Open in New Tab
+              {translate('openInNewTab')}
             </a>
           </div>
         </div>
@@ -143,7 +145,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
           <div className="flex items-center gap-2 overflow-hidden">
             <FileBadge size={20} className="text-blue-600 flex-shrink-0" />
             <h2 className="text-lg font-semibold text-slate-800 truncate">
-              {reportTitle ? reportTitle : 'Report Preview'}
+              {reportTitle ? reportTitle : translate('reportPreview')}
             </h2>
           </div>
           <div className="flex items-center gap-2">
@@ -154,7 +156,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
                   onDownload();
                 }}
                 className="p-1.5 rounded-lg hover:bg-blue-50 text-blue-600 transition-colors"
-                title="Download Report"
+                title={translate('downloadReport')}
               >
                 <Download size={20} />
               </button>
@@ -164,7 +166,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
               target="_blank" 
               rel="noopener noreferrer"
               className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
-              title="Open in New Tab"
+              title={translate('openInNewTab')}
               onClick={(e) => e.stopPropagation()}
             >
               <ExternalLink size={20} />
@@ -172,7 +174,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
             <button
               onClick={onClose}
               className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition-colors"
-              title="Close Preview"
+              title={translate('closePreview')}
             >
               <X size={20} />
             </button>
@@ -188,10 +190,9 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
           
           {renderPreview()}
 
-          {/* Direct link message at the bottom */}
           <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-white/90 px-4 py-2 rounded-full shadow-md text-sm text-slate-600 flex items-center gap-2">
             <AlertTriangle size={14} className="text-amber-500" />
-            Having trouble viewing? 
+            {translate('havingTrouble')} 
             <a 
               href={fileUrl} 
               target="_blank" 
@@ -199,7 +200,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
               className="text-blue-600 hover:underline font-medium"
               onClick={(e) => e.stopPropagation()}
             >
-              Open directly
+              {translate('openDirectly')}
             </a>
           </div>
         </div>

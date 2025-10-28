@@ -12,8 +12,11 @@ import {
   Gift
 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDownload, viewMode = 'grid' }) => {
+  const { translate } = useTranslation();
+  
   const cardVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { 
@@ -83,7 +86,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                 {type === 'paid' && (
                   <div className="text-right flex-shrink-0">
                     <div className="text-2xl font-bold text-gray-900">₹{report.price || 500}</div>
-                    <div className="text-xs text-gray-500 font-medium">one-time</div>
+                    <div className="text-xs text-gray-500 font-medium">{translate('oneTime')}</div>
                   </div>
                 )}
               </div>
@@ -106,7 +109,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                   )}
                   <div className="flex items-center gap-1.5">
                     <Star className="h-4 w-4 text-amber-400 fill-amber-400" />
-                    <span className="font-medium">Expert</span>
+                    <span className="font-medium">{translate('expertAnalysisLabel')}</span>
                   </div>
                 </div>
 
@@ -118,7 +121,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                       className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                     >
                       <Download className="h-4 w-4" />
-                      Download
+                      {translate('download')}
                     </button>
                   ) : report.isPurchased ? (
                     <Link
@@ -126,7 +129,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                       className="flex items-center justify-center gap-2 px-5 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                     >
                       <Eye className="h-4 w-4" />
-                      Read
+                      {translate('read')}
                     </Link>
                   ) : (
                     <button
@@ -134,7 +137,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                       className="flex items-center gap-2 px-5 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 text-sm font-semibold shadow-md hover:shadow-lg transform hover:scale-105"
                     >
                       <ShoppingCart className="h-4 w-4" />
-                      Purchase
+                      {translate('purchase')}
                     </button>
                   )}
                 </div>
@@ -177,7 +180,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
           {type === 'paid' && (
             <div className="text-right flex-shrink-0 ml-3">
               <div className="text-xl lg:text-2xl font-bold text-gray-900">₹{report.price || 500}</div>
-              <div className="text-xs text-gray-500 font-medium">one-time</div>
+              <div className="text-xs text-gray-500 font-medium">{translate('oneTime')}</div>
             </div>
           )}
         </div>
@@ -222,11 +225,11 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
           <div className="flex items-center gap-4 text-xs">
             <div className="flex items-center gap-1.5 text-gray-600">
               <Star className="h-3.5 w-3.5 text-amber-400 fill-amber-400" />
-              <span className="font-medium">Expert Analysis</span>
+              <span className="font-medium">{translate('expertAnalysisLabel')}</span>
             </div>
             <div className="flex items-center gap-1.5 text-gray-600">
               <BarChart3 className="h-3.5 w-3.5 text-blue-500" />
-              <span className="font-medium">Data Insights</span>
+              <span className="font-medium">{translate('dataInsights')}</span>
             </div>
           </div>
         </div>
@@ -239,7 +242,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
             >
               <Download className="h-4 w-4" />
-              Download Free
+              {translate('downloadFree')}
             </button>
           ) : report.isPurchased ? (
             <Link
@@ -247,7 +250,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-xl hover:from-green-700 hover:to-emerald-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
             >
               <Eye className="h-4 w-4" />
-              Read Report
+              {translate('readReport')}
             </Link>
           ) : (
             <button
@@ -255,7 +258,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
               className="flex items-center justify-center gap-2 w-full px-6 py-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl hover:from-blue-700 hover:to-indigo-700 transition-all duration-300 font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02]"
             >
               <ShoppingCart className="h-4 w-4" />
-              Purchase Report
+              {translate('purchaseReport')}
             </button>
           )}
         </div>

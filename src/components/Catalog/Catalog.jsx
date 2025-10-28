@@ -16,8 +16,10 @@ import Toast from '../common/Toast';
 import CatalogHeader from './CatalogHeader';
 import ReportCard from './ReportCard';
 import PaymentChoiceModal from './PaymentChoiceModal';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const Catalog = () => {
+  const { translate } = useTranslation();
   const [reports, setReports] = useState([]);
   const [purchasedReports, setPurchasedReports] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -263,13 +265,13 @@ const Catalog = () => {
         )}
       </motion.div>
       <h3 className="text-2xl font-bold text-gray-900 mb-3">
-        No {type === 'free' ? 'sample' : 'premium'} reports found
+        {type === 'free' ? translate('noSampleReportsFound') : translate('noPremiumReportsFound')}
       </h3>
       <p className="text-gray-600 mb-8 max-w-md mx-auto leading-relaxed">
         {searchTerm || selectedSector !== 'all' ? (
-          <>Try adjusting your search terms or filters to discover more reports.</>
+          <>{translate('tryAdjustingFilters')}</>
         ) : (
-          <>Check back soon for new {type === 'free' ? 'sample' : 'premium'} reports.</>
+          <>{translate('checkBackSoon', { type: type === 'free' ? 'sample' : 'premium' })}</>
         )}
       </p>
       {(searchTerm || selectedSector !== 'all') && (
@@ -277,7 +279,7 @@ const Catalog = () => {
           onClick={clearFilters}
           className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium"
         >
-          Clear All Filters
+          {translate('clearAllFilters')}
         </button>
       )}
     </motion.div>
@@ -310,7 +312,7 @@ const Catalog = () => {
         filteredResults={freeReports.length + paidReports.length}
       />
 
-      {/* Purchased Reports Section - Redesigned */}
+      {/* Purchased Reports Section */}
       <AnimatePresence>
         {purchasedReports.length > 0 && (
           <motion.section
@@ -325,9 +327,9 @@ const Catalog = () => {
                   <CheckCircle className="h-6 w-6 text-white" />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Your Library</h2>
+                  <h2 className="text-2xl font-bold text-gray-900">{translate('yourLibrary')}</h2>
                   <p className="text-green-700 text-sm">
-                    {purchasedReports.length} {purchasedReports.length === 1 ? 'report' : 'reports'} • Full access anytime
+                    {purchasedReports.length} {purchasedReports.length === 1 ? translate('result') : translate('results')} • {translate('fullAccessAnytime')}
                   </p>
                 </div>
               </div>
@@ -353,7 +355,7 @@ const Catalog = () => {
                       </div>
                       <div className="flex-1 min-w-0">
                         <span className="inline-block px-2 py-0.5 bg-green-600 text-white rounded-full text-xs font-semibold mb-2">
-                          OWNED
+                          {translate('owned')}
                         </span>
                         <h3 className="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-green-700 transition-colors">
                           {report.title}
@@ -374,7 +376,7 @@ const Catalog = () => {
                       className="flex items-center justify-center gap-2 w-full px-4 py-2.5 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg hover:from-green-700 hover:to-emerald-700 transition-all font-medium shadow-sm hover:shadow-md"
                     >
                       <Eye className="h-4 w-4" />
-                      Read Report
+                      {translate('readReport')}
                     </Link>
                   </motion.div>
                 ))}
@@ -395,11 +397,11 @@ const Catalog = () => {
               <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
               <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin" style={{ animationDuration: '1.5s' }} />
             </div>
-            <p className="text-gray-600 text-lg mt-6 font-medium">Loading reports...</p>
+            <p className="text-gray-600 text-lg mt-6 font-medium">{translate('loadingReports')}</p>
           </motion.div>
         ) : (
           <>
-            {/* Sample Reports Section - Redesigned */}
+            {/* Sample Reports Section */}
             <section className="mb-16">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -411,13 +413,13 @@ const Catalog = () => {
                     <Sparkles className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Free Sample Reports</h2>
-                    <p className="text-gray-600">Experience premium analysis at no cost</p>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{translate('freeSampleReports')}</h2>
+                    <p className="text-gray-600">{translate('experiencePremiumAnalysis')}</p>
                   </div>
                 </div>
                 <div className="hidden sm:block">
                   <div className="bg-gradient-to-r from-green-100 to-emerald-100 text-green-800 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm border border-green-200">
-                    {freeReports.length} Available
+                    {freeReports.length} {translate('available')}
                   </div>
                 </div>
               </motion.div>
@@ -444,7 +446,7 @@ const Catalog = () => {
               )}
             </section>
 
-            {/* Premium Reports Section - Redesigned */}
+            {/* One-Time Reports Section */}
             <section>
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
@@ -456,13 +458,13 @@ const Catalog = () => {
                     <Crown className="h-6 w-6 text-white" />
                   </div>
                   <div>
-                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">Premium Reports</h2>
-                    <p className="text-gray-600">In-depth research for informed decisions</p>
+                    <h2 className="text-2xl lg:text-3xl font-bold text-gray-900">{translate('oneTimeReports')}</h2>
+                    <p className="text-gray-600">{translate('inDepthResearch')}</p>
                   </div>
                 </div>
                 <div className="hidden sm:block">
                   <div className="bg-gradient-to-r from-blue-100 to-indigo-100 text-blue-800 px-5 py-2.5 rounded-xl text-sm font-semibold shadow-sm border border-blue-200">
-                    {paidReports.length} Available
+                    {paidReports.length} {translate('available')}
                   </div>
                 </div>
               </motion.div>

@@ -146,97 +146,127 @@ const HomePage = () => {
             variants={containerVariants}
             initial="hidden"
             animate="visible"
-            className="w-full flex flex-col lg:grid lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-16 items-center"
+            className="w-full flex flex-col lg:grid lg:grid-cols-2 gap-8 sm:gap-10 lg:gap-16 items-center"
           >
-            {/* Left Content */}
-            <div className="space-y-4 sm:space-y-6 lg:space-y-8 text-center lg:text-left max-w-2xl mx-auto lg:mx-0 order-2 lg:order-1">
-              {/* Main Heading */}
-              <motion.div variants={itemVariants} className="space-y-2 sm:space-y-4">
-                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold text-white text-nowrap leading-tight tracking-tight">
+            {/* Left Content - Enhanced for mobile */}
+            <div className="space-y-5 sm:space-y-6 lg:space-y-8 text-center lg:text-left max-w-2xl mx-auto lg:mx-0 order-2 lg:order-1">
+              {/* Main Heading - Better mobile spacing */}
+              <motion.div variants={itemVariants} className="space-y-3 sm:space-y-4">
+                <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl text-nowrap font-bold text-white leading-tight tracking-tight">
                   {translate('heroTitle')}
                 </h1>
               </motion.div>
 
-              {/* Description */}
+              {/* Description - Improved mobile readability */}
               <motion.div variants={itemVariants} className="relative">
-                <p className="text-xs sm:text-sm md:text-base lg:text-lg text-blue-100 leading-relaxed max-w-xl mx-auto lg:mx-0">
+                <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-100 leading-relaxed max-w-xl mx-auto lg:mx-0">
                   {translate('heroDescription')}
                 </p>
               </motion.div>
 
-              {/* Stats Section */}
-              <motion.div variants={itemVariants} className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-8 py-3 sm:py-4 lg:py-6 border-y border-white/10">
-                <div className="text-center lg:text-left">
-                  <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white">{translate('statsNumber')}</div>
-                  <div className="text-blue-200 text-xs sm:text-sm mt-1">{translate('companyReports')}</div>
-                </div>
-                <div className="text-center lg:text-left">
-                  <div className="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-white">{translate('access')}</div>
-                  <div className="text-blue-200 text-xs sm:text-sm mt-1">{translate('instantAccess')}</div>
-                </div>
+              {/* Stats Section - Enhanced mobile design */}
+              <motion.div 
+                variants={itemVariants} 
+                className="grid grid-cols-2 gap-3 sm:gap-4 lg:gap-8 py-4 sm:py-5 lg:py-6 border-y border-white/10"
+              >
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  className="text-center lg:text-left bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/10"
+                >
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">
+                    {translate('statsNumber')}
+                  </div>
+                  <div className="text-blue-200 text-xs sm:text-sm font-medium">
+                    {translate('companyReports')}
+                  </div>
+                </motion.div>
+                <motion.div 
+                  whileHover={{ scale: 1.05 }}
+                  className="text-center lg:text-left bg-white/5 backdrop-blur-sm rounded-xl p-3 sm:p-4 border border-white/10"
+                >
+                  <div className="text-xl sm:text-2xl lg:text-3xl font-bold text-white mb-1">
+                    {translate('access')}
+                  </div>
+                  <div className="text-blue-200 text-xs sm:text-sm font-medium">
+                    {translate('instantAccess')}
+                  </div>
+                </motion.div>
               </motion.div>
 
-              {/* Action Buttons */}
+              {/* Action Buttons - Enhanced mobile layout */}
               <motion.div variants={itemVariants}>
                 <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start">
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => navigate("/catalog")}
-                    className="group w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-white text-blue-600 rounded-xl font-semibold shadow-lg hover:shadow-xl hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                    className="group w-full sm:w-auto px-6 sm:px-7 lg:px-8 py-3 sm:py-3.5 lg:py-4 bg-white text-blue-600 rounded-xl font-semibold shadow-lg hover:shadow-xl transition-all duration-300 flex items-center justify-center gap-2"
                   >
-                    <span className="text-xs sm:text-sm lg:text-base">{translate('browseReports')}</span>
-                    <ChevronRight className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 transition-transform group-hover:translate-x-1" />
-                  </button>
+                    <span className="text-sm sm:text-base">{translate('browseReports')}</span>
+                    <ChevronRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1" />
+                  </motion.button>
                   
-                  <button
+                  <motion.button
+                    whileHover={{ scale: 1.02 }}
+                    whileTap={{ scale: 0.98 }}
                     onClick={() => navigate("/contact")}
-                    className="group w-full sm:w-auto px-4 sm:px-6 lg:px-8 py-2.5 sm:py-3 lg:py-4 bg-blue-700/30 text-white rounded-xl font-semibold backdrop-blur-sm border border-white/10 hover:bg-blue-700/40 hover:scale-[1.02] transition-all duration-300 flex items-center justify-center gap-2"
+                    className="group w-full sm:w-auto px-6 sm:px-7 lg:px-8 py-3 sm:py-3.5 lg:py-4 bg-blue-700/30 text-white rounded-xl font-semibold backdrop-blur-sm border border-white/10 hover:bg-blue-700/40 transition-all duration-300 flex items-center justify-center gap-2"
                   >
-                    <span className="text-xs sm:text-sm lg:text-base">{translate('customAnalysis')}</span>
-                    <ArrowRight className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 transition-transform group-hover:translate-x-1" />
-                  </button>
+                    <span className="text-sm sm:text-base">{translate('customAnalysis')}</span>
+                    <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5 transition-transform group-hover:translate-x-1" />
+                  </motion.button>
                 </div>
               </motion.div>
 
-              {/* Price Badge */}
-              <motion.div variants={fadeInUp} className="relative">
-                <div className="inline-flex items-center gap-2 px-3 lg:px-4 py-1.5 lg:py-2 bg-gradient-to-r from-white/10 to-white/5 backdrop-blur-sm border border-white/10 rounded-full text-white text-xs lg:text-sm font-medium">
-                  <Sparkles size={12} className="sm:w-3 sm:h-3 lg:w-4 lg:h-4 text-blue-200 animate-pulse" />
+              {/* Price Badge - Enhanced mobile design */}
+              <motion.div variants={fadeInUp} className="relative flex justify-center lg:justify-start">
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm border border-white/20 rounded-full text-white text-xs sm:text-sm font-medium shadow-lg"
+                >
+                  <Sparkles className="w-3 h-3 sm:w-4 sm:h-4 text-blue-200 animate-pulse" />
                   <span>{translate('pricingBadge')}</span>
-                </div>
+                </motion.div>
               </motion.div>
             </div>
 
-            {/* Right Illustration/Visual */}
+            {/* Right Illustration - Enhanced mobile positioning */}
             <motion.div
               variants={itemVariants}
               className="relative flex justify-center lg:justify-end order-1 lg:order-2 w-full"
             >
-              <div className="relative w-full max-w-xs sm:max-w-sm lg:max-w-none">
-                {/* Hero Image with dynamic height - increased for full visibility */}
+              <div className="relative w-full max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-none">
+                {/* Hero Image - Optimized for mobile */}
                 <div className="relative z-10 w-full h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[28rem] 2xl:h-[32rem] group">
-                  <img
+                  <motion.img
+                    whileHover={{ scale: 1.05, rotate: 1 }}
+                    transition={{ duration: 0.3 }}
                     src="/hero.png"
                     alt="Business Intelligence Dashboard"
-                    className="w-full h-full object-contain rounded-xl sm:rounded-2xl transition-transform duration-300 group-hover:scale-105 group-hover:rotate-1"
+                    className="w-full h-full object-contain rounded-xl sm:rounded-2xl"
                   />
                 </div>
 
-                {/* Floating Cards - Responsive positioning */}
+                {/* Floating Cards - Enhanced mobile design */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 0.8, duration: 0.6 }}
-                  className="absolute -left-1 sm:-left-2 lg:-left-4 top-1/4 block hover:scale-105 hover:shadow-xl transition-transform duration-300 float-animation"
+                  className="absolute -left-2 sm:-left-3 lg:-left-4 top-1/4 block hover:scale-105 transition-transform duration-300 float-animation"
                   style={{ animationDelay: '0s' }}
                 >
-                  <div className="bg-white/95 backdrop-blur-sm p-1.5 sm:p-2 lg:p-3 xl:p-4 rounded-lg sm:rounded-xl shadow-lg border border-slate-100/50">
-                    <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
-                      <div className="p-1 sm:p-1.5 lg:p-2 bg-green-100 rounded-lg">
-                        <TrendingUp className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-green-600" />
+                  <div className="bg-white/95 backdrop-blur-sm p-2 sm:p-3 lg:p-4 rounded-lg sm:rounded-xl shadow-lg border border-slate-100/50">
+                    <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3">
+                      <div className="p-1.5 sm:p-2 bg-green-100 rounded-lg flex-shrink-0">
+                        <TrendingUp className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-green-600" />
                       </div>
-                      <div>
-                        <div className="text-[10px] sm:text-xs lg:text-sm font-semibold text-slate-900">{translate('revenueGrowth')}</div>
-                        <div className="text-[8px] sm:text-xs text-slate-600 hidden md:block">{translate('growthStats')}</div>
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm lg:text-base font-semibold text-slate-900 truncate">
+                          {translate('revenueGrowth')}
+                        </div>
+                        <div className="text-[10px] sm:text-xs text-slate-600 hidden sm:block">
+                          {translate('growthStats')}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -246,17 +276,21 @@ const HomePage = () => {
                   initial={{ opacity: 0, x: 20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: 1, duration: 0.6 }}
-                  className="absolute -right-1 sm:-right-2 lg:-right-4 top-2/3 block hover:scale-105 hover:shadow-xl transition-transform duration-300 float-animation"
+                  className="absolute -right-2 sm:-right-3 lg:-right-4 top-2/3 block hover:scale-105 transition-transform duration-300 float-animation"
                   style={{ animationDelay: '2s' }}
                 >
-                  <div className="bg-white/95 backdrop-blur-sm p-1.5 sm:p-2 lg:p-3 xl:p-4 rounded-lg sm:rounded-xl shadow-lg border border-slate-100/50">
-                    <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
-                      <div className="p-1 sm:p-1.5 lg:p-2 bg-blue-100 rounded-lg">
-                        <BarChart3 className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-blue-600" />
+                  <div className="bg-white/95 backdrop-blur-sm p-2 sm:p-3 lg:p-4 rounded-lg sm:rounded-xl shadow-lg border border-slate-100/50">
+                    <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3">
+                      <div className="p-1.5 sm:p-2 bg-blue-100 rounded-lg flex-shrink-0">
+                        <BarChart3 className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-blue-600" />
                       </div>
-                      <div>
-                        <div className="text-[10px] sm:text-xs lg:text-sm font-semibold text-slate-900">{translate('marketAnalysis')}</div>
-                        <div className="text-[8px] sm:text-xs text-slate-600 hidden md:block">{translate('deepInsights')}</div>
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm lg:text-base font-semibold text-slate-900 truncate">
+                          {translate('marketAnalysis')}
+                        </div>
+                        <div className="text-[10px] sm:text-xs text-slate-600 hidden sm:block">
+                          {translate('deepInsights')}
+                        </div>
                       </div>
                     </div>
                   </div>
@@ -266,59 +300,66 @@ const HomePage = () => {
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 1.2, duration: 0.6 }}
-                  className="absolute -bottom-2 sm:-bottom-3 lg:-bottom-6 left-1/2 transform -translate-x-1/2 block hover:scale-105 hover:shadow-xl transition-transform duration-300 float-animation"
+                  className="absolute -bottom-3 sm:-bottom-4 lg:-bottom-6 left-1/2 transform -translate-x-1/2 block hover:scale-105 transition-transform duration-300 float-animation"
                   style={{ animationDelay: '4s' }}
                 >
-                  <div className="bg-white/95 backdrop-blur-sm p-1.5 sm:p-2 lg:p-3 xl:p-4 rounded-lg sm:rounded-xl shadow-lg border border-slate-100/50">
-                    <div className="flex items-center gap-1.5 sm:gap-2 lg:gap-3">
-                      <div className="p-1 sm:p-1.5 lg:p-2 bg-purple-100 rounded-lg">
-                        <Users className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 lg:w-5 lg:h-5 text-purple-600" />
+                  <div className="bg-white/95 backdrop-blur-sm p-2 sm:p-3 lg:p-4 rounded-lg sm:rounded-xl shadow-lg border border-slate-100/50">
+                    <div className="flex items-center gap-2 sm:gap-2.5 lg:gap-3">
+                      <div className="p-1.5 sm:p-2 bg-purple-100 rounded-lg flex-shrink-0">
+                        <Users className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-purple-600" />
                       </div>
-                      <div>
-                        <div className="text-[10px] sm:text-xs lg:text-sm font-semibold text-slate-900">{translate('expertTeam')}</div>
-                        <div className="text-[8px] sm:text-xs text-slate-600 hidden md:block">{translate('industrySpecialists')}</div>
+                      <div className="min-w-0">
+                        <div className="text-xs sm:text-sm lg:text-base font-semibold text-slate-900 truncate">
+                          {translate('expertTeam')}
+                        </div>
+                        <div className="text-[10px] sm:text-xs text-slate-600 hidden sm:block">
+                          {translate('industrySpecialists')}
+                        </div>
                       </div>
                     </div>
                   </div>
                 </motion.div>
 
-                {/* Background decoration */}
-                <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-500/20 to-purple-500/20 rounded-3xl blur-3xl transform rotate-6 scale-110 lg:hidden"></div>
+                {/* Background decoration - subtle for mobile */}
+                <div className="absolute inset-0 -z-10 bg-gradient-to-br from-blue-500/10 to-purple-500/10 rounded-3xl blur-2xl sm:blur-3xl transform rotate-6 scale-110"></div>
               </div>
             </motion.div>
           </motion.div>
         </div>
 
-        {/* Scroll Down Button - positioned at bottom */}
+        {/* Scroll Down Button - Enhanced mobile design */}
         <motion.div
           variants={scrollDownVariants}
           initial="hidden"
           animate="visible"
-          className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center cursor-pointer"
+          className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center cursor-pointer z-10"
           onClick={handleScrollDown}
         >
           <motion.div
             variants={bounceAnimation}
             animate="animate"
-            className="group flex flex-col items-center space-y-1 hover:scale-110 transition-transform duration-300"
+            className="group flex flex-col items-center space-y-1 sm:space-y-1.5 hover:scale-110 transition-transform duration-300"
           >
             <span className="text-white/80 text-[10px] sm:text-xs font-medium tracking-wide uppercase mb-1 group-hover:text-white transition-colors duration-300">
               {translate('scrollDownText')}
             </span>
             
             <div className="relative">
-              <div className="w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 border-2 border-white/30 rounded-full flex items-center justify-center backdrop-blur-sm bg-white/10 group-hover:border-white/60 group-hover:bg-white/20 transition-all duration-300">
-                <ChevronDown className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 text-white/80 group-hover:text-white transition-colors duration-300" />
-              </div>
+              <motion.div 
+                whileHover={{ scale: 1.1 }}
+                className="w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 border-2 border-white/30 rounded-full flex items-center justify-center backdrop-blur-sm bg-white/10 group-hover:border-white/60 group-hover:bg-white/20 transition-all duration-300 shadow-lg"
+              >
+                <ChevronDown className="w-4 h-4 sm:w-5 sm:h-5 text-white/80 group-hover:text-white transition-colors duration-300" />
+              </motion.div>
               
-              <div className="absolute inset-0 w-8 h-8 sm:w-10 sm:h-10 lg:w-12 lg:h-12 border-2 border-white/40 rounded-full custom-pulse pointer-events-none"></div>
+              <div className="absolute inset-0 w-9 h-9 sm:w-10 sm:h-10 lg:w-12 lg:h-12 border-2 border-white/40 rounded-full custom-pulse pointer-events-none"></div>
             </div>
             
             <motion.div
               initial={{ height: 0 }}
-              animate={{ height: 12 }}
+              animate={{ height: 10 }}
               transition={{ delay: 3, duration: 0.6, ease: "easeOut" }}
-              className="w-px bg-gradient-to-b from-white/60 to-transparent"
+              className="w-px bg-gradient-to-b from-white/60 to-transparent hidden sm:block"
             />
           </motion.div>
         </motion.div>

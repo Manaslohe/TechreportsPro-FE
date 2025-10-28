@@ -5,9 +5,11 @@ import ExpertAnalysis from './Home/ExpertAnalysis';
 import ReportDetails from './Home/ReportDetails';
 import Pricing from './Home/Pricing';
 import Footer from './Home/Footer';
+import About from './About/About';
 
 export default function LandingPage() {
   const [showBackToTop, setShowBackToTop] = useState(false);
+  const [aboutOpen, setAboutOpen] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
@@ -24,7 +26,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col">
       <Home />
-      <ExpertAnalysis />
+      <ExpertAnalysis onLearnMore={() => setAboutOpen(true)} />
       <ReportDetails />
       <Pricing />
       <Footer />
@@ -44,6 +46,7 @@ export default function LandingPage() {
           </span>
         </button>
       </div>
+      <About isOpen={aboutOpen} onClose={() => setAboutOpen(false)} />
     </div>
   );
 }

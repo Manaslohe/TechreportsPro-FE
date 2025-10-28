@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import React, { useState, useEffect, useMemo } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
 import { 
   User, 
   Star, 
@@ -10,11 +10,40 @@ import {
   XCircle,
   AlertCircle,
   TrendingUp,
-  Eye
+  Eye,
+  ArrowRight,
+  Sparkles,
+  Crown,
+  Gift
 } from 'lucide-react';
 import axios from 'axios';
 import Toast from './common/Toast';
 import { useNavigate } from 'react-router-dom';
+
+const StatCard = React.memo(({ icon: Icon, label, value, gradient, delay = 0 }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20, scale: 0.95 }}
+    animate={{ opacity: 1, y: 0, scale: 1 }}
+    transition={{ delay, duration: 0.4, ease: "easeOut" }}
+    whileHover={{ y: -4, transition: { duration: 0.2 } }}
+    className="bg-white rounded-xl shadow-sm hover:shadow-md transition-all p-6 border border-gray-100"
+  >
+    <div className="flex items-center justify-between">
+      <div className="flex-1">
+        <p className="text-sm font-medium text-gray-600 mb-1">{label}</p>
+        <p className="text-3xl font-bold text-gray-900">{value}</p>
+      </div>
+      <motion.div 
+        whileHover={{ scale: 1.1, rotate: 5 }}
+        className={`p-3 rounded-xl ${gradient} shadow-sm`}
+      >
+        <Icon className="w-7 h-7 text-white" />
+      </motion.div>
+    </div>
+  </motion.div>
+));
+
+StatCard.displayName = 'StatCard';
 
 const Dashboard = () => {
   const [dashboardData, setDashboardData] = useState(null);
@@ -24,7 +53,6 @@ const Dashboard = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // Check if user is logged in
     const token = localStorage.getItem('authToken');
     if (!token) {
       setToast({
@@ -42,14 +70,10 @@ const Dashboard = () => {
   const fetchDashboardData = async () => {
     try {
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('No authentication token found');
-      }
+      if (!token) throw new Error('No authentication token found');
 
       const response = await axios.get('/api/users/dashboard', {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
       
       setDashboardData(response.data);
@@ -84,26 +108,26 @@ const Dashboard = () => {
   const getStatusIcon = (status) => {
     switch (status) {
       case 'pending':
-        return <Clock className="w-5 h-5 text-yellow-500" />;
+        return <Clock className="w-4 h-4 text-yellow-600" />;
       case 'approved':
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'rejected':
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return <XCircle className="w-4 h-4 text-red-600" />;
       default:
-        return <AlertCircle className="w-5 h-5 text-gray-500" />;
+        return <AlertCircle className="w-4 h-4 text-gray-600" />;
     }
   };
 
   const getStatusColor = (status) => {
     switch (status) {
       case 'pending':
-        return 'bg-yellow-100 text-yellow-800';
+        return 'bg-yellow-50 text-yellow-700 border-yellow-200';
       case 'approved':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-50 text-green-700 border-green-200';
       case 'rejected':
-        return 'bg-red-100 text-red-800';
+        return 'bg-red-50 text-red-700 border-red-200';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-50 text-gray-700 border-gray-200';
     }
   };
 
@@ -120,161 +144,136 @@ const Dashboard = () => {
     return days;
   };
 
+  // Memoized stats
+  const stats = useMemo(() => {
+    if (!dashboardData) return null;
+    return [
+      { 
+        icon: FileText, 
+        label: 'Total Reports', 
+        value: dashboardData.stats?.totalReportsAccessed || 0, 
+        gradient: 'bg-gradient-to-br from-blue-500 to-blue-600' 
+      },
+      { 
+        icon: Star, 
+        label: 'Points Earned', 
+        value: dashboardData.user?.points || 0, 
+        gradient: 'bg-gradient-to-br from-amber-500 to-orange-500' 
+      },
+      { 
+        icon: Clock, 
+        label: 'Pending Payments', 
+        value: dashboardData.stats?.pendingPayments || 0, 
+        gradient: 'bg-gradient-to-br from-purple-500 to-purple-600' 
+      },
+      { 
+        icon: TrendingUp, 
+        label: 'Total Spent', 
+        value: `₹${dashboardData.stats?.totalSpent || 0}`, 
+        gradient: 'bg-gradient-to-br from-green-500 to-emerald-600' 
+      },
+    ];
+  }, [dashboardData]);
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 pt-20">
-        <div className="text-center">
-          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <p className="text-gray-600">Loading your dashboard...</p>
-        </div>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white pt-20">
+        <motion.div 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          className="text-center"
+        >
+          <div className="relative mb-6">
+            <div className="w-16 h-16 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
+            <div className="absolute inset-0 w-16 h-16 border-4 border-transparent border-t-blue-400 rounded-full animate-spin mx-auto" style={{ animationDuration: '1.5s' }} />
+          </div>
+          <p className="text-gray-600 font-medium">Loading your dashboard...</p>
+        </motion.div>
       </div>
     );
   }
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 pt-20">
-        <div className="text-center max-w-md mx-auto p-6">
-          <AlertCircle className="w-16 h-16 text-red-500 mx-auto mb-4" />
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">Dashboard Error</h2>
-          <p className="text-gray-600 mb-6">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-gray-50 to-white pt-20 px-4">
+        <motion.div 
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="text-center max-w-md mx-auto"
+        >
+          <div className="bg-red-50 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-6">
+            <AlertCircle className="w-10 h-10 text-red-600" />
+          </div>
+          <h2 className="text-2xl font-bold text-gray-900 mb-3">Dashboard Error</h2>
+          <p className="text-gray-600 mb-6 leading-relaxed">{error}</p>
           <div className="flex flex-col sm:flex-row gap-3 justify-center">
             <button
               onClick={fetchDashboardData}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+              className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium"
             >
               Try Again
             </button>
             <button
               onClick={() => navigate('/')}
-              className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+              className="px-6 py-3 bg-gray-100 text-gray-700 rounded-xl hover:bg-gray-200 transition-all font-medium"
             >
               Go Home
             </button>
           </div>
-        </div>
+        </motion.div>
       </div>
     );
   }
 
-  if (!dashboardData) {
-    return (
-      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 via-white to-blue-100 pt-20">
-        <div className="text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">No Data Available</h2>
-          <p className="text-gray-600 mb-6">Unable to load dashboard data</p>
-          <button
-            onClick={fetchDashboardData}
-            className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-          >
-            Reload Dashboard
-          </button>
-        </div>
-      </div>
-    );
-  }
+  if (!dashboardData) return null;
 
-  // Safely destructure with defaults
-  const { 
-    user = {}, 
-    subscription = { hasActive: false, availableReports: { premium: 0, bluechip: 0, total: 0 } }, 
-    pendingRequests = [], 
-    purchasedReports = [], 
-    stats = { totalReportsAccessed: 0, totalSpent: 0, pendingPayments: 0 } 
-  } = dashboardData;
+  const { user = {}, subscription = { hasActive: false }, pendingRequests = [], purchasedReports = [] } = dashboardData;
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-100">
-      {/* Blue Header Background */}
-      <div className="bg-gradient-to-r from-blue-600 to-blue-700 pt-24 pb-32 px-4 sm:px-6 lg:px-8">
-        <div className="max-w-7xl mx-auto">
-          {/* Header */}
+    <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
+      {/* Hero Header */}
+      <div className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-indigo-800 overflow-hidden">
+        {/* Background Pattern */}
+        <div className="absolute inset-0 opacity-10">
+          <div className="absolute inset-0" style={{
+            backgroundImage: `radial-gradient(circle at 2px 2px, white 1px, transparent 0)`,
+            backgroundSize: '40px 40px'
+          }} />
+        </div>
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-20 relative z-10">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
             className="text-white"
           >
-            <h1 className="text-3xl sm:text-4xl font-bold mb-2">
+            <motion.div
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              transition={{ delay: 0.2 }}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-white/10 backdrop-blur-sm rounded-full text-sm font-medium mb-4 border border-white/20"
+            >
+              <Sparkles className="h-4 w-4" />
+              Your Dashboard
+            </motion.div>
+            <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-3">
               Welcome back, {user?.firstName || 'User'}!
             </h1>
-            <p className="text-blue-100 text-base sm:text-lg">
-              Manage your subscriptions and access your reports
+            <p className="text-blue-100 text-lg max-w-2xl">
+              Manage your subscriptions, track your reports, and stay updated
             </p>
           </motion.div>
         </div>
       </div>
 
-      {/* Main Content - Overlapping Cards */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-20 pb-16">
-        {/* Stats Cards */}
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-12 pb-16 relative z-10">
+        {/* Stats Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Total Reports</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats?.totalReportsAccessed || 0}</p>
-              </div>
-              <div className="bg-blue-100 p-3 rounded-lg">
-                <FileText className="w-6 h-6 sm:w-8 sm:h-8 text-blue-600" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Points Earned</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{user?.points || 0}</p>
-              </div>
-              <div className="bg-yellow-100 p-3 rounded-lg">
-                <Star className="w-6 h-6 sm:w-8 sm:h-8 text-yellow-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Pending Payments</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">{stats?.pendingPayments || 0}</p>
-              </div>
-              <div className="bg-orange-100 p-3 rounded-lg">
-                <Clock className="w-6 h-6 sm:w-8 sm:h-8 text-orange-500" />
-              </div>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="bg-white rounded-xl shadow-lg hover:shadow-xl transition-shadow p-6"
-          >
-            <div className="flex items-center justify-between">
-              <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Total Spent</p>
-                <p className="text-2xl sm:text-3xl font-bold text-gray-900">₹{stats?.totalSpent || 0}</p>
-              </div>
-              <div className="bg-green-100 p-3 rounded-lg">
-                <TrendingUp className="w-6 h-6 sm:w-8 sm:h-8 text-green-500" />
-              </div>
-            </div>
-          </motion.div>
+          {stats?.map((stat, index) => (
+            <StatCard key={stat.label} {...stat} delay={0.1 + index * 0.05} />
+          ))}
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 lg:gap-8">
@@ -282,73 +281,124 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.4 }}
             className="lg:col-span-2"
           >
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Subscription Status</h2>
+            <div className="bg-white rounded-2xl shadow-sm p-6 lg:p-8 border border-gray-100">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-gradient-to-br from-blue-500 to-indigo-600 rounded-xl">
+                  <Crown className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Subscription Status</h2>
+              </div>
               
-              {subscription?.hasActive ? (
-                <div className="space-y-4">
-                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between p-4 bg-gradient-to-r from-green-50 to-green-100 rounded-xl border border-green-200">
-                    <div className="flex items-center space-x-3 mb-3 sm:mb-0">
-                      <div className="bg-green-500 p-2 rounded-lg">
-                        <CheckCircle className="w-5 h-5 text-white" />
-                      </div>
-                      <div>
-                        <h3 className="font-semibold text-green-900 text-base sm:text-lg">
-                          {subscription.current?.planName || 'Active Plan'}
-                        </h3>
-                        <p className="text-sm text-green-700">
-                          Expires on {subscription.current?.expiryDate ? formatDate(subscription.current.expiryDate) : 'N/A'}
-                        </p>
-                      </div>
-                    </div>
-                    <span className="px-4 py-2 bg-white text-green-800 rounded-full text-sm font-medium shadow-sm">
-                      {subscription.current?.expiryDate ? getDaysLeft(subscription.current.expiryDate) : 0} days left
-                    </span>
-                  </div>
-
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div className="text-center p-4 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border border-blue-200">
-                      <p className="text-3xl font-bold text-blue-600 mb-1">
-                        {subscription.availableReports?.premium || 0}
-                      </p>
-                      <p className="text-xs sm:text-sm text-blue-700 font-medium">Premium Reports Left</p>
-                    </div>
-                    <div className="text-center p-4 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border border-purple-200">
-                      <p className="text-3xl font-bold text-purple-600 mb-1">
-                        {subscription.availableReports?.bluechip || 0}
-                      </p>
-                      <p className="text-xs sm:text-sm text-purple-700 font-medium">Bluechip Reports Left</p>
-                    </div>
-                    <div className="text-center p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border border-gray-200">
-                      <p className="text-3xl font-bold text-gray-600 mb-1">
-                        {subscription.availableReports?.total || 0}
-                      </p>
-                      <p className="text-xs sm:text-sm text-gray-700 font-medium">Total Reports Left</p>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <AlertCircle className="w-10 h-10 text-gray-400" />
-                  </div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    No Active Subscription
-                  </h3>
-                  <p className="text-gray-600 mb-6 text-sm sm:text-base">
-                    Subscribe to a plan to get access to premium reports
-                  </p>
-                  <button
-                    onClick={() => navigate('/plans')}
-                    className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+              <AnimatePresence mode="wait">
+                {subscription?.hasActive ? (
+                  <motion.div
+                    key="active"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="space-y-6"
                   >
-                    View Plans
-                  </button>
-                </div>
-              )}
+                    {/* Active Plan Card */}
+                    <div className="relative overflow-hidden p-6 bg-gradient-to-br from-green-50 to-emerald-50 rounded-xl border-2 border-green-200">
+                      <div className="absolute top-0 right-0 w-32 h-32 bg-green-200/30 rounded-full -mr-16 -mt-16" />
+                      <div className="relative flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+                        <div className="flex items-start gap-3">
+                          <div className="p-2.5 bg-green-500 rounded-xl shadow-md">
+                            <CheckCircle className="w-5 h-5 text-white" />
+                          </div>
+                          <div>
+                            <h3 className="font-bold text-green-900 text-lg mb-1">
+                              {subscription.current?.planName || 'Active Plan'}
+                            </h3>
+                            <p className="text-sm text-green-700 flex items-center gap-1.5">
+                              <Calendar className="h-4 w-4" />
+                              Expires on {subscription.current?.expiryDate ? formatDate(subscription.current.expiryDate) : 'N/A'}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <div className="px-4 py-2 bg-white rounded-xl shadow-sm border border-green-200">
+                            <span className="text-2xl font-bold text-green-600">
+                              {subscription.current?.expiryDate ? getDaysLeft(subscription.current.expiryDate) : 0}
+                            </span>
+                            <span className="text-xs text-green-700 font-medium ml-1">days left</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Reports Available */}
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      <motion.div 
+                        whileHover={{ y: -2 }}
+                        className="text-center p-5 bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl border-2 border-blue-200 shadow-sm"
+                      >
+                        <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-md">
+                          <FileText className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-3xl font-bold text-blue-600 mb-1">
+                          {subscription.availableReports?.premium || 0}
+                        </p>
+                        <p className="text-sm text-blue-700 font-medium">Premium Reports</p>
+                      </motion.div>
+                      
+                      <motion.div 
+                        whileHover={{ y: -2 }}
+                        className="text-center p-5 bg-gradient-to-br from-purple-50 to-purple-100 rounded-xl border-2 border-purple-200 shadow-sm"
+                      >
+                        <div className="w-12 h-12 bg-gradient-to-br from-purple-500 to-purple-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-md">
+                          <Crown className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-3xl font-bold text-purple-600 mb-1">
+                          {subscription.availableReports?.bluechip || 0}
+                        </p>
+                        <p className="text-sm text-purple-700 font-medium">Bluechip Reports</p>
+                      </motion.div>
+                      
+                      <motion.div 
+                        whileHover={{ y: -2 }}
+                        className="text-center p-5 bg-gradient-to-br from-gray-50 to-gray-100 rounded-xl border-2 border-gray-200 shadow-sm"
+                      >
+                        <div className="w-12 h-12 bg-gradient-to-br from-gray-500 to-gray-600 rounded-xl flex items-center justify-center mx-auto mb-3 shadow-md">
+                          <Gift className="w-6 h-6 text-white" />
+                        </div>
+                        <p className="text-3xl font-bold text-gray-600 mb-1">
+                          {subscription.availableReports?.total || 0}
+                        </p>
+                        <p className="text-sm text-gray-700 font-medium">Total Available</p>
+                      </motion.div>
+                    </div>
+                  </motion.div>
+                ) : (
+                  <motion.div
+                    key="inactive"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    className="text-center py-12"
+                  >
+                    <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <AlertCircle className="w-10 h-10 text-gray-400" />
+                    </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      No Active Subscription
+                    </h3>
+                    <p className="text-gray-600 mb-6 max-w-sm mx-auto leading-relaxed">
+                      Subscribe to a plan to get access to premium investment reports
+                    </p>
+                    <button
+                      onClick={() => navigate('/plans')}
+                      className="inline-flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium"
+                    >
+                      View Plans
+                      <ArrowRight className="w-4 h-4" />
+                    </button>
+                  </motion.div>
+                )}
+              </AnimatePresence>
             </div>
           </motion.div>
 
@@ -356,41 +406,55 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.5 }}
           >
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-bold text-gray-900 mb-6">Pending Requests</h2>
+            <div className="bg-white rounded-2xl shadow-sm p-6 border border-gray-100 h-full">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl">
+                  <Clock className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl font-bold text-gray-900">Pending Requests</h2>
+              </div>
               
               {pendingRequests && pendingRequests.length > 0 ? (
-                <div className="space-y-3 max-h-96 overflow-y-auto pr-2">
-                  {pendingRequests.map((request) => (
-                    <div key={request._id} className="p-4 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${getStatusColor(request.status)}`}>
+                <div className="space-y-3 max-h-96 overflow-y-auto pr-2 custom-scrollbar">
+                  {pendingRequests.map((request, index) => (
+                    <motion.div
+                      key={request._id}
+                      initial={{ opacity: 0, x: -20 }}
+                      animate={{ opacity: 1, x: 0 }}
+                      transition={{ delay: 0.1 * index }}
+                      className="p-4 border-2 border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition-all group"
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border ${getStatusColor(request.status)}`}>
+                          {getStatusIcon(request.status)}
                           {request.status?.charAt(0).toUpperCase() + request.status?.slice(1) || 'Pending'}
                         </span>
-                        <span className="text-sm font-semibold text-gray-700">
+                        <span className="text-base font-bold text-gray-900">
                           ₹{request.amount || 0}
                         </span>
                       </div>
-                      <h4 className="font-medium text-gray-900 text-sm mb-1">
+                      <h4 className="font-semibold text-gray-900 text-sm mb-1 line-clamp-2">
                         {request.paymentType === 'subscription' 
                           ? `${request.subscriptionPlan?.planName || 'Subscription'} Plan`
                           : request.report?.title || 'Individual Report'
                         }
                       </h4>
-                      <p className="text-xs text-gray-500">
+                      <p className="text-xs text-gray-500 flex items-center gap-1">
+                        <Calendar className="h-3 w-3" />
                         {request.createdAt ? formatDate(request.createdAt) : 'N/A'}
                       </p>
-                    </div>
+                    </motion.div>
                   ))}
                 </div>
               ) : (
                 <div className="text-center py-12">
-                  <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <CheckCircle className="w-10 h-10 text-gray-400" />
+                  <div className="w-16 h-16 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <CheckCircle className="w-8 h-8 text-green-500" />
                   </div>
-                  <p className="text-gray-600 text-sm">No pending requests</p>
+                  <p className="text-gray-600 text-sm font-medium">No pending requests</p>
+                  <p className="text-gray-500 text-xs mt-1">All clear! 🎉</p>
                 </div>
               )}
             </div>
@@ -401,66 +465,86 @@ const Dashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.7 }}
+          transition={{ delay: 0.6 }}
           className="mt-8"
         >
-          <div className="bg-white rounded-xl shadow-lg p-6">
+          <div className="bg-white rounded-2xl shadow-sm p-6 lg:p-8 border border-gray-100">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6 gap-3">
-              <h2 className="text-xl font-bold text-gray-900">Recent Reports</h2>
+              <div className="flex items-center gap-3">
+                <div className="p-2 bg-gradient-to-br from-green-500 to-emerald-600 rounded-xl">
+                  <FileText className="h-5 w-5 text-white" />
+                </div>
+                <h2 className="text-xl lg:text-2xl font-bold text-gray-900">Recent Reports</h2>
+              </div>
               <button
                 onClick={() => navigate('/catalog')}
-                className="text-blue-600 hover:text-blue-700 font-medium text-sm sm:text-base transition-colors"
+                className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 font-semibold text-sm transition-colors group"
               >
-                Browse All Reports →
+                Browse All Reports
+                <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
               </button>
             </div>
             
             {purchasedReports && purchasedReports.length > 0 ? (
               <div className="space-y-3">
                 {purchasedReports.slice(0, 5).map((purchase, index) => (
-                  <div key={purchase._id || index} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border border-gray-200 rounded-lg hover:bg-blue-50 hover:border-blue-300 transition-all group">
-                    <div className="flex items-start sm:items-center space-x-4 mb-3 sm:mb-0 flex-1">
-                      <div className="bg-blue-100 p-2 rounded-lg group-hover:bg-blue-200 transition-colors flex-shrink-0">
-                        <FileText className="w-6 h-6 text-blue-600" />
+                  <motion.div
+                    key={purchase._id || index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 * index }}
+                    whileHover={{ x: 4 }}
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border-2 border-gray-100 rounded-xl hover:border-blue-200 hover:bg-blue-50/50 transition-all group"
+                  >
+                    <div className="flex items-start gap-4 mb-3 sm:mb-0 flex-1 min-w-0">
+                      <div className="bg-blue-100 p-3 rounded-xl group-hover:bg-blue-200 transition-colors flex-shrink-0">
+                        <FileText className="w-5 h-5 text-blue-600" />
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h4 className="font-medium text-gray-900 text-sm sm:text-base truncate">
+                        <h4 className="font-semibold text-gray-900 mb-1 line-clamp-2 group-hover:text-blue-600 transition-colors">
                           {purchase.reportId?.title || 'Report Title'}
                         </h4>
-                        <p className="text-xs sm:text-sm text-gray-500 mt-1">
-                          {purchase.reportId?.sector || 'N/A'} • {purchase.purchaseDate ? formatDate(purchase.purchaseDate) : 'N/A'}
+                        <p className="text-sm text-gray-500 mb-2 flex items-center gap-2 flex-wrap">
+                          <span className="font-medium">{purchase.reportId?.sector || 'N/A'}</span>
+                          <span>•</span>
+                          <span className="flex items-center gap-1">
+                            <Calendar className="h-3 w-3" />
+                            {purchase.purchaseDate ? formatDate(purchase.purchaseDate) : 'N/A'}
+                          </span>
                         </p>
-                        <span className={`inline-flex px-2 py-1 rounded-full text-xs font-medium mt-2 ${
+                        <span className={`inline-flex px-3 py-1 rounded-lg text-xs font-semibold ${
                           purchase.accessType === 'subscription' 
-                            ? 'bg-blue-100 text-blue-800' 
-                            : 'bg-green-100 text-green-800'
+                            ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                            : 'bg-green-100 text-green-700 border border-green-200'
                         }`}>
-                          {purchase.accessType === 'subscription' ? 'Via Subscription' : 'Individual Purchase'}
+                          {purchase.accessType === 'subscription' ? '📋 Via Subscription' : '💳 Individual Purchase'}
                         </span>
                       </div>
                     </div>
-                    <div className="flex space-x-2 justify-end">
-                      <button
-                        onClick={() => navigate(`/report/view/${purchase.reportId?._id}`)}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-blue-100 rounded-lg transition-colors"
-                        title="View Report"
-                        disabled={!purchase.reportId?._id}
-                      >
-                        <Eye className="w-5 h-5" />
-                      </button>
-                    </div>
-                  </div>
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={() => navigate(`/report/view/${purchase.reportId?._id}`)}
+                      disabled={!purchase.reportId?._id}
+                      className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed font-medium"
+                      title="View Report"
+                    >
+                      <Eye className="w-4 h-4" />
+                      <span className="hidden sm:inline">View</span>
+                    </motion.button>
+                  </motion.div>
                 ))}
               </div>
             ) : (
-              <div className="text-center py-12">
-                <div className="bg-gray-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+              <div className="text-center py-16">
+                <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
                   <FileText className="w-10 h-10 text-gray-400" />
                 </div>
-                <p className="text-gray-600 mb-6 text-sm sm:text-base">No reports accessed yet</p>
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">No reports accessed yet</h3>
+                <p className="text-gray-600 mb-6">Start exploring our premium investment reports</p>
                 <button
                   onClick={() => navigate('/catalog')}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg"
+                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all shadow-md hover:shadow-lg font-medium"
                 >
                   Browse Reports
                 </button>
@@ -469,7 +553,6 @@ const Dashboard = () => {
           </div>
         </motion.div>
       </div>
-
       <Toast
         isVisible={toast.show}
         message={toast.message}

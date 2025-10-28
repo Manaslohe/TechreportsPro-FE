@@ -4,11 +4,13 @@ import { Upload, FileText, QrCode, Smartphone, Info, Copy, CheckCircle2, ArrowLe
 import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import axios from 'axios';
 import Toast from './common/Toast';
+import { useTranslation } from '../contexts/TranslationContext';
 
 const PaymentForm = () => {
   const { type, id } = useParams(); // type: 'report' or 'plan', id: reportId or planId
   const navigate = useNavigate();
   const location = useLocation();
+  const { translate } = useTranslation();
   
   const [report, setReport] = useState(null);
   const [plan, setPlan] = useState(null);
@@ -158,7 +160,7 @@ const PaymentForm = () => {
     } else {
       setToast({
         show: true,
-        message: 'Please upload a valid image file',
+        message: translate('uploadValidImage'),
         type: 'error',
       });
     }
@@ -175,7 +177,7 @@ const PaymentForm = () => {
     } else {
       setToast({
         show: true,
-        message: 'Please upload a valid image file',
+        message: translate('uploadValidImage'),
         type: 'error',
       });
     }
@@ -186,7 +188,7 @@ const PaymentForm = () => {
     if (!screenshot) {
       setToast({
         show: true,
-        message: 'Please select a screenshot to upload',
+        message: translate('selectScreenshotToUpload'),
         type: 'error'
       });
       return;
@@ -225,8 +227,8 @@ const PaymentForm = () => {
       });
 
       const successMessage = type === 'plan' 
-        ? `${plan.name} plan payment submitted successfully! Awaiting verification.`
-        : 'Report payment submitted successfully! Awaiting verification.';
+        ? translate('planPaymentSuccess', { planName: plan.name })
+        : translate('reportPaymentSuccess');
 
       setToast({
         show: true,
@@ -236,23 +238,24 @@ const PaymentForm = () => {
 
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (error) {
-      const errorMessage = {
-        'SCREENSHOT_REQUIRED': 'Payment screenshot is required',
-        'AUTH_REQUIRED': 'Please login to continue',
-        'TOKEN_EXPIRED': 'Session expired. Please login again',
-        'DUPLICATE_REQUEST': 'You already have a pending request for this item',
-        'ALREADY_PURCHASED': 'You have already purchased this item',
-        'ITEM_NOT_FOUND': 'Item not found',
-        'ACTIVE_SUBSCRIPTION': 'You already have an active subscription'
-      }[error.response?.data?.code] || 'Error submitting payment';
+      const errorCode = error.response?.data?.code;
+      const errorMessages = {
+        'SCREENSHOT_REQUIRED': translate('screenshotRequired'),
+        'AUTH_REQUIRED': translate('authRequired'),
+        'TOKEN_EXPIRED': translate('tokenExpired'),
+        'DUPLICATE_REQUEST': translate('duplicateRequest'),
+        'ALREADY_PURCHASED': translate('alreadyPurchased'),
+        'ITEM_NOT_FOUND': translate('itemNotFound'),
+        'ACTIVE_SUBSCRIPTION': translate('activeSubscription')
+      };
 
       setToast({
         show: true,
-        message: errorMessage,
+        message: errorMessages[errorCode] || translate('errorSubmittingPayment'),
         type: 'error',
       });
 
-      if (['AUTH_REQUIRED', 'TOKEN_EXPIRED'].includes(error.response?.data?.code)) {
+      if (['AUTH_REQUIRED', 'TOKEN_EXPIRED'].includes(errorCode)) {
         setTimeout(() => navigate('/signin'), 2000);
       }
     } finally {
@@ -265,7 +268,7 @@ const PaymentForm = () => {
     setCopiedUPI(true);
     setToast({
       show: true,
-      message: 'UPI ID copied to clipboard',
+      message: translate('upiIdCopied'),
       type: 'success',
     });
   };
@@ -303,9 +306,9 @@ const PaymentForm = () => {
         >
           {/* Header */}
           <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white p-6">
-            <h2 className="text-xl md:text-2xl font-bold">Complete Your Purchase</h2>
+            <h2 className="text-xl md:text-2xl font-bold">{translate('completePurchase')}</h2>
             <p className="mt-1 text-blue-100 text-sm md:text-base">
-              {type === 'plan' ? 'Subscription Plan Payment' : 'Individual Report Payment'}
+              {type === 'plan' ? translate('subscriptionPlanPayment') : translate('individualReportPayment')}
             </p>
           </div>
           
@@ -317,17 +320,17 @@ const PaymentForm = () => {
               </div>
               <div className="flex-1">
                 <h3 className="font-semibold text-gray-900">
-                  {type === 'plan' ? `${plan?.name} Plan` : report?.title}
+                  {type === 'plan' ? `${plan?.name} ${translate('planBasic')}` : report?.title}
                 </h3>
                 <p className="text-sm text-gray-500 mt-1">
-                  Price: ₹{getAmount()}
+                  {translate('price')}: ₹{getAmount()}
                   {type === 'plan' && (
-                    <span className="ml-2">• {plan?.totalReports} reports included • Valid for {plan?.period}</span>
+                    <span className="ml-2">• {plan?.totalReports} {translate('reportsIncluded')} • {translate('validFor')} {plan?.period}</span>
                   )}
                 </p>
                 {type === 'plan' && (
                   <div className="mt-2 text-sm text-blue-600">
-                    {plan?.premiumReports} Premium Reports + {plan?.bluechipReports} Bluechip Reports
+                    {translate('premiumReportsCount', { count: plan?.premiumReports })} + {translate('bluechipReportsCount', { count: plan?.bluechipReports })}
                   </div>
                 )}
               </div>
@@ -349,8 +352,8 @@ const PaymentForm = () => {
                 >
                   <span className="flex items-center justify-center gap-2">
                     <QrCode size={18} />
-                    <span className="hidden sm:inline">Step 1: Pay</span>
-                    <span className="inline sm:hidden">Pay</span>
+                    <span className="hidden sm:inline">{translate('step1Pay')}</span>
+                    <span className="inline sm:hidden">{translate('pay')}</span>
                   </span>
                 </button>
                 <button 
@@ -363,8 +366,8 @@ const PaymentForm = () => {
                 >
                   <span className="flex items-center justify-center gap-2">
                     <Upload size={18} />
-                    <span className="hidden sm:inline">Step 2: Upload Proof</span>
-                    <span className="inline sm:hidden">Upload</span>
+                    <span className="hidden sm:inline">{translate('step2Upload')}</span>
+                    <span className="inline sm:hidden">{translate('uploadProof')}</span>
                   </span>
                 </button>
               </div>
@@ -387,7 +390,7 @@ const PaymentForm = () => {
                       <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-xl">
                         <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 text-white text-sm py-1.5 px-3 rounded-full shadow-lg flex items-center gap-1.5">
                           <Smartphone size={16} />
-                          Tap to pay
+                          {translate('tapToPay')}
                         </span>
                       </div>
                     )}
@@ -397,16 +400,16 @@ const PaymentForm = () => {
                 {/* Payment Info */}
                 <div className="flex-1 space-y-4">
                   <div className="space-y-4">
-                    <h4 className="font-medium text-gray-800 text-lg">How to Pay:</h4>
+                    <h4 className="font-medium text-gray-800 text-lg">{translate('howToPay')}</h4>
                     
                     <div className="bg-gray-50 p-4 rounded-lg space-y-4">
                       <div>
-                        <p className="text-sm text-gray-500">Amount to Pay</p>
+                        <p className="text-sm text-gray-500">{translate('amountToPay')}</p>
                         <p className="font-semibold text-lg text-gray-900">₹{getAmount()}</p>
                       </div>
                       
                       <div>
-                        <p className="text-sm text-gray-500">UPI ID (for payment)</p>
+                        <p className="text-sm text-gray-500">{translate('upiIdForPayment')}</p>
                         <div className="flex items-center gap-2 mt-1">
                           <code className="text-sm font-medium bg-gray-100 px-2.5 py-1.5 rounded text-gray-800">
                             {UPI_ID}
@@ -414,7 +417,7 @@ const PaymentForm = () => {
                           <button 
                             onClick={copyUpiId}
                             className="p-1.5 hover:bg-gray-200 rounded-full transition-colors"
-                            title="Copy UPI ID"
+                            title={translate('copyUpiId')}
                           >
                             {copiedUPI ? 
                               <CheckCircle2 size={18} className="text-green-600" /> : 
@@ -431,18 +434,18 @@ const PaymentForm = () => {
                         className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <Smartphone size={18} />
-                        Pay Using UPI App
+                        {translate('payUsingUpiApp')}
                       </button>
                     )}
                     
                     <div className="flex items-start gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
                       <Info size={16} className="text-blue-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <p className="font-medium text-gray-700">Simple Steps:</p>
+                        <p className="font-medium text-gray-700">{translate('simpleSteps')}</p>
                         <ol className="list-decimal ml-4 mt-1 space-y-1">
-                          <li>Scan QR code with any UPI app</li>
-                          <li>Pay ₹{getAmount()}</li>
-                          <li>Take a screenshot of payment confirmation</li>
+                          <li>{translate('scanQrCode')}</li>
+                          <li>{translate('payAmount', { amount: getAmount() })}</li>
+                          <li>{translate('takeScreenshot')}</li>
                         </ol>
                       </div>
                     </div>
@@ -455,7 +458,7 @@ const PaymentForm = () => {
                       className="w-full py-3.5 sm:py-3 bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 hover:bg-blue-700 shadow-sm text-sm sm:text-base"
                     >
                       <Upload size={isMobile ? 16 : 18} className="flex-shrink-0" />
-                      <span className="truncate">Continue to Upload Payment Screenshot</span>
+                      <span className="truncate">{translate('continueToUpload')}</span>
                     </button>
                   </div>
                 </div>
@@ -464,7 +467,7 @@ const PaymentForm = () => {
               <form onSubmit={handleSubmit} className="space-y-5">
                 <div>
                   <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Upload Your Payment Screenshot:
+                    {translate('uploadPaymentScreenshot')}
                   </label>
                   <div
                     className={`border-2 border-dashed rounded-lg p-4 text-center transition-colors ${
@@ -482,7 +485,7 @@ const PaymentForm = () => {
                       <div className="flex flex-col items-center gap-2">
                         <img
                           src={screenshot}
-                          alt="Uploaded Screenshot"
+                          alt={translate('uploadedScreenshot')}
                           className="max-w-full max-h-[240px] object-contain rounded-lg"
                         />
                         <button
@@ -490,17 +493,17 @@ const PaymentForm = () => {
                           onClick={() => setScreenshot(null)}
                           className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-all text-sm font-medium"
                         >
-                          Remove Screenshot
+                          {translate('removeScreenshot')}
                         </button>
                       </div>
                     ) : (
                       <div className="py-6">
                         <Upload className="mx-auto h-12 w-12 text-gray-400" />
                         <p className="text-sm font-medium text-gray-700 mt-2">
-                          Click below to select a screenshot or drag and drop it here
+                          {translate('clickToSelect')}
                         </p>
                         <label className="mt-3 inline-block px-5 py-2.5 bg-blue-600 text-white text-sm font-medium rounded-lg cursor-pointer hover:bg-blue-700 transition-colors">
-                          Select Screenshot from Device
+                          {translate('selectScreenshot')}
                           <input
                             type="file"
                             accept="image/*"
@@ -508,7 +511,7 @@ const PaymentForm = () => {
                             className="hidden"
                           />
                         </label>
-                        <p className="mt-2 text-xs text-gray-500">Any image format is accepted (JPG, PNG, etc.)</p>
+                        <p className="mt-2 text-xs text-gray-500">{translate('anyImageFormat')}</p>
                       </div>
                     )}
                   </div>
@@ -516,7 +519,7 @@ const PaymentForm = () => {
                   <div className="mt-4 p-3 bg-yellow-50 border border-yellow-100 rounded-lg flex items-start gap-2">
                     <Info size={16} className="text-yellow-500 mt-0.5 flex-shrink-0" />
                     <p className="text-sm text-yellow-700">
-                      Please upload a screenshot showing your payment confirmation with transaction details
+                      {translate('uploadScreenshotNote')}
                     </p>
                   </div>
                 </div>
@@ -527,7 +530,7 @@ const PaymentForm = () => {
                     onClick={toggleViewMode}
                     className="px-6 py-3 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition-all flex-1 md:flex-none"
                   >
-                    Back to Payment QR
+                    {translate('backToPaymentQr')}
                   </button>
                   
                   <button
@@ -538,12 +541,12 @@ const PaymentForm = () => {
                     {submitting ? (
                       <>
                         <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                        <span>Processing...</span>
+                        <span>{translate('processing')}</span>
                       </>
                     ) : (
                       <>
                         <Upload size={18} />
-                        <span>Submit Payment Proof</span>
+                        <span>{translate('submitPaymentProof')}</span>
                       </>
                     )}
                   </button>
@@ -555,7 +558,7 @@ const PaymentForm = () => {
           {/* Footer with help text */}
           <div className="bg-gray-50 p-4 border-t border-gray-100">
             <p className="text-sm text-gray-600 text-center">
-              Need help? Contact our support team at <a href="mailto:support@techreportspro.com" className="text-blue-600 hover:underline">support@techreportspro.com</a>
+              {translate('needHelp')} <a href="mailto:support@techreportspro.com" className="text-blue-600 hover:underline">support@techreportspro.com</a>
             </p>
           </div>
         </motion.div>

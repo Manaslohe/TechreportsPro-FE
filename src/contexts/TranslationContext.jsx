@@ -42,7 +42,7 @@ export const TranslationProvider = ({ children }) => {
     if (translations[newLanguage]) {
       setLanguage(newLanguage);
     } else {
-      console.error(`Language "${newLanguage}" not supported`);
+      console.warn(`Language "${newLanguage}" not supported or missing in translations`);
     }
   };
 

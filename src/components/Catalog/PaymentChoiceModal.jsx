@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, CreditCard, Gift, CheckCircle, ArrowRight, Sparkles, Zap } from 'lucide-react';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const PaymentChoiceModal = ({ 
   isOpen, 
@@ -11,6 +12,7 @@ const PaymentChoiceModal = ({
   onPayIndividually,
   loading 
 }) => {
+  const { translate } = useTranslation();
   const [selectedOption, setSelectedOption] = useState(null);
 
   const handleConfirm = () => {
@@ -51,10 +53,13 @@ const PaymentChoiceModal = ({
               <div className="p-2 bg-white/20 rounded-lg">
                 <Sparkles className="w-6 h-6" />
               </div>
-              <h2 className="text-2xl font-bold">Choose Payment Method</h2>
+              <h2 className="text-2xl font-bold">{translate('choosePaymentMethod')}</h2>
             </div>
             <p className="text-blue-100 text-sm">
-              You have an active subscription with {availableReports.total} report{availableReports.total !== 1 ? 's' : ''} remaining
+              {translate('youHaveActiveSubscription', { 
+                count: availableReports.total,
+                plural: availableReports.total !== 1 ? 's' : ''
+              })}
             </p>
           </div>
 
@@ -65,7 +70,7 @@ const PaymentChoiceModal = ({
                 <CheckCircle className="w-5 h-5 text-blue-600" />
               </div>
               <div className="flex-1">
-                <p className="text-sm text-gray-500 mb-1">Selected Report</p>
+                <p className="text-sm text-gray-500 mb-1">{translate('selectedReport')}</p>
                 <h3 className="font-semibold text-gray-900 line-clamp-2">{reportTitle}</h3>
               </div>
             </div>
@@ -96,12 +101,12 @@ const PaymentChoiceModal = ({
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-gray-900 flex items-center gap-2">
-                        Use Subscription
+                        {translate('useSubscription')}
                         <span className="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-medium">
-                          Free
+                          {translate('free')}
                         </span>
                       </h3>
-                      <p className="text-sm text-gray-500">Access instantly from your plan</p>
+                      <p className="text-sm text-gray-500">{translate('accessInstantly')}</p>
                     </div>
                   </div>
                   {selectedOption === 'subscription' && (
@@ -118,21 +123,21 @@ const PaymentChoiceModal = ({
                 <div className="space-y-3 pl-14">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <Zap className="w-4 h-4 text-green-500" />
-                    <span>Instant access to report</span>
+                    <span>{translate('instantAccessToReport')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-green-500" />
-                    <span>{availableReports.premium} Premium reports remaining</span>
+                    <span>{translate('premiumReportsRemaining', { count: availableReports.premium })}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-purple-500" />
-                    <span>{availableReports.bluechip} Bluechip reports remaining</span>
+                    <span>{translate('bluechipReportsRemaining', { count: availableReports.bluechip })}</span>
                   </div>
                 </div>
 
                 <div className="mt-4 p-3 bg-green-50 rounded-lg border border-green-200">
                   <p className="text-sm text-green-700 font-medium">
-                    ✨ No additional payment required
+                    {translate('noAdditionalPayment')}
                   </p>
                 </div>
               </div>
@@ -161,9 +166,9 @@ const PaymentChoiceModal = ({
                     </div>
                     <div>
                       <h3 className="text-lg font-bold text-gray-900">
-                        Pay Individually
+                        {translate('payIndividually')}
                       </h3>
-                      <p className="text-sm text-gray-500">One-time purchase for this report</p>
+                      <p className="text-sm text-gray-500">{translate('oneTimePurchaseReport')}</p>
                     </div>
                   </div>
                   {selectedOption === 'individual' && (
@@ -180,22 +185,22 @@ const PaymentChoiceModal = ({
                 <div className="space-y-3 pl-14">
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-blue-500" />
-                    <span>Save your subscription reports</span>
+                    <span>{translate('saveSubscriptionReports')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-blue-500" />
-                    <span>Permanent access to this report</span>
+                    <span>{translate('permanentAccess')}</span>
                   </div>
                   <div className="flex items-center gap-2 text-sm text-gray-600">
                     <CheckCircle className="w-4 h-4 text-blue-500" />
-                    <span>UPI payment accepted</span>
+                    <span>{translate('upiPaymentAccepted')}</span>
                   </div>
                 </div>
 
                 <div className="mt-4 p-3 bg-orange-50 rounded-lg border border-orange-200">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-orange-700 font-medium">
-                      Amount to pay:
+                      {translate('amountToPay')}
                     </p>
                     <p className="text-lg font-bold text-orange-700">₹555</p>
                   </div>
@@ -210,7 +215,7 @@ const PaymentChoiceModal = ({
               onClick={onClose}
               className="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-xl hover:bg-gray-100 transition-colors font-semibold"
             >
-              Cancel
+              {translate('cancel')}
             </button>
             <button
               onClick={handleConfirm}
@@ -224,12 +229,12 @@ const PaymentChoiceModal = ({
               {loading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  <span>Processing...</span>
+                  <span>{translate('processing')}</span>
                 </>
               ) : (
                 <>
                   <span>
-                    {selectedOption === 'subscription' ? 'Get Report Now' : 'Proceed to Payment'}
+                    {selectedOption === 'subscription' ? translate('getReportNow') : translate('proceedToPayment')}
                   </span>
                   <ArrowRight size={18} />
                 </>
