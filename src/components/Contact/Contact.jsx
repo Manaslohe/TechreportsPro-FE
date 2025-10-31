@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Mail, Phone, CheckCircle, Send, ChevronDown, Clock, Sparkles } from "lucide-react";
 import { FaWhatsapp, FaInstagram } from "react-icons/fa";
@@ -6,6 +6,7 @@ import ReactCountryFlag from "react-country-flag";
 import { useTranslation } from "../../contexts/TranslationContext";
 import axios from "axios";
 import Toast from "../common/Toast";
+import countriesData from "world-countries"; // Import the world-countries data
 
 const Contact = () => {
   const { translate } = useTranslation();
@@ -25,6 +26,18 @@ const Contact = () => {
   const [copied, setCopied] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [countries, setCountries] = useState([]);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+
+  useEffect(() => {
+    // Transform and set country data
+    const transformedCountries = countriesData.map((country) => ({
+      name: country.name.common,
+      alpha2Code: country.cca2,
+      dialCode: country.idd.root + (country.idd.suffixes ? country.idd.suffixes[0] : ""),
+    }));
+    setCountries(transformedCountries);
+  }, []);
 
   // Animation variants
   const containerVariants = {
@@ -104,44 +117,19 @@ const Contact = () => {
     }
   };
 
-  const countryCodes = [
-    { value: '+91', label: 'IN', country: 'India' },
-    { value: '+1', label: 'US', country: 'United States' },
-    { value: '+44', label: 'GB', country: 'United Kingdom' },
-    { value: '+86', label: 'CN', country: 'China' },
-    { value: '+81', label: 'JP', country: 'Japan' },
-    { value: '+49', label: 'DE', country: 'Germany' },
-    { value: '+33', label: 'FR', country: 'France' },
-    { value: '+39', label: 'IT', country: 'Italy' },
-    { value: '+34', label: 'ES', country: 'Spain' },
-    { value: '+7', label: 'RU', country: 'Russia' },
-    { value: '+55', label: 'BR', country: 'Brazil' },
-    { value: '+52', label: 'MX', country: 'Mexico' },
-    { value: '+61', label: 'AU', country: 'Australia' },
-    { value: '+82', label: 'KR', country: 'South Korea' },
-    { value: '+90', label: 'TR', country: 'Turkey' },
-    { value: '+966', label: 'SA', country: 'Saudi Arabia' },
-    { value: '+971', label: 'AE', country: 'United Arab Emirates' },
-    { value: '+65', label: 'SG', country: 'Singapore' },
-    { value: '+60', label: 'MY', country: 'Malaysia' },
-    { value: '+66', label: 'TH', country: 'Thailand' },
-    { value: '+84', label: 'VN', country: 'Vietnam' },
-    { value: '+62', label: 'ID', country: 'Indonesia' },
-    { value: '+63', label: 'PH', country: 'Philippines' },
-    { value: '+92', label: 'PK', country: 'Pakistan' },
-    { value: '+880', label: 'BD', country: 'Bangladesh' },
-    { value: '+94', label: 'LK', country: 'Sri Lanka' },
-    { value: '+977', label: 'NP', country: 'Nepal' },
-    { value: '+27', label: 'ZA', country: 'South Africa' },
-    { value: '+20', label: 'EG', country: 'Egypt' },
-    { value: '+234', label: 'NG', country: 'Nigeria' },
-    { value: '+254', label: 'KE', country: 'Kenya' }
-  ];
-
   const handleCountrySelect = (country) => {
-    setSelectedCountry(country);
+    setSelectedCountry({
+      value: country.dialCode,
+      label: country.alpha2Code,
+      country: country.name,
+    });
     setIsDropdownOpen(false);
   };
+
+  const filteredCountries = countries.filter((country) =>
+    country.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    country.dialCode.includes(searchQuery)
+  );
 
   return (
     <div className="min-h-screen bg-blue-600 p-4 sm:p-6 lg:p-8 pt-4">
@@ -192,23 +180,23 @@ const Contact = () => {
                 </h1>
               </motion.div>
 
-              <div className="space-y-6 mb-8 lg:mb-12">
+              <div className="space-y-4 mb-8 lg:mb-12">
                 {/* Email */}
                 <motion.div 
                   variants={itemVariants}
-                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  className="flex items-start gap-3 group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all"
                   whileHover={{ x: 8 }}
                   onClick={() => handleCopy('info.marketmindsresearch@gmail.com')}
                 >
                   <motion.div 
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10"
+                    className="flex-shrink-0 w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10"
                   >
-                    <Mail className="w-6 h-6 text-white" />
+                    <Mail className="w-5 h-5 text-white" />
                   </motion.div>
                   <div className="min-w-0 flex-1">
                     <p className="text-blue-200 text-sm font-medium mb-1">{translate("emailUs")}</p>
-                    <p className="text-white font-semibold text-base lg:text-lg break-all">
+                    <p className="text-white font-semibold text-base break-all">
                       info.marketmindsresearch@gmail.com
                     </p>
                     {copied === 'info.marketmindsresearch@gmail.com' && (
@@ -227,22 +215,22 @@ const Contact = () => {
                 {/* Phone */}
                 <motion.div 
                   variants={itemVariants}
-                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  className="flex items-start gap-3 group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all"
                   whileHover={{ x: 8 }}
                   onClick={() => handleCopy('+91 7987090461')}
                 >
                   <motion.div 
                     whileHover={{ scale: 1.1, rotate: -5 }}
-                    className="flex-shrink-0 w-12 h-12 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10"
+                    className="flex-shrink-0 w-11 h-11 bg-white/10 rounded-xl flex items-center justify-center group-hover:bg-white/20 transition-all backdrop-blur-sm border border-white/10"
                   >
-                    <Phone className="w-6 h-6 text-white" />
+                    <Phone className="w-5 h-5 text-white" />
                   </motion.div>
                   <div>
                     <p className="text-blue-200 text-sm font-medium mb-1">{translate("callUs")}</p>
-                    <p className="text-white font-semibold text-base lg:text-lg">
+                    <p className="text-white font-semibold text-base">
                       +91 7987090461
                     </p>
-                    <div className="flex items-center gap-1 mt-2 text-sm text-blue-100">
+                    <div className="flex items-center gap-1 mt-1 text-xs text-blue-100">
                       <Clock className="w-3 h-3" />
                       <span>Mon-Fri 9AM-6PM IST</span>
                     </div>
@@ -262,20 +250,41 @@ const Contact = () => {
                 {/* WhatsApp */}
                 <motion.div 
                   variants={itemVariants}
-                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  className="flex items-start gap-3 group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all"
                   whileHover={{ x: 8 }}
                   onClick={() => window.open('https://wa.me/917987090461', '_blank')}
                 >
                   <motion.div 
                     whileHover={{ scale: 1.1, rotate: 5 }}
-                    className="flex-shrink-0 w-12 h-12 bg-green-500/20 rounded-xl flex items-center justify-center group-hover:bg-green-500/30 transition-all backdrop-blur-sm border border-green-300/20"
+                    className="flex-shrink-0 w-11 h-11 bg-green-500/20 rounded-xl flex items-center justify-center group-hover:bg-green-500/30 transition-all backdrop-blur-sm border border-green-300/20"
                   >
-                    <FaWhatsapp className="w-6 h-6 text-green-300" />
+                    <FaWhatsapp className="w-5 h-5 text-green-300" />
                   </motion.div>
                   <div>
                     <p className="text-blue-200 text-sm font-medium mb-1">WhatsApp</p>
-                    <p className="text-white font-semibold text-base lg:text-lg">
+                    <p className="text-white font-semibold text-base">
                       {translate("quickResponse")}
+                    </p>
+                  </div>
+                </motion.div>
+
+                {/* WhatsApp Channel */}
+                <motion.div 
+                  variants={itemVariants}
+                  className="flex items-start gap-3 group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all"
+                  whileHover={{ x: 8 }}
+                  onClick={() => window.open('https://whatsapp.com/channel/0029VbBSnwYIHphOdIpwXc1r', '_blank')}
+                >
+                  <motion.div 
+                    whileHover={{ scale: 1.1, rotate: 5 }}
+                    className="flex-shrink-0 w-11 h-11 bg-emerald-500/20 rounded-xl flex items-center justify-center group-hover:bg-emerald-500/30 transition-all backdrop-blur-sm border border-emerald-300/20"
+                  >
+                    <FaWhatsapp className="w-5 h-5 text-emerald-300" />
+                  </motion.div>
+                  <div>
+                    <p className="text-blue-200 text-sm font-medium mb-1">WhatsApp Channel</p>
+                    <p className="text-white font-semibold text-base">
+                      {translate("joinOurChannel") || "Join Our Channel"}
                     </p>
                   </div>
                 </motion.div>
@@ -283,19 +292,19 @@ const Contact = () => {
                 {/* Instagram */}
                 <motion.div 
                   variants={itemVariants}
-                  className="flex items-start gap-4 group cursor-pointer p-4 rounded-xl hover:bg-white/5 transition-all"
+                  className="flex items-start gap-3 group cursor-pointer p-3 rounded-xl hover:bg-white/5 transition-all"
                   whileHover={{ x: 8 }}
                   onClick={() => window.open('https://www.instagram.com/marketmindsresearch/', '_blank')}
                 >
                    <motion.div 
                     whileHover={{ scale: 1.1, rotate: -5 }}
-                    className="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-xl flex items-center justify-center group-hover:from-pink-500/30 group-hover:to-purple-500/30 transition-all backdrop-blur-sm border border-pink-300/20"
+                    className="flex-shrink-0 w-11 h-11 bg-gradient-to-br from-pink-500/20 to-purple-500/20 rounded-xl flex items-center justify-center group-hover:from-pink-500/30 group-hover:to-purple-500/30 transition-all backdrop-blur-sm border border-pink-300/20"
                   >
-                    <FaInstagram className="w-6 h-6 text-pink-300" />
+                    <FaInstagram className="w-5 h-5 text-pink-300" />
                   </motion.div>
                   <div>
                     <p className="text-blue-200 text-sm font-medium mb-1">Instagram</p>
-                    <p className="text-white font-semibold text-base lg:text-lg">
+                    <p className="text-white font-semibold text-base">
                       @marketmindsresearch
                     </p>
                   </div>
@@ -391,21 +400,32 @@ const Contact = () => {
                               className="absolute top-full left-0 mt-2 w-80 bg-white border border-gray-200 rounded-xl shadow-xl z-50 max-h-64 overflow-y-auto"
                             >
                               <div className="p-2">
-                                {countryCodes.map((country) => (
+                                {/* Search Bar */}
+                                <div className="mb-2">
+                                  <input
+                                    type="text"
+                                    value={searchQuery}
+                                    onChange={(e) => setSearchQuery(e.target.value)}
+                                    placeholder="Search country or code"
+                                    className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  />
+                                </div>
+                                {/* Filtered Country List */}
+                                {filteredCountries.map((country) => (
                                   <button
-                                    key={country.label}
+                                    key={country.alpha2Code}
                                     type="button"
                                     onClick={() => handleCountrySelect(country)}
                                     className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg transition-colors text-left"
                                   >
                                     <ReactCountryFlag
-                                      countryCode={country.label}
+                                      countryCode={country.alpha2Code}
                                       svg
                                       style={{ width: '20px', height: '15px' }}
                                     />
-                                    <span className="font-semibold text-gray-900 text-sm">{country.value}</span>
-                                    <span className="text-gray-500 text-sm flex-1 truncate">{country.country}</span>
-                                    {selectedCountry.label === country.label && (
+                                    <span className="font-semibold text-gray-900 text-sm">{country.dialCode}</span>
+                                    <span className="text-gray-500 text-sm flex-1 truncate">{country.name}</span>
+                                    {selectedCountry.label === country.alpha2Code && (
                                       <CheckCircle className="w-4 h-4 text-blue-600" />
                                     )}
                                   </button>

@@ -558,7 +558,7 @@ const PaymentForm = () => {
           {/* Footer with help text */}
           <div className="bg-gray-50 p-4 border-t border-gray-100">
             <p className="text-sm text-gray-600 text-center">
-              {translate('needHelp')} <a href="mailto:support@techreportspro.com" className="text-blue-600 hover:underline">support@techreportspro.com</a>
+              {translate('needHelp')} <a href="mailto:info.marketmindsresearch@gmail.com" className="text-blue-600 hover:underline">info.marketmindsresearch@gmail.com</a>
             </p>
           </div>
         </motion.div>

@@ -182,8 +182,8 @@ const PrivacyPolicy = () => {
                   <Mail className="w-5 h-5 text-blue-600" />
                   <div>
                     <p className="text-sm text-gray-600">{translate("emailUsAt")}</p>
-                    <a href="mailto:privacy@marketminds.com" className="text-blue-600 font-semibold hover:underline">
-                      privacy@marketminds.com
+                    <a href="mailto:info.marketmindsresearch@gmail.com" className="text-blue-600 font-semibold hover:underline">
+                      info.marketmindsresearch@gmail.com
                     </a>
                   </div>
                 </div>
@@ -191,9 +191,10 @@ const PrivacyPolicy = () => {
                   <Phone className="w-5 h-5 text-blue-600" />
                   <div>
                     <p className="text-sm text-gray-600">{translate("callUsAt")}</p>
-                    <a href="tel:+916264799001" className="text-blue-600 font-semibold hover:underline">
-                      +91 6264799001
+                    <a href="tel:+917987090461" className="text-blue-600 font-semibold hover:underline">
+                      +91 7987090461
                     </a>
+                    <p className="text-sm text-gray-600">{translate("callUsAt")} (Mon-Fri 9AM-6PM IST)</p>
                   </div>
                 </div>
               </div>

@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { X, User, Phone, Mail, Lock, ArrowRight, CheckCircle } from "lucide-react";
+import { X, User, Phone, Mail, Lock, ArrowRight, CheckCircle, ChevronDown } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Home/Header";
 import axios from 'axios';
 import Toast from './common/Toast';
 import { useTranslation } from "../contexts/TranslationContext";
 import TermsAndConditions from './Legal/TermsAndConditions';
+import countriesData from "world-countries"; // Import the world-countries data
+import ReactCountryFlag from "react-country-flag";
+import ReactDOM from 'react-dom'; // Import ReactDOM for portal
 
 const apiBaseUrl = import.meta.env.MODE === 'production' 
   ? import.meta.env.VITE_REACT_APP_API_BASE_URL_PRODUCTION 
@@ -32,6 +35,40 @@ export default function SignupForm() {
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [showSuccess, setShowSuccess] = useState(false);
   const [showTerms, setShowTerms] = useState(false);
+  const [countries, setCountries] = useState([]);
+  const [selectedCountry, setSelectedCountry] = useState({
+    value: '+91',
+    label: 'IN',
+    country: 'India'
+  });
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+
+  useEffect(() => {
+    // Transform and set country data
+    const transformedCountries = countriesData.map((country) => ({
+      name: country.name.common,
+      alpha2Code: country.cca2,
+      dialCode: country.idd.root + (country.idd.suffixes ? country.idd.suffixes[0] : ""),
+    }));
+    setCountries(transformedCountries);
+  }, []);
+
+  // Add: compute filtered list and a proper select handler (these were missing, causing blank page)
+  const filteredCountries = countries.filter((c) =>
+    c.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+    c.dialCode.includes(searchQuery)
+  );
+
+  const handleCountrySelect = (country) => {
+    setSelectedCountry({
+      value: country.dialCode,
+      label: country.alpha2Code,
+      country: country.name,
+    });
+    setIsDropdownOpen(false);
+    setSearchQuery("");
+  };
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -163,20 +200,87 @@ export default function SignupForm() {
                 <label className="block text-sm font-medium text-black mb-2">
                   {translate("phoneNumber")}
                 </label>
-                <div className="flex">
-                  <div className="flex items-center px-3 bg-gray-50 border border-gray-300 rounded-l-lg border-r-0">
-                    <Phone className="h-4 w-4 text-gray-400 mr-2" />
-                    <span className="text-black font-medium">+91</span>
+                <div className="relative">
+                  <div className="flex items-stretch bg-gray-50 border border-gray-300 rounded-lg hover:border-gray-400 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all">
+                    <div className="relative">
+                      <button
+                        type="button"
+                        onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                        className="flex items-center gap-2 px-4 py-3 hover:bg-gray-100/50 rounded-l-lg transition-colors border-r border-gray-300"
+                      >
+                        <ReactCountryFlag
+                          countryCode={selectedCountry.label}
+                          svg
+                          style={{ width: '20px', height: '15px', borderRadius: '2px' }}
+                        />
+                        <span className="font-semibold text-gray-700 text-sm">
+                          {selectedCountry.value}
+                        </span>
+                        {/* Ensure arrow is visible and never shrinks */}
+                        <ChevronDown className={`ml-1 w-4 h-4 text-gray-500 shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                      </button>
+
+                      {isDropdownOpen && ReactDOM.createPortal(
+                        <>
+                          <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                          <motion.div
+                            initial={{ opacity: 0, y: -10 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            className="fixed z-50 w-80 bg-white border border-gray-300 rounded-lg shadow-xl max-h-64 overflow-y-auto"
+                            style={{
+                              top: '50%',
+                              left: '50%',
+                              transform: 'translate(-50%, -50%)'
+                            }}
+                          >
+                            <div className="p-2">
+                              {/* Search Bar */}
+                              <div className="mb-2">
+                                <input
+                                  type="text"
+                                  value={searchQuery}
+                                  onChange={(e) => setSearchQuery(e.target.value)}
+                                  placeholder="Search country or code"
+                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                />
+                              </div>
+                              {/* Filtered Country List */}
+                              {filteredCountries.map((country) => (
+                                <button
+                                  key={country.alpha2Code}
+                                  type="button"
+                                  onClick={() => handleCountrySelect(country)}
+                                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg transition-colors text-left"
+                                >
+                                  <ReactCountryFlag
+                                    countryCode={country.alpha2Code}
+                                    svg
+                                    style={{ width: '20px', height: '15px' }}
+                                  />
+                                  <span className="font-semibold text-gray-900 text-sm">{country.dialCode}</span>
+                                  <span className="text-gray-500 text-sm flex-1 truncate">{country.name}</span>
+                                  {selectedCountry.label === country.alpha2Code && (
+                                    <CheckCircle className="w-4 h-4 text-blue-600" />
+                                  )}
+                                </button>
+                              ))}
+                            </div>
+                          </motion.div>
+                        </>,
+                        document.body
+                      )}
+                    </div>
+                    <input
+                      type="tel"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleInputChange}
+                      className="flex-1 px-4 py-3 bg-transparent border-none rounded-r-lg text-gray-900 placeholder-gray-400 focus:outline-none"
+                      placeholder="000-000-0000"
+                      maxLength="15"
+                      required
+                    />
                   </div>
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleInputChange}
-                    className="flex-1 xl:w-35 px-4 py-3 rounded-r-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
-                    placeholder="000-000-0000"
-                    required
-                  />
                 </div>
               </div>
               <div className="sm:col-span-1">
