@@ -85,7 +85,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                 </div>
                 {type === 'paid' && (
                   <div className="text-right flex-shrink-0">
-                    <div className="text-2xl font-bold text-gray-900">₹{report.price || 500}</div>
+                    <div className="text-2xl font-bold text-gray-900">₹{report.price || 555}</div>
                     <div className="text-xs text-gray-500 font-medium">{translate('oneTime')}</div>
                   </div>
                 )}
@@ -179,7 +179,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
           </div>
           {type === 'paid' && (
             <div className="text-right flex-shrink-0 ml-3">
-              <div className="text-xl lg:text-2xl font-bold text-gray-900">₹{report.price || 500}</div>
+              <div className="text-xl lg:text-2xl font-bold text-gray-900">₹{report.price || 555}</div>
               <div className="text-xs text-gray-500 font-medium">{translate('oneTime')}</div>
             </div>
           )}

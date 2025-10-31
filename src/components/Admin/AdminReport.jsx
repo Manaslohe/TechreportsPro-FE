@@ -93,7 +93,8 @@ const AdminReport = () => {
             console.error('Invalid report ID for preview');
             return;
         }
-        const url = `${axios.defaults.baseURL || ''}/api/reports/${reportId}/pdf`;
+        const token = localStorage.getItem('authToken');
+        const url = `${axios.defaults.baseURL || ''}/api/reports/${reportId}/pdf?token=${encodeURIComponent(token)}`;
         setPreviewFileUrl(url);
         setPreviewReport({
             id: reportId,

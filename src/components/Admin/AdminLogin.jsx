@@ -24,7 +24,9 @@ const AdminLogin = () => {
       (username === 'manas' && password === 'manas123') ||
       (username === 'marketsmind@555' && password === 'Kuber@55555')
     ) {
+      // Set admin auth token with a simple identifier
       localStorage.setItem('adminAuth', 'true');
+      localStorage.setItem('adminToken', 'admin-authenticated'); // Add this line
       navigate('/admin/dashboard');
     } else {
       setError('Invalid username or password');
