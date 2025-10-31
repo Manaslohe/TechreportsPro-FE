@@ -382,7 +382,7 @@ const PaymentForm = () => {
                     {!qrImageError ? (
                       <img 
                         src="/QR.jpeg" 
-                        alt="Payment QR Code" 
+                        alt="if you see this text, then please reload the page once again." 
                         className="w-full max-w-[220px] h-auto"
                         onError={() => setQrImageError(true)}
                         style={{ 
