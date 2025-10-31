@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Lock, User, CheckCircle } from "lucide-react";
+import { Mail, Lock, User, CheckCircle, ArrowRight } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Home/Header";
 import axios from 'axios';
@@ -46,7 +46,7 @@ export default function SignInForm() {
     e.preventDefault();
     setIsLoading(true);
     try {
-        const response = await axios.post(`${apiBaseUrl}/api/users/signin`, { // Corrected route
+        const response = await axios.post(`${apiBaseUrl}/api/users/signin`, {
             email: formData.email,
             password: formData.password,
         });
@@ -144,21 +144,22 @@ export default function SignInForm() {
             duration: 0.6,
             delay: 0.2
           }}
-          className="max-w-5xl w-full mx-auto bg-white rounded-2xl shadow-xl border border-gray-200 flex overflow-hidden relative min-h-[450px] z-10 mt-4"
+          className="max-w-6xl w-full mx-auto bg-white rounded-3xl shadow-2xl border border-gray-200 flex overflow-hidden relative z-10 mt-4"
+          style={{ height: '600px', maxHeight: '90vh' }}
         >
           {/* Left Column - Form */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="w-full lg:w-1/2 p-6 bg-white flex items-center"
+            className="w-full lg:w-1/2 p-8 lg:p-12 bg-white flex flex-col"
           >
-            <div className="w-full max-w-sm mx-auto">
+            <div className="w-full max-w-md mx-auto h-full flex flex-col justify-center">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="text-center mb-6"
+                className="text-center mb-10"
               >
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
@@ -169,15 +170,15 @@ export default function SignInForm() {
                     damping: 20,
                     delay: 0.7 
                   }}
-                  className="w-10 h-10 mx-auto mb-3 bg-blue-600 rounded-lg flex items-center justify-center"
+                  className="w-14 h-14 mx-auto mb-4 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg"
                 >
-                  <User className="w-5 h-5 text-white" />
+                  <User className="w-7 h-7 text-white" />
                 </motion.div>
                 <motion.h2 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.8 }}
-                  className="text-xl font-bold text-black mb-1"
+                  className="text-3xl font-bold text-gray-900 mb-2"
                 >
                   {translate("welcomeBack")}
                 </motion.h2>
@@ -185,7 +186,7 @@ export default function SignInForm() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.9 }}
-                  className="text-gray-600 text-xs"
+                  className="text-gray-500 text-sm"
                 >
                   {translate("signinDescription")}
                 </motion.p>
@@ -196,25 +197,25 @@ export default function SignInForm() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 1.1 }}
                 onSubmit={handleSubmit} 
-                className="space-y-4"
+                className="space-y-6"
               >
-                <div className="space-y-4">
+                <div className="space-y-5">
                   <motion.div
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 1.3 }}
                   >
-                    <label className="block text-xs font-medium text-black mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       {translate("email")}
                     </label>
                     <div className="relative">
-                      <Mail className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                      <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <input
                         type="email"
                         name="email"
                         value={formData.email}
                         onChange={handleInputChange}
-                        className="pl-8 w-full px-3 py-2.5 text-sm rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                        className="pl-11 w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                         placeholder="john@example.com"
                         required
                       />
@@ -226,17 +227,17 @@ export default function SignInForm() {
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 1.4 }}
                   >
-                    <label className="block text-xs font-medium text-black mb-1.5">
+                    <label className="block text-sm font-semibold text-gray-700 mb-2">
                       {translate("password")}
                     </label>
                     <div className="relative">
-                      <Lock className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-400" />
+                      <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
                       <input
                         type="password"
                         name="password"
                         value={formData.password}
                         onChange={handleInputChange}
-                        className="pl-8 w-full px-3 py-2.5 text-sm rounded-md border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition"
+                        className="pl-11 w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
                         placeholder="••••••••"
                         required
                       />
@@ -247,15 +248,15 @@ export default function SignInForm() {
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.4, delay: 1.5 }}
-                    className="flex items-center justify-between pt-1"
+                    className="flex items-center justify-between"
                   >
-                    <label className="flex items-center text-xs text-gray-600">
+                    <label className="flex items-center text-sm text-gray-600 cursor-pointer">
                       <input
                         type="checkbox"
                         name="rememberMe"
                         checked={formData.rememberMe}
                         onChange={handleInputChange}
-                        className="mr-2 h-3 w-3 rounded border-gray-300 focus:ring-2 focus:ring-blue-500"
+                        className="mr-2 w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
                       />
                       {translate("rememberMe")}
                     </label>
@@ -270,19 +271,22 @@ export default function SignInForm() {
                   whileTap={{ scale: 0.98 }}
                   type="submit"
                   disabled={isLoading}
-                  className="w-full px-4 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-all duration-200 text-sm font-medium shadow-sm hover:shadow-md disabled:opacity-50 disabled:cursor-not-allowed mt-6"
+                  className="w-full h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 font-semibold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                 >
                   {isLoading ? (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
-                      className="flex items-center justify-center space-x-2"
+                      className="flex items-center justify-center gap-2"
                     >
-                      <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                       <span>{translate("signingIn")}</span>
                     </motion.div>
                   ) : (
-                    translate("signin")
+                    <>
+                      <span>{translate("signin")}</span>
+                      <ArrowRight className="w-5 h-5" />
+                    </>
                   )}
                 </motion.button>
               </motion.form>
@@ -291,21 +295,22 @@ export default function SignInForm() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 1.8 }}
-                className="text-center mt-4 pt-4 border-t border-gray-100"
+                className="text-center mt-6 pt-6 border-t-2 border-gray-100"
               >
                 <motion.p 
-                  className="text-xs text-gray-600"
+                  className="text-sm text-gray-600"
                   whileHover={{ scale: 1.02 }}
                 >
                   {translate("dontHaveAccount")}{" "}
                   <motion.a
                     href="/signup"
                     onClick={handleSignUpClick}
-                    className="text-blue-600 hover:text-blue-700 font-medium inline-block"
-                    whileHover={{ x: 2 }}
+                    className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1"
+                    whileHover={{ x: 3 }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    {translate("signupHere")} →
+                    {translate("signupHere")}
+                    <ArrowRight className="w-4 h-4" />
                   </motion.a>
                 </motion.p>
               </motion.div>
@@ -317,11 +322,11 @@ export default function SignInForm() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="hidden lg:block w-1/2 bg-gradient-to-br from-blue-50 to-indigo-50 p-6 relative overflow-hidden"
+            className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-50 to-indigo-50 p-10 relative overflow-hidden"
           >
-            <div className="h-full flex items-center justify-center relative z-10">
+            <div className="h-full w-full flex flex-col items-center justify-center relative z-10">
               <motion.div
-                initial={{ opacity: 0, scale: 0.8, y: 20 }}
+                initial={{ opacity: 0, scale: 0.8, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
                 transition={{ 
                   type: "spring",
@@ -330,59 +335,68 @@ export default function SignInForm() {
                   delay: 0.8,
                   duration: 0.8 
                 }}
-                className="text-center"
+                className="w-full max-w-lg"
               >
                 <motion.img
-                  initial={{ opacity: 0, y: 15 }}
+                  initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.6, delay: 1.2 }}
                   src="/signin.png"
                   alt="Welcome back to our platform"
-                  className="w-full max-w-xs object-contain mb-4 drop-shadow-lg"
+                  className="w-[70%] max-w-sm mx-auto object-contain -mb-5 drop-shadow-2xl"
                 />
                 <motion.div 
-                  initial={{ opacity: 0, y: 10 }}
+                  initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 1.4 }}
-                  className="space-y-2"
+                  className="space-y-5 text-center"
                 >
-                  <h3 className="text-lg font-bold text-black">{translate("welcomeBackTitle")}</h3>
-                  <p className="text-gray-700 max-w-xs mx-auto text-xs leading-relaxed">
-                    {translate("accessDashboard")}
+                  <h3 className="text-2xl font-bold text-gray-900 leading-tight">
+                    Welcome Back to <span className="text-blue-600">MarketMinds</span>
+                  </h3>
+                  <p className="text-gray-600 text-base max-w-lg mx-auto leading-relaxed px-4">
+                    Access your dashboard and continue your investment research journey.
                   </p>
                   <motion.div 
-                    initial={{ opacity: 0, y: 8 }}
+                    initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.6 }}
-                    className="flex justify-center gap-2 mt-4"
+                    className="flex justify-center gap-6 mt-10 px-4"
                   >
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: 1.7 }}
-                      className="bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm border border-white/40"
+                      className="flex-1 max-w-[180px]"
                     >
-                      <CheckCircle className="w-4 h-4 text-blue-600 mx-auto mb-1" />
-                      <p className="text-xs font-medium text-black">{translate("secure")}</p>
+                      <div className="bg-white rounded-2xl p-5 shadow-xl border-2 border-blue-100 hover:shadow-2xl transition-shadow">
+                        <div className="w-10 h-10 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center">
+                          <CheckCircle className="w-7 h-7 text-blue-600" />
+                        </div>
+                        <p className="text-base font-bold text-gray-900">{translate("secure")}</p>
+                      </div>
                     </motion.div>
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: 1.8 }}
-                      className="bg-white/80 backdrop-blur-sm rounded-lg px-3 py-2 shadow-sm border border-white/40"
+                      className="flex-1 max-w-[180px]"
                     >
-                      <CheckCircle className="w-4 h-4 text-blue-600 mx-auto mb-1" />
-                      <p className="text-xs font-medium text-black">{translate("fast")}</p>
+                      <div className="bg-white rounded-2xl p-5 shadow-xl border-2 border-blue-100 hover:shadow-2xl transition-shadow">
+                        <div className="w-10 h-10 mx-auto mb-3 bg-blue-100 rounded-xl flex items-center justify-center">
+                          <CheckCircle className="w-7 h-7 text-blue-600" />
+                        </div>
+                        <p className="text-base font-bold text-gray-900">{translate("fast")}</p>
+                      </div>
                     </motion.div>
                   </motion.div>
                 </motion.div>
               </motion.div>
             </div>
             
-            {/* Subtle background pattern */}
-            <div className="absolute inset-0 opacity-5">
-              <div className="absolute inset-0 bg-gradient-to-r from-blue-600/20 to-indigo-600/20" />
-            </div>
+            {/* Decorative elements */}
+            <div className="absolute top-10 right-10 w-32 h-32 bg-blue-200 rounded-full opacity-20 blur-3xl"></div>
+            <div className="absolute bottom-10 left-10 w-40 h-40 bg-indigo-200 rounded-full opacity-20 blur-3xl"></div>
           </motion.div>
         </motion.div>
       </div>
