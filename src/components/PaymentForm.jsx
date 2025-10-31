@@ -378,43 +378,33 @@ const PaymentForm = () => {
               <div className="flex flex-col md:flex-row md:items-center gap-6 p-2">
                 {/* QR Code Section */}
                 <div className="flex-1 flex justify-center">
-                  <div className="relative group">
-                    <div className="bg-white p-4 rounded-xl border-2 border-gray-200 shadow-lg">
-                      {!qrImageError ? (
-                        <img 
-                          src="/QR.jpeg" 
-                          alt="Payment QR Code" 
-                          className="w-full max-w-[220px] h-auto object-contain cursor-pointer"
-                          onClick={isMobile ? openUpiApp : undefined}
-                          onError={() => setQrImageError(true)}
-                          loading="eager"
-                          style={{ 
-                            display: 'block',
-                            minHeight: '220px',
-                            backgroundColor: '#f3f4f6'
-                          }}
-                        />
-                      ) : (
-                        <div className="w-[220px] h-[220px] flex flex-col items-center justify-center bg-gray-100 rounded-lg">
-                          <QrCode className="w-16 h-16 text-gray-400 mb-3" />
-                          <p className="text-sm text-gray-600 text-center px-4">
-                            {translate('qrCodeUnavailable')}
-                          </p>
-                          <button
-                            onClick={openUpiApp}
-                            className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                          >
-                            {translate('payDirectly')}
-                          </button>
-                        </div>
-                      )}
-                    </div>
-                    {isMobile && !qrImageError && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-xl pointer-events-none">
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 text-white text-sm py-2 px-4 rounded-full shadow-lg flex items-center gap-2">
-                          <Smartphone size={16} />
-                          {translate('tapToPay')}
-                        </span>
+                  <div className="bg-white p-4 rounded-xl border-2 border-gray-200 shadow-lg">
+                    {!qrImageError ? (
+                      <img 
+                        src="/QR.jpeg" 
+                        alt="Payment QR Code" 
+                        className="w-full max-w-[220px] h-auto"
+                        onError={() => setQrImageError(true)}
+                        style={{ 
+                          display: 'block',
+                          width: '220px',
+                          height: 'auto',
+                          objectFit: 'contain'
+                        }}
+                      />
+                    ) : (
+                      <div className="w-[220px] h-[220px] flex flex-col items-center justify-center bg-gray-100 rounded-lg">
+                        <QrCode className="w-16 h-16 text-gray-400 mb-3" />
+                        <p className="text-sm text-gray-600 text-center px-4 mb-3">
+                          QR Code unavailable
+                        </p>
+                        <button
+                          type="button"
+                          onClick={openUpiApp}
+                          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Pay with UPI App
+                        </button>
                       </div>
                     )}
                   </div>
@@ -438,6 +428,7 @@ const PaymentForm = () => {
                             {UPI_ID}
                           </code>
                           <button 
+                            type="button"
                             onClick={copyUpiId}
                             className="p-1.5 hover:bg-gray-200 rounded-full transition-colors"
                             title={translate('copyUpiId')}
@@ -453,6 +444,7 @@ const PaymentForm = () => {
                     
                     {isMobile && (
                       <button 
+                        type="button"
                         onClick={openUpiApp}
                         className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
@@ -477,6 +469,7 @@ const PaymentForm = () => {
                   {/* Mobile-optimized button */}
                   <div className="pt-2 sm:pt-4">
                     <button 
+                      type="button"
                       onClick={toggleViewMode}
                       className="w-full py-3.5 sm:py-3 bg-blue-600 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2 hover:bg-blue-700 shadow-sm text-sm sm:text-base"
                     >
