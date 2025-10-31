@@ -42,7 +42,8 @@ export default function SignupForm() {
     country: 'India'
   });
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState(""); // State for search query
+  const [searchQuery, setSearchQuery] = useState("");
+  const [dropdownButtonRef, setDropdownButtonRef] = useState(null);
 
   useEffect(() => {
     // Transform and set country data
@@ -220,66 +221,70 @@ export default function SignupForm() {
                         <ChevronDown className={`ml-1 w-4 h-4 text-gray-500 shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
                       </button>
 
-                      {isDropdownOpen && ReactDOM.createPortal(
+                      {isDropdownOpen && (
                         <>
-                          <div className="fixed inset-0 z-40" onClick={() => setIsDropdownOpen(false)} />
+                          <div 
+                            className="fixed inset-0 z-40" 
+                            onClick={() => setIsDropdownOpen(false)} 
+                          />
                           <motion.div
-                            initial={{ opacity: 0, y: -10 }}
-                            animate={{ opacity: 1, y: 0 }}
-                            className="fixed z-50 w-80 bg-white border border-gray-300 rounded-lg shadow-xl max-h-64 overflow-y-auto"
-                            style={{
-                              top: '50%',
-                              left: '50%',
-                              transform: 'translate(-50%, -50%)'
-                            }}
+                            initial={{ opacity: 0, scale: 0.95 }}
+                            animate={{ opacity: 1, scale: 1 }}
+                            exit={{ opacity: 0, scale: 0.95 }}
+                            transition={{ duration: 0.15 }}
+                            className="absolute left-0 top-full mt-2 w-80 bg-white border-2 border-gray-300 rounded-xl shadow-2xl max-h-72 overflow-hidden z-50"
                           >
-                            <div className="p-2">
-                              {/* Search Bar */}
-                              <div className="mb-2">
+                            <div className="p-3">
+                              <div className="mb-2 sticky top-0 bg-white z-10">
                                 <input
                                   type="text"
                                   value={searchQuery}
                                   onChange={(e) => setSearchQuery(e.target.value)}
                                   placeholder="Search country or code"
-                                  className="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                  autoFocus
                                 />
                               </div>
-                              {/* Filtered Country List */}
-                              {filteredCountries.map((country) => (
-                                <button
-                                  key={country.alpha2Code}
-                                  type="button"
-                                  onClick={() => handleCountrySelect(country)}
-                                  className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg transition-colors text-left"
-                                >
-                                  <ReactCountryFlag
-                                    countryCode={country.alpha2Code}
-                                    svg
-                                    style={{ width: '20px', height: '15px' }}
-                                  />
-                                  <span className="font-semibold text-gray-900 text-sm">{country.dialCode}</span>
-                                  <span className="text-gray-500 text-sm flex-1 truncate">{country.name}</span>
-                                  {selectedCountry.label === country.alpha2Code && (
-                                    <CheckCircle className="w-4 h-4 text-blue-600" />
-                                  )}
-                                </button>
-                              ))}
+                              <div className="space-y-1 max-h-56 overflow-y-auto">
+                                {filteredCountries.map((country) => (
+                                  <button
+                                    key={country.alpha2Code}
+                                    type="button"
+                                    onClick={() => handleCountrySelect(country)}
+                                    className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg transition-colors text-left"
+                                  >
+                                    <ReactCountryFlag
+                                      countryCode={country.alpha2Code}
+                                      svg
+                                      style={{ width: '22px', height: '16px' }}
+                                    />
+                                    <span className="font-semibold text-gray-900 text-sm min-w-[60px]">{country.dialCode}</span>
+                                    <span className="text-gray-500 text-sm flex-1 truncate">{country.name}</span>
+                                    {selectedCountry.label === country.alpha2Code && (
+                                      <CheckCircle className="w-4 h-4 text-blue-600 shrink-0" />
+                                    )}
+                                  </button>
+                                ))}
+                              </div>
                             </div>
                           </motion.div>
-                        </>,
-                        document.body
+                        </>
                       )}
                     </div>
-                    <input
-                      type="tel"
-                      name="phone"
-                      value={formData.phone}
-                      onChange={handleInputChange}
-                      className="flex-1 px-4 py-3 bg-transparent border-none rounded-r-lg text-gray-900 placeholder-gray-400 focus:outline-none"
-                      placeholder="000-000-0000"
-                      maxLength="15"
-                      required
-                    />
+                    
+                    <div className="relative flex-1">
+                      <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={formData.phone}
+                        onChange={handleInputChange}
+                        className="w-full h-full px-4 pl-11 bg-transparent border-none rounded-r-xl text-gray-900 placeholder-gray-400 focus:outline-none"
+                        placeholder="000-000-0000"
+                        maxLength="15"
+                        required
+                      />
+                    </div>
                   </div>
                 </div>
               </div>
@@ -484,21 +489,22 @@ export default function SignupForm() {
             duration: 0.6,
             delay: 0.2
           }}
-          className="max-w-6xl w-full mx-auto bg-white rounded-3xl shadow-2xl border border-gray-200 flex overflow-hidden relative min-h-[500px] z-10 mt-4"
+          className="max-w-6xl w-full mx-auto bg-white rounded-3xl shadow-2xl border border-gray-200 flex overflow-hidden relative z-10 mt-4"
+          style={{ height: '680px', maxHeight: '90vh' }}
         >
           {/* Left Column - Form */}
           <motion.div 
             initial={{ opacity: 0, x: -30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.4 }}
-            className="w-full lg:w-1/2 p-8 bg-white"
+            className="w-full lg:w-1/2 p-8 lg:p-12 bg-white flex flex-col"
           >
-            <div className="max-w-md mx-auto">
+            <div className="max-w-md mx-auto w-full h-full flex flex-col">
               <motion.div 
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.6 }}
-                className="text-center mb-6"
+                className="text-center mb-8"
               >
                 <motion.div
                   initial={{ scale: 0, rotate: -180 }}
@@ -509,15 +515,15 @@ export default function SignupForm() {
                     damping: 20,
                     delay: 0.7 
                   }}
-                  className="w-12 h-12 mx-auto mb-3 bg-blue-600 rounded-xl flex items-center justify-center"
+                  className="w-14 h-14 mx-auto mb-3 bg-gradient-to-br from-blue-600 to-blue-700 rounded-2xl flex items-center justify-center shadow-lg"
                 >
-                  <User className="w-6 h-6 text-white" />
+                  <User className="w-7 h-7 text-white" />
                 </motion.div>
                 <motion.h2 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 0.8 }}
-                  className="text-2xl font-bold text-black mb-1"
+                  className="text-3xl font-bold text-gray-900 mb-2"
                 >
                   {step === 1 && translate("createAccount")}
                   {step === 2 && translate("secureAccount")}
@@ -526,7 +532,7 @@ export default function SignupForm() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ duration: 0.4, delay: 0.9 }}
-                  className="text-gray-600 text-sm mb-2"
+                  className="text-gray-500 text-sm"
                 >
                   {translate("stepOf", { current: step, total: 2 })}
                 </motion.p>
@@ -534,19 +540,19 @@ export default function SignupForm() {
                   initial={{ opacity: 0, scaleX: 0 }}
                   animate={{ opacity: 1, scaleX: 1 }}
                   transition={{ duration: 0.6, delay: 1 }}
-                  className="flex justify-center space-x-2 mb-6"
+                  className="flex justify-center space-x-2 mt-4"
                 >
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: 24 }}
+                    animate={{ width: 40 }}
                     transition={{ duration: 0.4, delay: 1.1 }}
-                    className={`h-1.5 rounded-full transition-colors duration-300 ${step >= 1 ? 'bg-blue-600' : 'bg-gray-200'}`}
+                    className={`h-2 rounded-full transition-all duration-300 ${step >= 1 ? 'bg-blue-600' : 'bg-gray-200'}`}
                   />
                   <motion.div 
                     initial={{ width: 0 }}
-                    animate={{ width: 24 }}
+                    animate={{ width: 40 }}
                     transition={{ duration: 0.4, delay: 1.2 }}
-                    className={`h-1.5 rounded-full transition-colors duration-300 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}
+                    className={`h-2 rounded-full transition-all duration-300 ${step >= 2 ? 'bg-blue-600' : 'bg-gray-200'}`}
                   />
                 </motion.div>
               </motion.div>
@@ -557,16 +563,251 @@ export default function SignupForm() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 1.3 }}
                 onSubmit={handleSubmit} 
-                className="space-y-6"
+                className="flex-1 flex flex-col justify-between"
               >
-                {renderStepContent()}
+                <AnimatePresence mode="wait" custom={step}>
+                  <motion.div
+                    key={step}
+                    custom={step}
+                    variants={slideVariants}
+                    initial="enter"
+                    animate="center"
+                    exit="exit"
+                    transition={{ type: "spring", stiffness: 300, damping: 30 }}
+                    className="w-full"
+                  >
+                    {step === 1 && (
+                      <div className="space-y-5">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              {translate("firstName")}
+                            </label>
+                            <div className="relative">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                              <input
+                                type="text"
+                                name="firstName"
+                                value={formData.firstName}
+                                onChange={handleInputChange}
+                                className="pl-11 w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
+                                placeholder="John"
+                                required
+                              />
+                            </div>
+                          </div>
+                          <div>
+                            <label className="block text-sm font-semibold text-gray-700 mb-2">
+                              {translate("lastName")}
+                            </label>
+                            <div className="relative">
+                              <User className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                              <input
+                                type="text"
+                                name="lastName"
+                                value={formData.lastName}
+                                onChange={handleInputChange}
+                                className="pl-11 w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
+                                placeholder="Doe"
+                                required
+                              />
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            {translate("phoneNumber")}
+                          </label>
+                          <div className="relative">
+                            <div className="flex items-stretch bg-white border-2 border-gray-200 rounded-xl hover:border-gray-300 focus-within:ring-2 focus-within:ring-blue-500 focus-within:border-blue-500 transition-all h-12">
+                              <div className="relative">
+                                <button
+                                  ref={setDropdownButtonRef}
+                                  type="button"
+                                  onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+                                  className="flex items-center gap-2 px-4 h-full hover:bg-gray-50 rounded-l-xl transition-colors border-r-2 border-gray-200"
+                                >
+                                  <ReactCountryFlag
+                                    countryCode={selectedCountry.label}
+                                    svg
+                                    style={{ width: '22px', height: '16px', borderRadius: '2px' }}
+                                  />
+                                  <span className="font-semibold text-gray-700 text-sm">
+                                    {selectedCountry.value}
+                                  </span>
+                                  <ChevronDown className={`w-4 h-4 text-gray-500 shrink-0 transition-transform ${isDropdownOpen ? 'rotate-180' : ''}`} />
+                                </button>
+
+                                {isDropdownOpen && (
+                                  <>
+                                    <div 
+                                      className="fixed inset-0 z-40" 
+                                      onClick={() => setIsDropdownOpen(false)} 
+                                    />
+                                    <motion.div
+                                      initial={{ opacity: 0, scale: 0.95 }}
+                                      animate={{ opacity: 1, scale: 1 }}
+                                      exit={{ opacity: 0, scale: 0.95 }}
+                                      transition={{ duration: 0.15 }}
+                                      className="absolute left-0 top-full mt-2 w-80 bg-white border-2 border-gray-300 rounded-xl shadow-2xl max-h-72 overflow-hidden z-50"
+                                    >
+                                      <div className="p-3">
+                                        <div className="mb-2 sticky top-0 bg-white z-10">
+                                          <input
+                                            type="text"
+                                            value={searchQuery}
+                                            onChange={(e) => setSearchQuery(e.target.value)}
+                                            placeholder="Search country or code"
+                                            className="w-full px-4 py-2.5 border-2 border-gray-200 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                                            autoFocus
+                                          />
+                                        </div>
+                                        <div className="space-y-1 max-h-56 overflow-y-auto">
+                                          {filteredCountries.map((country) => (
+                                            <button
+                                              key={country.alpha2Code}
+                                              type="button"
+                                              onClick={() => handleCountrySelect(country)}
+                                              className="w-full flex items-center gap-3 px-3 py-2.5 hover:bg-blue-50 rounded-lg transition-colors text-left"
+                                            >
+                                              <ReactCountryFlag
+                                                countryCode={country.alpha2Code}
+                                                svg
+                                                style={{ width: '22px', height: '16px' }}
+                                              />
+                                              <span className="font-semibold text-gray-900 text-sm min-w-[60px]">{country.dialCode}</span>
+                                              <span className="text-gray-500 text-sm flex-1 truncate">{country.name}</span>
+                                              {selectedCountry.label === country.alpha2Code && (
+                                                <CheckCircle className="w-4 h-4 text-blue-600 shrink-0" />
+                                              )}
+                                            </button>
+                                          ))}
+                                        </div>
+                                      </div>
+                                    </motion.div>
+                                  </>
+                                )}
+                              </div>
+                              
+                              <div className="relative flex-1">
+                                <Phone className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400 pointer-events-none" />
+                                <input
+                                  type="tel"
+                                  name="phone"
+                                  value={formData.phone}
+                                  onChange={handleInputChange}
+                                  className="w-full h-full px-4 pl-11 bg-transparent border-none rounded-r-xl text-gray-900 placeholder-gray-400 focus:outline-none"
+                                  placeholder="000-000-0000"
+                                  maxLength="15"
+                                  required
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            {translate("email")}
+                          </label>
+                          <div className="relative">
+                            <Mail className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <input
+                              type="email"
+                              name="email"
+                              value={formData.email}
+                              onChange={handleInputChange}
+                              className="pl-11 w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
+                              placeholder="john@example.com"
+                              required
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {step === 2 && (
+                      <div className="space-y-5">
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            {translate("password")}
+                          </label>
+                          <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <input
+                              type="password"
+                              name="password"
+                              value={formData.password}
+                              onChange={handleInputChange}
+                              className="pl-11 w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
+                              placeholder="••••••••"
+                              required
+                            />
+                          </div>
+                        </div>
+
+                        <div>
+                          <label className="block text-sm font-semibold text-gray-700 mb-2">
+                            {translate("confirmPassword")}
+                          </label>
+                          <div className="relative">
+                            <Lock className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-gray-400" />
+                            <input
+                              type="password"
+                              name="confirmPassword"
+                              value={formData.confirmPassword}
+                              onChange={handleInputChange}
+                              className="pl-11 w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-gray-900 placeholder-gray-400"
+                              placeholder="••••••••"
+                              required
+                            />
+                          </div>
+                          {!passwordMatch && (
+                            <motion.p 
+                              initial={{ opacity: 0, y: -10 }}
+                              animate={{ opacity: 1, y: 0 }}
+                              className="text-red-500 text-sm mt-2 flex items-center gap-2"
+                            >
+                              <X className="w-4 h-4" />
+                              {translate("passwordsDoNotMatch")}
+                            </motion.p>
+                          )}
+                        </div>
+
+                        <div className="bg-blue-50 border-2 border-blue-200 rounded-xl p-4">
+                          <label className="flex items-start text-sm text-gray-700 cursor-pointer">
+                            <input
+                              type="checkbox"
+                              name="termsAccepted"
+                              checked={formData.termsAccepted}
+                              onChange={handleInputChange}
+                              className="mt-0.5 mr-3 w-5 h-5 rounded border-gray-300 text-blue-600 focus:ring-2 focus:ring-blue-500"
+                              required
+                            />
+                            <span>
+                              {translate("agreeToTerms")}{" "}
+                              <button
+                                type="button"
+                                onClick={() => setShowTerms(true)}
+                                className="text-blue-600 hover:text-blue-700 hover:underline font-semibold"
+                              >
+                                {translate("termsAndConditions")}
+                              </button>
+                            </span>
+                          </label>
+                        </div>
+                      </div>
+                    )}
+                  </motion.div>
+                </AnimatePresence>
                 
                 {/* Navigation buttons */}
                 <motion.div 
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.4, delay: 1.5 }}
-                  className="flex justify-between pt-6"
+                  className="flex justify-between gap-4 pt-6"
                 >
                   {step > 1 && (
                     <motion.button
@@ -574,7 +815,7 @@ export default function SignupForm() {
                       whileTap={{ scale: 0.98 }}
                       type="button"
                       onClick={handleBack}
-                      className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-black rounded-lg transition-all duration-200 text-sm font-medium shadow-md hover:shadow-lg border border-gray-200"
+                      className="px-6 h-12 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-xl transition-all duration-200 font-semibold shadow-sm hover:shadow-md border-2 border-gray-200"
                     >
                       {translate("back")}
                     </motion.button>
@@ -586,10 +827,10 @@ export default function SignupForm() {
                       type="button"
                       onClick={handleNext}
                       disabled={!validateStep()}
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium ml-auto shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center space-x-2"
+                      className="px-8 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 font-semibold ml-auto shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                     >
                       <span>{translate("continue")}</span>
-                      <ArrowRight className="w-4 h-4" />
+                      <ArrowRight className="w-5 h-5" />
                     </motion.button>
                   ) : (
                     <motion.button
@@ -597,21 +838,21 @@ export default function SignupForm() {
                       whileTap={{ scale: 0.98 }}
                       type="submit"
                       disabled={isLoading || !formData.termsAccepted}
-                      className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-all duration-200 text-sm font-medium ml-auto relative shadow-md hover:shadow-lg disabled:opacity-50 disabled:cursor-not-allowed"
+                      className="px-8 h-12 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white rounded-xl transition-all duration-200 font-semibold ml-auto shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed"
                     >
                       {isLoading ? (
                         <motion.div
                           initial={{ opacity: 0 }}
                           animate={{ opacity: 1 }}
-                          className="flex items-center justify-center space-x-2"
+                          className="flex items-center justify-center gap-2"
                         >
-                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                           <span>{translate("creating")}</span>
                         </motion.div>
                       ) : (
-                        <div className="flex items-center space-x-2">
+                        <div className="flex items-center justify-center gap-2">
                           <span>{translate("createAccountButton")}</span>
-                          <CheckCircle className="w-4 h-4" />
+                          <CheckCircle className="w-5 h-5" />
                         </div>
                       )}
                     </motion.button>
@@ -624,7 +865,7 @@ export default function SignupForm() {
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{ duration: 0.4, delay: 1.7 }}
-                className="text-center mt-6 pt-6 border-t border-gray-100"
+                className="text-center mt-5 pt-5 border-t-2 border-gray-100"
               >
                 <motion.p 
                   className="text-sm text-gray-600"
@@ -634,11 +875,12 @@ export default function SignupForm() {
                   <motion.a
                     href="/signin"
                     onClick={handleSignInClick}
-                    className="text-blue-600 hover:text-blue-700 font-medium inline-block"
+                    className="text-blue-600 hover:text-blue-700 font-semibold inline-flex items-center gap-1"
                     whileHover={{ x: 3 }}
                     transition={{ type: "spring", stiffness: 400, damping: 10 }}
                   >
-                    {translate("signinHere")} →
+                    {translate("signinHere")}
+                    <ArrowRight className="w-4 h-4" />
                   </motion.a>
                 </motion.p>
               </motion.div>
@@ -650,9 +892,9 @@ export default function SignupForm() {
             initial={{ opacity: 0, x: 30 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.5 }}
-            className="hidden lg:block w-1/2 bg-gray-50 p-8 relative overflow-hidden"
+            className="hidden lg:flex w-1/2 bg-gradient-to-br from-blue-50 to-indigo-50 p-10 relative overflow-hidden"
           >
-            <div className="h-full flex items-center justify-center relative z-10">
+            <div className="h-full w-full flex items-center justify-center relative z-10">
               <motion.div
                 initial={{ opacity: 0, scale: 0.8, y: 30 }}
                 animate={{ opacity: 1, scale: 1, y: 0 }}
@@ -671,41 +913,41 @@ export default function SignupForm() {
                   transition={{ duration: 0.6, delay: 1.2 }}
                   src="/signup.png"
                   alt="Join our professional platform"
-                  className="w-full max-w-md object-contain mb-6 drop-shadow-2xl"
+                  className="w-full max-w-md object-contain mb-8 drop-shadow-2xl"
                 />
                 <motion.div 
                   initial={{ opacity: 0, y: 15 }}
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ duration: 0.5, delay: 1.4 }}
-                  className="space-y-3"
+                  className="space-y-4"
                 >
-                  <h3 className="text-xl font-bold text-black">{translate("joinPlatform")}</h3>
-                  <p className="text-gray-700 max-w-xs mx-auto text-sm leading-relaxed">
+                  <h3 className="text-2xl font-bold text-gray-900">{translate("joinPlatform")}</h3>
+                  <p className="text-gray-600 max-w-md mx-auto leading-relaxed">
                     {translate("unlockPowerfulTools")}
                   </p>
                   <motion.div 
                     initial={{ opacity: 0, y: 10 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.5, delay: 1.6 }}
-                    className="grid grid-cols-2 gap-3 mt-6"
+                    className="grid grid-cols-2 gap-4 mt-8 max-w-md mx-auto"
                   >
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: 1.7 }}
-                      className="bg-white rounded-lg p-3 shadow-lg border border-gray-200"
+                      className="bg-white rounded-xl p-4 shadow-lg border-2 border-blue-100"
                     >
-                      <CheckCircle className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-                      <p className="text-xs font-medium text-black">{translate("secureReliable")}</p>
+                      <CheckCircle className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                      <p className="text-sm font-semibold text-gray-900">{translate("secureReliable")}</p>
                     </motion.div>
                     <motion.div 
                       initial={{ opacity: 0, scale: 0.8 }}
                       animate={{ opacity: 1, scale: 1 }}
                       transition={{ duration: 0.4, delay: 1.8 }}
-                      className="bg-white rounded-lg p-3 shadow-lg border border-gray-200"
+                      className="bg-white rounded-xl p-4 shadow-lg border-2 border-blue-100"
                     >
-                      <CheckCircle className="w-5 h-5 text-blue-600 mx-auto mb-1" />
-                      <p className="text-xs font-medium text-black">{translate("professionalTools")}</p>
+                      <CheckCircle className="w-6 h-6 text-blue-600 mx-auto mb-2" />
+                      <p className="text-sm font-semibold text-gray-900">{translate("professionalTools")}</p>
                     </motion.div>
                   </motion.div>
                 </motion.div>
