@@ -21,6 +21,7 @@ const PaymentForm = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [copiedUPI, setCopiedUPI] = useState(false);
   const [viewMode, setViewMode] = useState('qr');
+  const [qrImageError, setQrImageError] = useState(false);
   
   const UPI_ID = "marketmindsresearch@ibl";
   const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
@@ -378,17 +379,39 @@ const PaymentForm = () => {
                 {/* QR Code Section */}
                 <div className="flex-1 flex justify-center">
                   <div className="relative group">
-                    <div className="bg-white p-2.5 rounded-xl border-2 border-gray-200 shadow-sm">
-                      <img 
-                        src="/QR.jpeg" 
-                        alt="Payment QR Code" 
-                        className="w-full max-w-[220px] h-auto cursor-pointer"
-                        onClick={isMobile ? openUpiApp : undefined}
-                      />
+                    <div className="bg-white p-4 rounded-xl border-2 border-gray-200 shadow-lg">
+                      {!qrImageError ? (
+                        <img 
+                          src="/QR.jpeg" 
+                          alt="Payment QR Code" 
+                          className="w-full max-w-[220px] h-auto object-contain cursor-pointer"
+                          onClick={isMobile ? openUpiApp : undefined}
+                          onError={() => setQrImageError(true)}
+                          loading="eager"
+                          style={{ 
+                            display: 'block',
+                            minHeight: '220px',
+                            backgroundColor: '#f3f4f6'
+                          }}
+                        />
+                      ) : (
+                        <div className="w-[220px] h-[220px] flex flex-col items-center justify-center bg-gray-100 rounded-lg">
+                          <QrCode className="w-16 h-16 text-gray-400 mb-3" />
+                          <p className="text-sm text-gray-600 text-center px-4">
+                            {translate('qrCodeUnavailable')}
+                          </p>
+                          <button
+                            onClick={openUpiApp}
+                            className="mt-3 px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
+                          >
+                            {translate('payDirectly')}
+                          </button>
+                        </div>
+                      )}
                     </div>
-                    {isMobile && (
-                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-xl">
-                        <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 text-white text-sm py-1.5 px-3 rounded-full shadow-lg flex items-center gap-1.5">
+                    {isMobile && !qrImageError && (
+                      <div className="absolute inset-0 flex items-center justify-center bg-black bg-opacity-0 group-hover:bg-opacity-30 transition-all rounded-xl pointer-events-none">
+                        <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-blue-600 text-white text-sm py-2 px-4 rounded-full shadow-lg flex items-center gap-2">
                           <Smartphone size={16} />
                           {translate('tapToPay')}
                         </span>
