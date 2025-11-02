@@ -44,8 +44,8 @@ const AdminReport = () => {
         data.append('title', formData.title);
         data.append('description', formData.description);
         data.append('sector', formData.sector);
-        data.append('isFree', formData.isFree);
-        data.append('uploadDate', formData.uploadDate); // Add uploadDate
+        data.append('reportType', formData.reportType); // ADD THIS
+        data.append('uploadDate', formData.uploadDate);
         data.append('file', formData.file);
 
         try {
@@ -274,6 +274,14 @@ const ReportCard = ({ report, onPreview, onDownload, onDelete, variants }) => {
         'Auto': 'bg-cyan-100 text-cyan-700 border-cyan-200'
     };
 
+    const reportTypeConfig = {
+        premium: { bg: 'bg-blue-100', text: 'text-blue-700', border: 'border-blue-200', icon: '👑', label: 'Premium' },
+        bluechip: { bg: 'bg-purple-100', text: 'text-purple-700', border: 'border-purple-200', icon: '💎', label: 'Bluechip' },
+        free: { bg: 'bg-green-100', text: 'text-green-700', border: 'border-green-200', icon: '🎁', label: 'Free' }
+    };
+
+    const typeStyle = reportTypeConfig[report.reportType] || reportTypeConfig.premium;
+
     return (
         <motion.div
             variants={variants}
@@ -290,12 +298,16 @@ const ReportCard = ({ report, onPreview, onDownload, onDelete, variants }) => {
                     </div>
                 </div>
                 
-                {/* Sector Badge */}
-                <div className="flex items-center gap-2">
-                    <Tag size={12} className="text-slate-400" />
-                    <span className={`inline-flex text-xs font-semibold px-2.5 py-1 rounded-full border ${sectorColors[report.sector] || sectorColors['Technology']}`}>
-                        {report.sector}
-                    </span>
+                {/* Sector & Report Type Badges */}
+                <div className="flex items-center gap-2 flex-wrap">
+                  <Tag size={12} className="text-slate-400" />
+                  <span className={`inline-flex text-xs font-semibold px-2.5 py-1 rounded-full border ${sectorColors[report.sector] || sectorColors['Technology']}`}>
+                    {report.sector}
+                  </span>
+                  <span className={`inline-flex items-center gap-1 text-xs font-semibold px-2.5 py-1 rounded-full border ${typeStyle.bg} ${typeStyle.text} ${typeStyle.border}`}>
+                    <span>{typeStyle.icon}</span>
+                    {typeStyle.label}
+                  </span>
                 </div>
             </div>
 

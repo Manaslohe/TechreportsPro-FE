@@ -6,6 +6,7 @@ import Header from "./Home/Header";
 import axios from 'axios';
 import Toast from './common/Toast';
 import { useTranslation } from "../contexts/TranslationContext";
+import ForgotPassword from "./ForgotPassword"; // ADD
 
 const apiBaseUrl = import.meta.env.MODE === 'production' 
   ? import.meta.env.VITE_REACT_APP_API_BASE_URL_PRODUCTION 
@@ -22,6 +23,7 @@ export default function SignInForm() {
   });
   const [isLoading, setIsLoading] = useState(false);
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+  const [showForgotPassword, setShowForgotPassword] = useState(false); // ADD
 
   // Add background image preloader
   useEffect(() => {
@@ -89,6 +91,12 @@ export default function SignInForm() {
         type={toast.type}
         onClose={() => setToast({ ...toast, show: false })}
       />
+      
+      <ForgotPassword 
+        isOpen={showForgotPassword} 
+        onClose={() => setShowForgotPassword(false)} 
+      />
+
       <div 
         className="min-h-screen relative flex items-center justify-center p-4 pt-24 overflow-hidden"
         style={{
@@ -260,6 +268,13 @@ export default function SignInForm() {
                       />
                       {translate("rememberMe")}
                     </label>
+                    <button
+                      type="button"
+                      onClick={() => setShowForgotPassword(true)}
+                      className="text-sm text-blue-600 hover:text-blue-700 font-semibold hover:underline"
+                    >
+                      Forgot Password?
+                    </button>
                   </motion.div>
                 </div>
 

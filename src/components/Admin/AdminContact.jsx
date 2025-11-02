@@ -55,7 +55,7 @@ const AdminContact = () => {
   );
 
   const thisWeekCount = contacts.filter(c => 
-    new Date(c.submittedAt) > new Date(Date.now() - 7*24*60*60*1000)
+    new Date(c.createdAt) > new Date(Date.now() - 7*24*60*60*1000)
   ).length;
 
   const containerVariants = {
@@ -268,20 +268,11 @@ const ContactCard = ({ contact, selectedContact, onToggleDetails, variants }) =>
                 )}
               </div>
 
-              {/* Timestamp */}
+              {/* Timestamp - CHANGED from submittedAt to createdAt */}
               <div className="flex items-center gap-1.5 text-sm text-gray-500">
                 <Calendar className="w-4 h-4" />
-                <span>{formatDate(contact.submittedAt)}</span>
+                <span>{formatDate(contact.createdAt)}</span>
               </div>
-
-              {/* Subject Badge */}
-              {contact.subject && (
-                <div className="inline-flex">
-                  <span className="px-3 py-1 bg-blue-50 text-blue-600 text-xs font-semibold rounded-lg border border-blue-200">
-                    {contact.subject}
-                  </span>
-                </div>
-              )}
 
               {/* Message Preview (when not expanded) */}
               {!isExpanded && (

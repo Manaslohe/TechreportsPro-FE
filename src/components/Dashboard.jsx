@@ -155,12 +155,6 @@ const Dashboard = () => {
         gradient: 'bg-gradient-to-br from-blue-500 to-blue-600' 
       },
       { 
-        icon: Star, 
-        label: 'Points Earned', 
-        value: dashboardData.user?.points || 0, 
-        gradient: 'bg-gradient-to-br from-amber-500 to-orange-500' 
-      },
-      { 
         icon: Clock, 
         label: 'Pending Payments', 
         value: dashboardData.stats?.pendingPayments || 0, 

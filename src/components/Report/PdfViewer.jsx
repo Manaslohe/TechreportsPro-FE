@@ -8,11 +8,9 @@ import {
   Maximize2, 
   Minimize2,
   Download,
-  Shield,
-  AlertTriangle,
   RefreshCw,
-  Lock,
-  Eye
+  Eye,
+  AlertTriangle
 } from 'lucide-react';
 import axios from 'axios';
 import Toast from '../common/Toast';
@@ -32,72 +30,11 @@ const PdfViewer = () => {
   const [error, setError] = useState(null);
   const [isRetrying, setIsRetrying] = useState(false);
   const [pdfLoadError, setPdfLoadError] = useState(false);
+  const [downloading, setDownloading] = useState(false);
 
-  // Security and protection hooks
   useEffect(() => {
     fetchReport();
   }, [id]);
-
-  // Enhanced security measures
-  useEffect(() => {
-    const disableRightClick = (e) => {
-      e.preventDefault();
-      e.stopPropagation();
-      showToast('Right-click is disabled for security', 'error');
-      return false;
-    };
-
-    const disableKeyboardShortcuts = (e) => {
-      // Comprehensive keyboard shortcut blocking
-      const forbidden = (
-        (e.ctrlKey && ['s', 'p', 'a', 'c', 'u'].includes(e.key.toLowerCase())) ||
-        e.key === 'F12' ||
-        (e.ctrlKey && e.shiftKey && ['i', 'j', 'c'].includes(e.key.toLowerCase())) ||
-        e.key === 'PrintScreen'
-      );
-
-      if (forbidden) {
-        e.preventDefault();
-        e.stopPropagation();
-        showToast('This action is not permitted', 'error');
-        return false;
-      }
-    };
-
-    const disableSelection = () => {
-      document.body.style.userSelect = 'none';
-      document.body.style.webkitUserSelect = 'none';
-      document.body.style.mozUserSelect = 'none';
-      document.body.style.msUserSelect = 'none';
-    };
-
-    const disableCopyPaste = (e) => {
-      if (e.type === 'copy' || e.type === 'cut') {
-        e.preventDefault();
-        showToast('Copying is disabled', 'error');
-        return false;
-      }
-    };
-
-    // Apply all security measures
-    document.addEventListener('contextmenu', disableRightClick, true);
-    document.addEventListener('keydown', disableKeyboardShortcuts, true);
-    document.addEventListener('copy', disableCopyPaste, true);
-    document.addEventListener('cut', disableCopyPaste, true);
-    disableSelection();
-
-    // Cleanup
-    return () => {
-      document.removeEventListener('contextmenu', disableRightClick, true);
-      document.removeEventListener('keydown', disableKeyboardShortcuts, true);
-      document.removeEventListener('copy', disableCopyPaste, true);
-      document.removeEventListener('cut', disableCopyPaste, true);
-      document.body.style.userSelect = '';
-      document.body.style.webkitUserSelect = '';
-      document.body.style.mozUserSelect = '';
-      document.body.style.msUserSelect = '';
-    };
-  }, []);
 
   // Prevent fullscreen API abuse
   useEffect(() => {
@@ -137,7 +74,7 @@ const PdfViewer = () => {
 
       setReport(response.data);
       
-      const secureUrl = `${axios.defaults.baseURL}/api/reports/${id}/pdf?mode=inline&nocache=${Date.now()}&secure=true&token=${encodeURIComponent(token)}`;
+      const secureUrl = `${axios.defaults.baseURL}/api/reports/${id}/pdf?mode=inline&nocache=${Date.now()}&token=${encodeURIComponent(token)}`;
       setPreviewFileUrl(secureUrl);
 
     } catch (error) {
@@ -167,6 +104,33 @@ const PdfViewer = () => {
       }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleDownload = async () => {
+    setDownloading(true);
+    try {
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get(`/api/reports/${id}/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${report?.title || 'report'}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      showToast('Download started successfully!', 'success');
+    } catch (error) {
+      console.error('Download error:', error);
+      showToast('Failed to download report', 'error');
+    } finally {
+      setDownloading(false);
     }
   };
 
@@ -210,12 +174,7 @@ const PdfViewer = () => {
       </div>
       <div className="text-center max-w-md">
         <p className="text-2xl font-bold text-gray-900 mb-3">Loading Document</p>
-        <p className="text-gray-600 text-sm sm:text-base">Preparing your secure PDF viewer...</p>
-      </div>
-      <div className="flex items-center gap-3 bg-blue-50 px-4 py-3 rounded-full border border-blue-100">
-        <Shield className="text-blue-600" size={18} />
-        <span className="text-sm font-medium text-blue-900">Protected Mode Active</span>
-        <Lock className="text-blue-600" size={14} />
+        <p className="text-gray-600 text-sm sm:text-base">Preparing your PDF viewer...</p>
       </div>
     </div>
   );
@@ -260,7 +219,6 @@ const PdfViewer = () => {
   return (
     <div 
       className={`min-h-screen bg-gradient-to-br from-blue-50 via-white to-blue-50 ${isFullScreen ? 'fixed inset-0 z-50' : 'pt-16 sm:pt-20'}`}
-      onContextMenu={(e) => e.preventDefault()}
       style={{ touchAction: 'pan-y pinch-zoom' }}
     >
       {/* Main Content */}
@@ -302,18 +260,32 @@ const PdfViewer = () => {
                     </div>
                     <div>
                       <h2 className="text-base sm:text-xl font-bold">
-                        Secure Document Viewer
+                        Document Viewer
                       </h2>
                       {!isFullScreen && (
                         <div className="flex items-center gap-2 mt-1">
                           <Eye size={12} className="opacity-75" />
-                          <span className="text-xs text-blue-100">View-Only Mode</span>
+                          <span className="text-xs text-blue-100">{report?.title}</span>
                         </div>
                       )}
                     </div>
                   </div>
                   
                   <div className="flex items-center gap-2">
+                    <motion.button
+                      whileHover={{ scale: 1.05 }}
+                      whileTap={{ scale: 0.95 }}
+                      onClick={handleDownload}
+                      disabled={downloading}
+                      className="flex items-center gap-2 p-2 sm:px-4 sm:py-2.5 rounded-lg bg-white/10 hover:bg-white/20 transition-all backdrop-blur disabled:opacity-50"
+                      title="Download PDF"
+                    >
+                      <Download size={18} className={downloading ? 'animate-bounce' : ''} />
+                      <span className="hidden sm:inline text-sm font-medium">
+                        {downloading ? 'Downloading...' : 'Download'}
+                      </span>
+                    </motion.button>
+
                     {!isFullScreen && (
                       <motion.button
                         whileHover={{ scale: 1.05 }}
@@ -355,7 +327,6 @@ const PdfViewer = () => {
                   className={`relative bg-gray-100 ${
                     isFullScreen ? 'h-[calc(100vh-70px)]' : 'h-[calc(100vh-200px)] sm:h-[85vh]'
                   }`}
-                  onContextMenu={(e) => e.preventDefault()}
                   style={{ 
                     touchAction: 'pan-y pinch-zoom',
                     WebkitOverflowScrolling: 'touch'
@@ -380,34 +351,18 @@ const PdfViewer = () => {
                       </motion.button>
                     </div>
                   ) : (
-                    <div className="relative w-full h-full">
-                      <embed
-                        ref={iframeRef}
-                        src={`${previewFileUrl}#toolbar=0&navpanes=0&scrollbar=1&view=FitH`}
-                        type="application/pdf"
-                        className="w-full h-full"
-                        onError={handlePdfError}
-                        style={{
-                          backgroundColor: '#f8fafc',
-                          border: 'none',
-                          touchAction: 'pan-y pinch-zoom'
-                        }}
-                      />
-                      
-                      {/* Security Overlay - doesn't block native PDF controls */}
-                      <div 
-                        className="absolute inset-0 pointer-events-none select-none"
-                        onContextMenu={(e) => e.preventDefault()}
-                        style={{
-                          background: 'transparent',
-                          userSelect: 'none',
-                          WebkitUserSelect: 'none',
-                          MozUserSelect: 'none',
-                          msUserSelect: 'none',
-                          WebkitTouchCallout: 'none'
-                        }}
-                      />
-                    </div>
+                    <embed
+                      ref={iframeRef}
+                      src={`${previewFileUrl}#toolbar=1&navpanes=1&scrollbar=1`}
+                      type="application/pdf"
+                      className="w-full h-full"
+                      onError={handlePdfError}
+                      style={{
+                        backgroundColor: '#f8fafc',
+                        border: 'none',
+                        touchAction: 'pan-y pinch-zoom'
+                      }}
+                    />
                   )}
                 </div>
 
@@ -417,13 +372,8 @@ const PdfViewer = () => {
                     <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 sm:gap-4">
                       <div className="flex items-center gap-3 text-xs sm:text-sm">
                         <div className="flex items-center gap-2 text-blue-700 font-medium">
-                          <Shield size={16} />
-                          <span>Protected Document</span>
-                        </div>
-                        <div className="hidden sm:block w-px h-4 bg-blue-200" />
-                        <div className="hidden sm:flex items-center gap-2 text-gray-600">
-                          <Lock size={14} />
-                          <span>Download Disabled</span>
+                          <FileText size={16} />
+                          <span>PDF Document</span>
                         </div>
                       </div>
                       <div className="flex items-center gap-2 text-xs text-gray-500">

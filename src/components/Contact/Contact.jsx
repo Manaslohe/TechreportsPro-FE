@@ -11,10 +11,10 @@ import countriesData from "world-countries"; // Import the world-countries data
 const Contact = () => {
   const { translate } = useTranslation();
   const [formData, setFormData] = useState({
-    name: '',
+    firstName: '',
+    lastName: '',
     email: '',
     phone: '',
-    subject: '',
     message: ''
   });
   const [selectedCountry, setSelectedCountry] = useState({
@@ -79,7 +79,6 @@ const Contact = () => {
     setIsSubmitting(true);
 
     try {
-      // Prefer production URL when not on localhost
       const apiBase =
         (window.location.hostname === 'localhost'
           ? import.meta.env.VITE_REACT_APP_API_BASE_URL
@@ -87,10 +86,22 @@ const Contact = () => {
 
       const fullPhone = `${selectedCountry.value}${formData.phone}`;
       
-      await axios.post(`${apiBase}/api/contacts`, {
-        ...formData,
+      // Send to both endpoints
+      await axios.post(`${apiBase}/api/contacts/email`, {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
         phone: fullPhone,
-        country: selectedCountry.country
+        country: selectedCountry.country,
+        message: formData.message
+      });
+
+      // Also save to database
+      await axios.post(`${apiBase}/api/contacts`, {
+        name: `${formData.firstName} ${formData.lastName}`.trim(),
+        email: formData.email,
+        phone: fullPhone,
+        country: selectedCountry.country,
+        message: formData.message
       });
       
       setToast({
@@ -100,10 +111,10 @@ const Contact = () => {
       });
 
       setFormData({
-        name: '',
+        firstName: '',
+        lastName: '',
         email: '',
         phone: '',
-        subject: '',
         message: ''
       });
     } catch (error) {
@@ -330,8 +341,8 @@ const Contact = () => {
                       </label>
                       <input
                         type="text"
-                        name="name"
-                        value={formData.name}
+                        name="firstName"
+                        value={formData.firstName}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
                         placeholder={translate('firstName')}
@@ -344,8 +355,8 @@ const Contact = () => {
                       </label>
                       <input
                         type="text"
-                        name="subject"
-                        value={formData.subject}
+                        name="lastName"
+                        value={formData.lastName}
                         onChange={handleInputChange}
                         className="w-full px-4 py-3 bg-gray-50 border border-gray-200 rounded-xl text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 focus:bg-white transition-all"
                         placeholder={translate('lastName')}

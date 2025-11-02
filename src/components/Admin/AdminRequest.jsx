@@ -4,7 +4,7 @@ import {
   MessageSquare, User, Calendar, Clock, CheckCircle, XCircle, 
   Search, Filter, Eye, DollarSign, FileText, X, ArrowRight,
   ChevronDown, ExternalLink, AlertCircle, Clipboard, Shield,
-  TrendingUp
+  TrendingUp, Bell, Send
 } from 'lucide-react';
 import axios from 'axios';
 import Toast from '../common/Toast';
@@ -365,6 +365,39 @@ const RequestCard = React.memo(({
   variants,
   onToast
 }) => {
+  const [isSendingNotification, setIsSendingNotification] = React.useState(false);
+
+  const handleSendNotification = async () => {
+    try {
+      setIsSendingNotification(true);
+      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+      await axios.post(
+        `${baseURL}/api/admin/payment-requests/${request._id}/notify`,
+        {},
+        {
+          headers: {
+            Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+            'x-admin-auth': localStorage.getItem('adminAuth') === 'true' ? 'true' : undefined
+          }
+        }
+      );
+
+      onToast({
+        show: true,
+        message: 'Notification sent to user successfully!',
+        type: 'success'
+      });
+    } catch (error) {
+      onToast({
+        show: true,
+        message: error.response?.data?.error || 'Failed to send notification',
+        type: 'error'
+      });
+    } finally {
+      setIsSendingNotification(false);
+    }
+  };
+
   // Format date and time for better display
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -568,33 +601,57 @@ const RequestCard = React.memo(({
 
               {/* Admin Response or Action Buttons */}
               {request.status !== 'pending' ? (
-                <div className={`p-4 rounded-lg border ${
-                  request.status === 'approved' 
-                    ? 'bg-emerald-50 border-emerald-200' 
-                    : 'bg-rose-50 border-rose-200'
-                }`}>
-                  <h4 className={`font-medium mb-2 flex items-center gap-2 ${
+                <>
+                  <div className={`p-4 rounded-lg border ${
                     request.status === 'approved' 
-                      ? 'text-emerald-900' 
-                      : 'text-rose-900'
+                      ? 'bg-emerald-50 border-emerald-200' 
+                      : 'bg-rose-50 border-rose-200'
                   }`}>
-                    <MessageSquare size={16} />
-                    Admin Response
-                  </h4>
-                  <p className={`text-sm ${
-                    request.status === 'approved' 
-                      ? 'text-emerald-700' 
-                      : 'text-rose-700'
-                  }`}>
-                    {request.adminComment || `Request ${request.status}`}
-                  </p>
-                  {request.reviewedAt && (
-                    <div className="mt-3 text-xs text-slate-500 flex items-center gap-1.5">
-                      <Clock size={12} />
-                      {new Date(request.reviewedAt).toLocaleString()}
-                    </div>
-                  )}
-                </div>
+                    <h4 className={`font-medium mb-2 flex items-center gap-2 ${
+                      request.status === 'approved' 
+                        ? 'text-emerald-900' 
+                        : 'text-rose-900'
+                    }`}>
+                      <MessageSquare size={16} />
+                      Admin Response
+                    </h4>
+                    <p className={`text-sm ${
+                      request.status === 'approved' 
+                        ? 'text-emerald-700' 
+                        : 'text-rose-700'
+                    }`}>
+                      {request.adminComment || `Request ${request.status}`}
+                    </p>
+                    {request.reviewedAt && (
+                      <div className="mt-3 text-xs text-slate-500 flex items-center gap-1.5">
+                        <Clock size={12} />
+                        {new Date(request.reviewedAt).toLocaleString()}
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex justify-end pt-2">
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={handleSendNotification}
+                      disabled={isSendingNotification}
+                      className="inline-flex items-center justify-center gap-2 px-5 py-2.5 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed font-medium text-sm shadow-sm"
+                    >
+                      {isSendingNotification ? (
+                        <>
+                          <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                          Sending...
+                        </>
+                      ) : (
+                        <>
+                          <Send size={16} />
+                          Notify User
+                        </>
+                      )}
+                    </motion.button>
+                  </div>
+                </>
               ) : (
                 <div className="space-y-4">
                   <div>

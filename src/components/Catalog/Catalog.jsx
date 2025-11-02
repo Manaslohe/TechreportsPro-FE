@@ -8,7 +8,8 @@ import {
   Calendar,
   Eye,
   Sparkles,
-  Crown
+  Crown,
+  Download
 } from 'lucide-react';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
@@ -24,7 +25,6 @@ const Catalog = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [sortBy, setSortBy] = useState('recent');
   const [sortOrder, setSortOrder] = useState('desc');
-  const [selectedSector, setSelectedSector] = useState('all');
   const [viewMode, setViewMode] = useState('grid');
   const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
   const [subscriptionStatus, setSubscriptionStatus] = useState(null);
@@ -34,6 +34,7 @@ const Catalog = () => {
     reportTitle: ''
   });
   const [processingSubscription, setProcessingSubscription] = useState(false);
+  const [downloading, setDownloading] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -48,7 +49,6 @@ const Catalog = () => {
         const response = await axios.get(`${baseURL}/api/reports/filtered`, {
             params: {
                 searchTerm,
-                sector: selectedSector,
                 sortBy,
                 sortOrder
             }
@@ -134,6 +134,43 @@ const Catalog = () => {
     });
   };
 
+  const handleDownloadPurchased = async (reportId, reportTitle) => {
+    setDownloading(true);
+    try {
+      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+      const token = localStorage.getItem('authToken');
+      
+      const response = await axios.get(`${baseURL}/api/reports/${reportId}/pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+        responseType: 'blob'
+      });
+
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `${reportTitle}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+
+      setToast({
+        show: true,
+        message: 'Download started successfully!',
+        type: 'success'
+      });
+    } catch (error) {
+      console.error('Download error:', error);
+      setToast({
+        show: true,
+        message: 'Failed to download report',
+        type: 'error'
+      });
+    } finally {
+      setDownloading(false);
+    }
+  };
+
   const handleUseSubscription = async () => {
     setProcessingSubscription(true);
     try {
@@ -198,8 +235,7 @@ const Catalog = () => {
     let filtered = reportsList.filter(report => {
       const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
                            report.description.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesSector = selectedSector === 'all' || report.sector === selectedSector;
-      return matchesSearch && matchesSector;
+      return matchesSearch;
     });
 
     // Sort reports
@@ -228,7 +264,6 @@ const Catalog = () => {
 
   const clearFilters = () => {
     setSearchTerm('');
-    setSelectedSector('all');
     setSortBy('recent');
     setSortOrder('desc');
   };
@@ -258,13 +293,13 @@ const Catalog = () => {
         No {type === 'free' ? 'sample' : 'premium'} reports found
       </h3>
       <p className="text-gray-500 mb-6 max-w-md mx-auto">
-        {searchTerm || selectedSector !== 'all' ? (
-          <>Try adjusting your search terms or filters to find what you're looking for.</>
+        {searchTerm ? (
+          <>Try adjusting your search terms to find what you're looking for.</>
         ) : (
           <>Check back later for new {type === 'free' ? 'sample' : 'premium'} reports.</>
         )}
       </p>
-      {(searchTerm || selectedSector !== 'all') && (
+      {searchTerm && (
         <button
           onClick={clearFilters}
           className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
@@ -290,8 +325,6 @@ const Catalog = () => {
       <CatalogHeader
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
-        selectedSector={selectedSector}
-        setSelectedSector={setSelectedSector}
         sortBy={sortBy}
         setSortBy={setSortBy}
         sortOrder={sortOrder}
@@ -304,69 +337,50 @@ const Catalog = () => {
         filteredResults={freeReports.length + paidReports.length}
       />
 
-      {/* Purchased Reports Section - only show if user has purchased reports */}
+      {/* Purchased Reports Section - Redesigned with ReportCard */}
       <AnimatePresence>
         {purchasedReports.length > 0 && (
           <motion.section
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.4 }}
             className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 mb-12"
           >
-            <div className="bg-green-50 rounded-2xl p-8 border border-green-100">
-              <div className="flex items-center gap-3 mb-6">
-                <CheckCircle className="h-6 w-6 text-green-600" />
+            {/* Section Header */}
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl shadow-lg shadow-blue-500/30">
+                  <CheckCircle className="h-5 w-5 text-white" />
+                </div>
                 <div>
-                  <h2 className="text-2xl font-bold text-gray-900">Your Purchased Reports</h2>
-                  <p className="text-green-700">Access your premium content anytime</p>
+                  <h2 className="text-2xl font-bold text-gray-900">Your Library</h2>
+                  <p className="text-sm text-gray-600">Access your purchased reports anytime</p>
                 </div>
               </div>
-              
-              <motion.div
-                variants={containerVariants}
-                initial="hidden"
-                animate="visible"
-                className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
-              >
-                {purchasedReports.map((report) => (
-                  <motion.div
-                    key={report._id}
-                    className="bg-white rounded-xl p-6 border border-green-200 relative"
-                  >
-                    <div className="absolute top-4 right-4 bg-green-600 text-white px-3 py-1 rounded-full text-xs font-medium">
-                      OWNED
-                    </div>
-                    
-                    <div className="flex items-start gap-3 mb-4">
-                      <div className="p-2 bg-green-100 rounded-lg text-green-600">
-                        <FileText className="w-5 h-5" />
-                      </div>
-                      <div className="flex-1">
-                        <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                          {report.title}
-                        </h3>
-                        <div className="flex items-center text-sm text-gray-500 mb-3">
-                          <Calendar className="h-4 w-4 mr-1" />
-                          {formatDate(report.uploadDate)}
-                        </div>
-                      </div>
-                    </div>
-
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-2">
-                      {report.description}
-                    </p>
-
-                    <Link
-                      to={`/report/view/${report._id}`}
-                      className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors font-medium"
-                    >
-                      <Eye className="h-4 w-4" />
-                      Read Report
-                    </Link>
-                  </motion.div>
-                ))}
-              </motion.div>
+              <div className="hidden sm:flex items-center gap-2 px-4 py-2 bg-blue-50 rounded-xl border border-blue-200">
+                <div className="h-2 w-2 bg-blue-500 rounded-full animate-pulse" />
+                <span className="text-sm font-medium text-blue-700">{purchasedReports.length} {purchasedReports.length === 1 ? 'Report' : 'Reports'}</span>
+              </div>
             </div>
+              
+            {/* Cards Grid using ReportCard */}
+            <motion.div
+              variants={containerVariants}
+              initial="hidden"
+              animate="visible"
+              className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5"
+            >
+              {purchasedReports.map((report) => (
+                <ReportCard
+                  key={report._id}
+                  report={report}
+                  type="purchased"
+                  onDownloadPurchased={handleDownloadPurchased}
+                  viewMode="grid"
+                />
+              ))}
+            </motion.div>
           </motion.section>
         )}
       </AnimatePresence>
@@ -454,6 +468,7 @@ const Catalog = () => {
                       report={report} 
                       type="paid" 
                       onPurchase={handlePurchase}
+                      onDownloadPurchased={handleDownloadPurchased}
                       viewMode={viewMode}
                     />
                   ))}
