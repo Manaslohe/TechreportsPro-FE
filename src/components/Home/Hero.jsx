@@ -236,16 +236,30 @@ const HomePage = () => {
               className="relative flex justify-center lg:justify-end order-1 lg:order-2 w-full"
             >
               <div className="relative w-full max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-none">
-                {/* Hero Image - Optimized for mobile */}
-                <div className="relative z-10 w-full h-48 sm:h-64 md:h-80 lg:h-96 xl:h-[28rem] 2xl:h-[32rem] group">
+                {/* Hero Video - Optimized for mobile */}
+                <div className="relative z-10 w-full h-40 sm:h-56 md:h-72 lg:h-80 xl:h-[20rem] 2xl:h-[24rem] group flex justify-center">
                   <motion.img
-                    whileHover={{ scale: 1.05, rotate: 1 }}
+                    whileHover={{ scale: 0.55, rotate: 1 }}
                     transition={{ duration: 0.3 }}
-                    src="/hero.png"
-                    alt="Business Intelligence Dashboard"
-                    className="w-full h-full object-contain rounded-xl sm:rounded-2xl"
+                    src="/hero.gif"
+                    alt="Hero GIF"
+                    className="w-[60%] h-[100%] object-cover rounded-xl sm:rounded-2xl slow-gif"
                   />
                 </div>
+
+                <style>
+                  {`
+                    .slow-gif {
+                      animation: slowGifPlayback 60s linear infinite; /* Increased duration to 60s */
+                    }
+
+                    @keyframes slowGifPlayback {
+                      0% { transform: scale(1); }
+                      50% { transform: scale(1.05); }
+                      100% { transform: scale(1); }
+                    }
+                  `}
+                </style>
 
                 {/* Floating Cards - Enhanced mobile design */}
                 <motion.div
