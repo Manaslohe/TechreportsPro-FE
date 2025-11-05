@@ -24,9 +24,15 @@ const AdminLogin = () => {
       (username === 'manas' && password === 'manas123') ||
       (username === 'marketsmind@555' && password === 'Kuber@55555')
     ) {
-      // Set admin auth token with a simple identifier
+      // Generate a simple admin token (in production, this should come from backend)
+      const adminToken = btoa(JSON.stringify({ 
+        username, 
+        role: 'admin', 
+        timestamp: Date.now() 
+      }));
+      
       localStorage.setItem('adminAuth', 'true');
-      localStorage.setItem('adminToken', 'admin-authenticated'); // Add this line
+      localStorage.setItem('authToken', adminToken); // Use authToken instead of adminToken
       navigate('/admin/dashboard');
     } else {
       setError('Invalid username or password');

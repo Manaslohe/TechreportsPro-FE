@@ -255,12 +255,19 @@ const Catalog = () => {
     return filtered;
   };
 
-  // Separate free and paid reports
-  const freeReports = filterAndSortReports(reports.filter(r => r.isFree === true));
-  const paidReports = filterAndSortReports(reports.filter(r => !r.isFree).map(report => ({
-    ...report,
-    isPurchased: purchasedReports.some(purchased => purchased._id === report._id)
-  })));
+  // Separate free and paid reports using reportType (fallback to legacy isFree)
+  const isFreeReport = (r) => (r.reportType ? r.reportType === 'free' : r.isFree === true);
+  const isPaidReport = (r) => (r.reportType ? (r.reportType === 'premium' || r.reportType === 'bluechip') : r.isFree !== true);
+
+  const freeReports = filterAndSortReports(reports.filter(isFreeReport));
+  const paidReports = filterAndSortReports(
+    reports
+      .filter(isPaidReport)
+      .map(report => ({
+        ...report,
+        isPurchased: purchasedReports.some(purchased => purchased._id === report._id)
+      }))
+  );
 
   const clearFilters = () => {
     setSearchTerm('');

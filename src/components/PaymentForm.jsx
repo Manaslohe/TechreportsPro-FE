@@ -71,6 +71,18 @@ const PaymentForm = () => {
   };
 
   useEffect(() => {
+    // Check if user is authenticated
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setToast({
+        show: true,
+        message: translate('authRequired') || 'Please login to continue',
+        type: 'error',
+      });
+      navigate('/signin');
+      return;
+    }
+
     if (type === 'report' && id) {
       fetchReportDetails();
     } else if (type === 'plan' && id) {
@@ -95,10 +107,28 @@ const PaymentForm = () => {
 
   const fetchReportDetails = async () => {
     try {
-      const response = await axios.get(`/api/reports/${id}`);
+      const token = localStorage.getItem('authToken');
+      const response = await axios.get(`/api/reports/${id}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
       setReport(response.data);
     } catch (error) {
       console.error('Error fetching report:', error);
+      
+      if (error.response?.status === 401) {
+        setToast({
+          show: true,
+          message: translate('sessionExpired') || 'Session expired. Please login again.',
+          type: 'error',
+        });
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        setTimeout(() => navigate('/signin'), 2000);
+        return;
+      }
+      
       setToast({
         show: true,
         message: 'Report not found or has been deleted',
@@ -186,23 +216,35 @@ const PaymentForm = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
     if (!screenshot) {
       setToast({
         show: true,
-        message: translate('selectScreenshotToUpload'),
+        message: translate('selectScreenshotToUpload') || 'Please select a screenshot to upload',
         type: 'error'
       });
+      return;
+    }
+
+    // Verify token exists before submitting
+    const token = localStorage.getItem('authToken');
+    if (!token) {
+      setToast({
+        show: true,
+        message: translate('sessionExpired') || 'Session expired. Please login again.',
+        type: 'error',
+      });
+      navigate('/signin');
       return;
     }
 
     setSubmitting(true);
 
     try {
-      // Map 'plan' type to 'subscription' for backend
       const backendPaymentType = type === 'plan' ? 'subscription' : type;
       
       const payloadData = {
-        paymentType: backendPaymentType, // Changed from: paymentType: type
+        paymentType: backendPaymentType,
         amount: getAmount(),
         screenshotData: screenshot
       };
@@ -223,13 +265,13 @@ const PaymentForm = () => {
       await axios.post('/api/payment-requests', payloadData, {
         headers: {
           'Content-Type': 'application/json',
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+          Authorization: `Bearer ${token}` // Ensure token is included
         },
       });
 
       const successMessage = type === 'plan' 
-        ? translate('planPaymentSuccess', { planName: plan.name })
-        : translate('reportPaymentSuccess');
+        ? translate('planPaymentSuccess', { planName: plan.name }) || `${plan.name} plan payment submitted successfully`
+        : translate('reportPaymentSuccess') || 'Report payment submitted successfully';
 
       setToast({
         show: true,
@@ -239,26 +281,38 @@ const PaymentForm = () => {
 
       setTimeout(() => navigate('/dashboard'), 2000);
     } catch (error) {
+      console.error('Payment submission error:', error);
+      
       const errorCode = error.response?.data?.code;
+      const errorStatus = error.response?.status;
+      
+      // Handle 401 specifically
+      if (errorStatus === 401 || errorCode === 'TOKEN_EXPIRED' || errorCode === 'AUTH_REQUIRED') {
+        setToast({
+          show: true,
+          message: translate('sessionExpired') || 'Session expired. Please login again.',
+          type: 'error',
+        });
+        localStorage.removeItem('authToken');
+        localStorage.removeItem('user');
+        setTimeout(() => navigate('/signin'), 2000);
+        return;
+      }
+      
       const errorMessages = {
-        'SCREENSHOT_REQUIRED': translate('screenshotRequired'),
-        'AUTH_REQUIRED': translate('authRequired'),
-        'TOKEN_EXPIRED': translate('tokenExpired'),
-        'DUPLICATE_REQUEST': translate('duplicateRequest'),
-        'ALREADY_PURCHASED': translate('alreadyPurchased'),
-        'ITEM_NOT_FOUND': translate('itemNotFound'),
-        'ACTIVE_SUBSCRIPTION': translate('activeSubscription')
+        'SCREENSHOT_REQUIRED': translate('screenshotRequired') || 'Screenshot is required',
+        'DUPLICATE_REQUEST': translate('duplicateRequest') || 'You already have a pending request',
+        'ALREADY_PURCHASED': translate('alreadyPurchased') || 'You have already purchased this item',
+        'ITEM_NOT_FOUND': translate('itemNotFound') || 'Item not found',
+        'ACTIVE_SUBSCRIPTION': translate('activeSubscription') || 'You already have an active subscription',
+        'MISSING_FIELDS': translate('missingFields') || 'All fields are required'
       };
 
       setToast({
         show: true,
-        message: errorMessages[errorCode] || translate('errorSubmittingPayment'),
+        message: errorMessages[errorCode] || error.response?.data?.error || translate('errorSubmittingPayment') || 'Error submitting payment',
         type: 'error',
       });
-
-      if (['AUTH_REQUIRED', 'TOKEN_EXPIRED'].includes(errorCode)) {
-        setTimeout(() => navigate('/signin'), 2000);
-      }
     } finally {
       setSubmitting(false);
     }

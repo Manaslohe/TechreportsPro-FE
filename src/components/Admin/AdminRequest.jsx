@@ -23,14 +23,22 @@ const AdminRequest = () => {
     try {
       setLoading(true);
       const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+      const token = localStorage.getItem('authToken');
+      const isAdmin = localStorage.getItem('adminAuth') === 'true';
+      
+      if (!token || !isAdmin) {
+        throw new Error('Admin authentication required');
+      }
+      
       const response = await axios.get(`${baseURL}/api/payment-requests`, {
         headers: {
-          Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-          'x-admin-auth': localStorage.getItem('adminAuth') === 'true' ? 'true' : undefined
+          Authorization: `Bearer ${token}`,
+          'x-admin-auth': 'true'
         }
       });
       setRequests(response.data);
     } catch (error) {
+      console.error('Error fetching requests:', error);
       setToast({
         show: true,
         message: error.response?.data?.error || 'Error fetching requests',

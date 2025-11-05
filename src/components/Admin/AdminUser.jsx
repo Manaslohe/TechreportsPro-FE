@@ -306,7 +306,8 @@ const UserCard = React.memo(({ user, selectedUser, onToggleDetails }) => {
                         <thead>
                           <tr className="text-left text-xs sm:text-sm text-slate-600 bg-slate-100/50 border-b border-slate-200">
                             <th className="px-4 py-3 font-semibold">Date</th>
-                            <th className="px-4 py-3 font-semibold">Report</th>
+                            <th className="px-4 py-3 font-semibold">Type</th>
+                            <th className="px-4 py-3 font-semibold">Report/Plan</th>
                             <th className="px-4 py-3 font-semibold">Amount</th>
                             <th className="px-4 py-3 font-semibold">Status</th>
                           </tr>
@@ -315,7 +316,18 @@ const UserCard = React.memo(({ user, selectedUser, onToggleDetails }) => {
                           {user.paymentRequests.map((payment) => (
                             <tr key={payment._id} className="hover:bg-slate-50 transition-colors">
                               <td className="px-4 py-3 text-sm text-slate-700">{new Date(payment.createdAt).toLocaleDateString()}</td>
-                              <td className="px-4 py-3 text-sm text-slate-700">{payment.report?.title || 'Unknown'}</td>
+                              <td className="px-4 py-3">
+                                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
+                                  payment.paymentType === 'subscription' 
+                                    ? 'bg-purple-100 text-purple-700' 
+                                    : 'bg-blue-100 text-blue-700'
+                                }`}>
+                                  {payment.paymentType === 'subscription' ? 'Subscription' : 'Report'}
+                                </span>
+                              </td>
+                              <td className="px-4 py-3 text-sm text-slate-700">
+                                {payment.report?.title || payment.subscriptionPlan?.planName || 'N/A'}
+                              </td>
                               <td className="px-4 py-3 text-sm font-semibold text-slate-900">₹{payment.amount}</td>
                               <td className="px-4 py-3">
                                 <PaymentStatusBadge status={payment.status} />
@@ -329,7 +341,18 @@ const UserCard = React.memo(({ user, selectedUser, onToggleDetails }) => {
                       {user.paymentRequests.map((payment) => (
                         <div key={payment._id} className="p-3 bg-white rounded-lg border border-slate-200">
                           <div className="flex justify-between items-start mb-2 gap-2">
-                            <span className="font-medium text-sm text-slate-900 line-clamp-2 flex-1">{payment.report?.title || 'Unknown'}</span>
+                            <div className="flex-1">
+                              <span className={`inline-block px-2 py-1 rounded-full text-xs font-medium mb-1 ${
+                                payment.paymentType === 'subscription' 
+                                  ? 'bg-purple-100 text-purple-700' 
+                                  : 'bg-blue-100 text-blue-700'
+                              }`}>
+                                {payment.paymentType === 'subscription' ? 'Subscription' : 'Report'}
+                              </span>
+                              <p className="font-medium text-sm text-slate-900 line-clamp-2 mt-1">
+                                {payment.report?.title || payment.subscriptionPlan?.planName || 'N/A'}
+                              </p>
+                            </div>
                             <PaymentStatusBadge status={payment.status} />
                           </div>
                           <div className="flex justify-between text-xs sm:text-sm text-slate-600">
