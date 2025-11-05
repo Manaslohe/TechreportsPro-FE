@@ -41,11 +41,11 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
     });
   };
 
-  // Determine actual type based on reportType field (fallback to prop)
-  const actualType = report.reportType || type;
-  const isFree = actualType === 'free';
-  const isPremium = actualType === 'premium';
-  const isBluechip = actualType === 'bluechip';
+  // Determine actual type based on reportType field
+  const actualType = report.reportType === 'free' ? 'free' : type;
+  const isFree = report.reportType === 'free';
+  const isPremium = report.reportType === 'premium';
+  const isBluechip = report.reportType === 'bluechip';
 
   // Report type badge configuration
   const getReportTypeBadge = () => {
