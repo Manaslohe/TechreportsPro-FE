@@ -59,35 +59,65 @@ const PdfViewer = () => {
       setPdfLoadError(false);
 
       const token = localStorage.getItem('authToken');
-      if (!token) {
-        throw new Error('Authentication required');
+      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL || axios.defaults.baseURL;
+      
+      // First, try to fetch report metadata without auth to check if it's free
+      let metadataResponse;
+      try {
+        metadataResponse = await axios.get(`${baseURL}/api/reports/${id}`, {
+          timeout: 15000
+        });
+      } catch (metadataError) {
+        // If initial request fails, try with token if available
+        if (token && (metadataError.response?.status === 401 || metadataError.response?.data?.code === 'AUTH_REQUIRED')) {
+          metadataResponse = await axios.get(`${baseURL}/api/reports/${id}`, {
+            headers: { Authorization: `Bearer ${token}` },
+            timeout: 15000
+          });
+        } else {
+          throw metadataError;
+        }
       }
 
-      const response = await axios.get(`/api/reports/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-        timeout: 15000
-      });
-
-      if (!response.data) {
+      if (!metadataResponse.data) {
         throw new Error('No report data received');
       }
 
-      setReport(response.data);
+      setReport(metadataResponse.data);
       
-      const secureUrl = `${axios.defaults.baseURL}/api/reports/${id}/pdf?mode=inline&nocache=${Date.now()}&token=${encodeURIComponent(token)}`;
+      // Check if report is free (using reportType or legacy isFree)
+      const isFreeReport = metadataResponse.data.reportType === 'free' || metadataResponse.data.isFree === true;
+      
+      // Build secure URL based on report type
+      let secureUrl;
+      if (isFreeReport) {
+        // Free reports don't need authentication
+        secureUrl = `${baseURL}/api/reports/${id}/pdf?mode=inline&nocache=${Date.now()}`;
+      } else {
+        // Paid reports require authentication
+        if (!token) {
+          throw new Error('Authentication required for premium reports');
+        }
+        secureUrl = `${baseURL}/api/reports/${id}/pdf?mode=inline&nocache=${Date.now()}&token=${encodeURIComponent(token)}`;
+      }
+      
       setPreviewFileUrl(secureUrl);
 
     } catch (error) {
       console.error('Error fetching report:', error);
 
-      if (retryCount > 0) {
+      if (retryCount > 0 && error.code === 'ECONNABORTED') {
         await new Promise(resolve => setTimeout(resolve, 2000));
         return fetchReport(retryCount - 1);
       }
 
       let errorMessage = 'Unable to load report';
-      if (error.response?.status === 401) {
-        errorMessage = 'Authentication failed. Please login again.';
+      if (error.message === 'Authentication required for premium reports') {
+        errorMessage = 'Please sign in to view premium reports';
+        setTimeout(() => navigate('/signin'), 2000);
+      } else if (error.response?.status === 401 || error.response?.data?.code === 'AUTH_REQUIRED') {
+        errorMessage = 'Please sign in to view this report';
+        setTimeout(() => navigate('/signin'), 2000);
       } else if (error.response?.status === 403) {
         errorMessage = 'You do not have access to this report';
       } else if (error.response?.status === 404) {
@@ -99,7 +129,7 @@ const PdfViewer = () => {
       setError(errorMessage);
       showToast(errorMessage, 'error');
       
-      if (error.response?.status !== 401) {
+      if (error.response?.status !== 401 && error.message !== 'Authentication required for premium reports') {
         setTimeout(() => navigate('/catalog'), 3000);
       }
     } finally {
@@ -111,10 +141,22 @@ const PdfViewer = () => {
     setDownloading(true);
     try {
       const token = localStorage.getItem('authToken');
-      const response = await axios.get(`/api/reports/${id}/pdf`, {
-        headers: { Authorization: `Bearer ${token}` },
-        responseType: 'blob'
-      });
+      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL || axios.defaults.baseURL;
+      
+      // Check if report is free
+      const isFreeReport = report?.reportType === 'free' || report?.isFree === true;
+      
+      const config = {
+        responseType: 'blob',
+        timeout: 30000
+      };
+      
+      // Only add auth header for paid reports
+      if (!isFreeReport && token) {
+        config.headers = { Authorization: `Bearer ${token}` };
+      }
+      
+      const response = await axios.get(`${baseURL}/api/reports/${id}/pdf`, config);
 
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');

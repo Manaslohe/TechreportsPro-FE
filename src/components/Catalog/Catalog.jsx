@@ -4,7 +4,6 @@ import {
   CheckCircle,
   Gift,
   FileText,
-  Lock,
   Calendar,
   Eye,
   Sparkles,
@@ -17,6 +16,7 @@ import Toast from '../common/Toast';
 import CatalogHeader from './CatalogHeader';
 import ReportCard from './ReportCard';
 import PaymentChoiceModal from './PaymentChoiceModal';
+import SubscriptionBanner from './SubscriptionBanner';
 
 const Catalog = () => {
   const [reports, setReports] = useState([]);
@@ -35,6 +35,7 @@ const Catalog = () => {
   });
   const [processingSubscription, setProcessingSubscription] = useState(false);
   const [downloading, setDownloading] = useState(false);
+  const [showSubscriptionBanner, setShowSubscriptionBanner] = useState(true);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -95,6 +96,14 @@ const Catalog = () => {
         headers: { Authorization: `Bearer ${token}` }
       });
       setSubscriptionStatus(response.data);
+      
+      // If user has active subscription, reset the banner dismissed flag
+      if (response.data?.hasActive && response.data?.availableReports?.total > 0) {
+        const bannerDismissed = localStorage.getItem('subscriptionBannerDismissed');
+        if (!bannerDismissed) {
+          setShowSubscriptionBanner(true);
+        }
+      }
     } catch (error) {
       console.error('Error fetching subscription status:', error);
     }
@@ -126,7 +135,8 @@ const Catalog = () => {
   };
 
   const handleSampleDownload = (reportId) => {
-    window.open(`${axios.defaults.baseURL}/api/reports/${reportId}/pdf`, '_blank');
+    const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+    window.open(`${baseURL}/api/reports/${reportId}/pdf`, '_blank');
     setToast({
       show: true,
       message: 'Opening sample report...',
@@ -229,6 +239,11 @@ const Catalog = () => {
   const handlePayIndividually = () => {
     setPaymentChoiceModal({ isOpen: false, reportId: null, reportTitle: '' });
     navigate(`/payment/report/${paymentChoiceModal.reportId}`);
+  };
+
+  const handleDismissBanner = () => {
+    setShowSubscriptionBanner(false);
+    localStorage.setItem('subscriptionBannerDismissed', 'true');
   };
 
   const filterAndSortReports = (reportsList) => {
@@ -343,6 +358,18 @@ const Catalog = () => {
         sampleReportsCount={freeReports.length}
         filteredResults={freeReports.length + paidReports.length}
       />
+
+      {/* Subscription Status Banner */}
+      <AnimatePresence>
+        {subscriptionStatus?.hasActive && 
+         subscriptionStatus?.availableReports?.total > 0 && 
+         showSubscriptionBanner && (
+          <SubscriptionBanner 
+            subscriptionStatus={subscriptionStatus}
+            onDismiss={handleDismissBanner}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Purchased Reports Section - Redesigned with ReportCard */}
       <AnimatePresence>
