@@ -112,7 +112,7 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                 </p>
 
                 {/* Stats - Compact Inline */}
-                <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-3">
                   {subscriptionStatus.availableReports.premium > 0 && (
                     <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-100">
                       <Crown className="h-3.5 w-3.5 text-blue-600" />
@@ -145,10 +145,12 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                     {translate('howToUse')}
                   </h4>
                   <p className="text-xs text-gray-600 leading-relaxed mb-2">
-                    {translate('clickPurchaseButton')} <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium">
+                    {translate('clickPurchaseButton')}{" "}
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium">
                       <ShoppingCart className="h-3 w-3" />
                       {translate('purchaseReportButton')}
-                    </span> {translate('chooseUseSubscription')}
+                    </span>{" "}
+                    {translate('chooseUseSubscription')}
                   </p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5 text-xs text-gray-600">
@@ -175,10 +177,10 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
           </div>
 
           {/* Mobile Info Section */}
-          <div className="lg:hidden mt-3 pt-3 border-t border-gray-200 space-y-3">
-            {/* Days Remaining - Mobile - Updated condition */}
+          <div className="lg:hidden mt-4 pt-4 border-t border-gray-200">
+            {/* Days Remaining - Mobile */}
             {daysRemaining !== null && daysRemaining !== undefined && (
-              <div className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border ${
+              <div className={`flex items-center justify-center gap-2 px-4 py-3 rounded-lg border mb-4 ${
                 daysRemaining <= 7 
                   ? 'bg-red-50 border-red-200' 
                   : 'bg-blue-50 border-blue-200'
@@ -186,7 +188,7 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                 <Clock className={`h-5 w-5 ${
                   daysRemaining <= 7 ? 'text-red-600' : 'text-blue-600'
                 }`} />
-                <div>
+                <div className="text-center">
                   <span className={`text-xl font-bold ${
                     daysRemaining <= 7 ? 'text-red-700' : 'text-blue-700'
                   }`}>
@@ -201,15 +203,35 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
               </div>
             )}
             
-            <div className="flex items-start gap-2 bg-blue-50 rounded-lg p-3">
-              <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
-              <div>
-                <p className="text-xs text-gray-700 leading-relaxed">
-                  {translate('clickPurchaseButton')} <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium">
-                    <ShoppingCart className="h-3 w-3" />
-                    {translate('purchaseReportButton')}
-                  </span> {translate('chooseUseSubscription')}
-                </p>
+            {/* How to use - Mobile */}
+            <div className="bg-blue-50 border border-blue-100 rounded-lg p-4">
+              <div className="flex items-start gap-3">
+                <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                <div className="flex-1">
+                  <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                    {translate('howToUse')}
+                  </h4>
+                  <div className="space-y-2">
+                    <p className="text-xs text-gray-700 leading-relaxed">
+                      {translate('clickPurchaseButton')}{" "}
+                      <span className="inline-flex items-center gap-1 px-2 py-1 bg-blue-600 text-white rounded text-xs font-medium">
+                        <ShoppingCart className="h-3 w-3" />
+                        {translate('purchaseReportButton')}
+                      </span>{" "}
+                      {translate('chooseUseSubscription')}
+                    </p>
+                    <div className="grid grid-cols-1 gap-1.5 mt-3">
+                      <div className="flex items-center gap-2 text-xs text-gray-700">
+                        <CheckCircle className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                        <span>{translate('noExtraPayment')}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-xs text-gray-700">
+                        <CheckCircle className="h-3.5 w-3.5 text-green-600 flex-shrink-0" />
+                        <span>{translate('instantAccess')}</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
