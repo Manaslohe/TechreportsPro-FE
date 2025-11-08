@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { Gift } from 'lucide-react';
 import axios from 'axios';
@@ -6,6 +6,26 @@ import Toast from '../../common/Toast';
 import UserSelector from './UserSelector';
 import AccessTypeSelector from './AccessTypeSelector';
 import RequestPreview from './RequestPreview';
+
+// Memoized loading component
+const LoadingSpinner = React.memo(() => (
+  <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50 flex items-center justify-center">
+    <div className="relative">
+      <div className="w-10 h-10 border-4 border-indigo-200 rounded-full animate-spin" />
+      <div className="absolute inset-0 w-10 h-10 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin" />
+    </div>
+  </div>
+));
+
+LoadingSpinner.displayName = 'LoadingSpinner';
+
+// Static subscription plans (moved outside component to prevent re-creation)
+const SUBSCRIPTION_PLANS = [
+  { id: 'basic', name: 'Basic', price: 355, duration: 1, totalReports: 7, premiumReports: 6, bluechipReports: 1 },
+  { id: 'plus', name: 'Plus', price: 855, duration: 3, totalReports: 21, premiumReports: 18, bluechipReports: 3 },
+  { id: 'pro', name: 'Pro', price: 1255, duration: 6, totalReports: 42, premiumReports: 36, bluechipReports: 6 },
+  { id: 'elite', name: 'Elite', price: 2555, duration: 12, totalReports: 84, premiumReports: 72, bluechipReports: 12 }
+];
 
 const AdminGrantAccess = () => {
   const [users, setUsers] = useState([]);
@@ -21,44 +41,77 @@ const AdminGrantAccess = () => {
   const [selectedReport, setSelectedReport] = useState(null);
   const [screenshot, setScreenshot] = useState(null);
 
-  const subscriptionPlans = [
-    { id: 'basic', name: 'Basic', price: 355, duration: 1, totalReports: 7, premiumReports: 6, bluechipReports: 1 },
-    { id: 'plus', name: 'Plus', price: 855, duration: 3, totalReports: 21, premiumReports: 18, bluechipReports: 3 },
-    { id: 'pro', name: 'Pro', price: 1255, duration: 6, totalReports: 42, premiumReports: 36, bluechipReports: 6 },
-    { id: 'elite', name: 'Elite', price: 2555, duration: 12, totalReports: 84, premiumReports: 72, bluechipReports: 12 }
-  ];
-
-  useEffect(() => {
-    fetchData();
+  // Memoized base URL and headers
+  const apiConfig = useMemo(() => {
+    const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+    const headers = {
+      Authorization: `Bearer ${localStorage.getItem('authToken')}`,
+      'x-admin-auth': 'true'
+    };
+    return { baseURL, headers };
   }, []);
 
-  const fetchData = async () => {
+  // Optimized data fetching with parallel requests and error handling
+  const fetchData = useCallback(async () => {
     try {
-      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
-      const headers = {
-        Authorization: `Bearer ${localStorage.getItem('authToken')}`,
-        'x-admin-auth': 'true'
-      };
-
-      const [usersRes, reportsRes] = await Promise.all([
+      const { baseURL, headers } = apiConfig;
+      
+      // Use Promise.allSettled for better error handling
+      const [usersResult, reportsResult] = await Promise.allSettled([
         axios.get(`${baseURL}/api/admin/users`, { headers }),
         axios.get(`${baseURL}/api/reports`, { headers })
       ]);
 
-      setUsers(usersRes.data);
-      setReports(reportsRes.data);
+      // Handle users result
+      if (usersResult.status === 'fulfilled') {
+        setUsers(usersResult.value.data || []);
+      } else {
+        console.error('Failed to fetch users:', usersResult.reason);
+        setUsers([]);
+      }
+
+      // Handle reports result
+      if (reportsResult.status === 'fulfilled') {
+        setReports(reportsResult.value.data || []);
+      } else {
+        console.error('Failed to fetch reports:', reportsResult.reason);
+        setReports([]);
+      }
+
+      // Show error only if both requests failed
+      if (usersResult.status === 'rejected' && reportsResult.status === 'rejected') {
+        setToast({
+          show: true,
+          message: 'Error fetching data. Please try refreshing the page.',
+          type: 'error'
+        });
+      }
     } catch (error) {
+      console.error('Unexpected error:', error);
       setToast({
         show: true,
-        message: 'Error fetching data',
+        message: 'Unexpected error occurred',
         type: 'error'
       });
     } finally {
       setLoading(false);
     }
-  };
+  }, [apiConfig]);
 
-  const handleSubmit = async (e) => {
+  useEffect(() => {
+    fetchData();
+  }, [fetchData]);
+
+  // Memoized form validation
+  const isFormValid = useMemo(() => {
+    return selectedUser && 
+           ((grantType === 'subscription' && selectedPlan) || 
+            (grantType === 'report' && selectedReport)) && 
+           screenshot;
+  }, [selectedUser, grantType, selectedPlan, selectedReport, screenshot]);
+
+  // Optimized submit handler
+  const handleSubmit = useCallback(async (e) => {
     e.preventDefault();
 
     if (!selectedUser) {
@@ -84,7 +137,7 @@ const AdminGrantAccess = () => {
     setSubmitting(true);
 
     try {
-      const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
+      const { baseURL } = apiConfig;
       
       const payloadData = {
         userId: selectedUser._id,
@@ -132,30 +185,29 @@ const AdminGrantAccess = () => {
     } finally {
       setSubmitting(false);
     }
-  };
+  }, [selectedUser, grantType, selectedPlan, selectedReport, screenshot, apiConfig]);
 
-  const resetForm = () => {
+  // Optimized reset function
+  const resetForm = useCallback(() => {
     setSelectedUser(null);
     setSelectedPlan(null);
     setSelectedReport(null);
     setScreenshot(null);
     setGrantType('subscription');
-  };
+  }, []);
 
+  // Optimized toast close handler
+  const handleToastClose = useCallback(() => {
+    setToast(prev => ({ ...prev, show: false }));
+  }, []);
+
+  // Early return for loading state
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50 flex items-center justify-center">
-        <div className="relative">
-          <div className="w-10 h-10 border-4 border-indigo-200 rounded-full animate-spin" />
-          <div className="absolute inset-0 w-10 h-10 border-4 border-transparent border-t-indigo-600 rounded-full animate-spin" />
-        </div>
-      </div>
-    );
+    return <LoadingSpinner />;
   }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-slate-50 to-indigo-50">
-      {/* Content - removed duplicate header */}
       <div className="px-4 sm:px-6 lg:px-8 py-8">
         <div className="max-w-7xl mx-auto">
           <div className="grid lg:grid-cols-2 gap-6">
@@ -182,7 +234,7 @@ const AdminGrantAccess = () => {
                   selectedPlan={selectedPlan}
                   selectedReport={selectedReport}
                   screenshot={screenshot}
-                  subscriptionPlans={subscriptionPlans}
+                  subscriptionPlans={SUBSCRIPTION_PLANS}
                   reports={reports}
                   onTypeChange={setGrantType}
                   onPlanSelect={setSelectedPlan}
@@ -195,13 +247,14 @@ const AdminGrantAccess = () => {
                   <button
                     type="button"
                     onClick={resetForm}
-                    className="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                    disabled={submitting}
+                    className="flex-1 px-4 py-3 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
                     Reset
                   </button>
                   <button
                     type="submit"
-                    disabled={submitting}
+                    disabled={submitting || !isFormValid}
                     className="flex-1 px-4 py-3 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
                   >
                     {submitting ? (
@@ -233,10 +286,10 @@ const AdminGrantAccess = () => {
         isVisible={toast.show}
         message={toast.message}
         type={toast.type}
-        onClose={() => setToast({ ...toast, show: false })}
+        onClose={handleToastClose}
       />
     </div>
   );
 };
 
-export default AdminGrantAccess;
+export default React.memo(AdminGrantAccess);

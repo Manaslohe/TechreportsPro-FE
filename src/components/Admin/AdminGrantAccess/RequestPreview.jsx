@@ -1,74 +1,120 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckCircle2, AlertCircle } from 'lucide-react';
+import { User, CreditCard, FileText, Image, CheckCircle } from 'lucide-react';
 
 const RequestPreview = ({ selectedUser, grantType, selectedPlan, selectedReport, screenshot }) => {
+  // Early return if no data to preview
+  if (!selectedUser && !selectedPlan && !selectedReport && !screenshot) {
+    return (
+      <motion.div
+        initial={{ opacity: 0, x: 20 }}
+        animate={{ opacity: 1, x: 0 }}
+        className="bg-white rounded-xl border border-slate-200 shadow-sm p-6"
+      >
+        <h2 className="text-lg font-semibold text-slate-900 mb-4">Request Preview</h2>
+        <div className="text-center py-8">
+          <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
+            <CheckCircle className="w-8 h-8 text-slate-400" />
+          </div>
+          <p className="text-slate-500">
+            Fill out the form to see preview
+          </p>
+        </div>
+      </motion.div>
+    );
+  }
+
   return (
     <motion.div
       initial={{ opacity: 0, x: 20 }}
       animate={{ opacity: 1, x: 0 }}
-      className="bg-white rounded-xl border border-slate-200 shadow-sm p-6"
+      className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 h-fit"
     >
-      <h2 className="text-lg font-semibold text-slate-900 mb-6">Preview</h2>
+      <h2 className="text-lg font-semibold text-slate-900 mb-6">Request Preview</h2>
       
       <div className="space-y-4">
-        <div className="p-4 bg-slate-50 rounded-lg">
-          <p className="text-sm text-slate-600 mb-1">Selected User</p>
-          {selectedUser ? (
-            <div className="flex items-center gap-3 mt-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-violet-600 rounded-lg flex items-center justify-center text-white font-semibold text-sm">
-                {selectedUser.firstName[0]}{selectedUser.lastName[0]}
+        {/* User Info */}
+        {selectedUser && (
+          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="flex items-center gap-3 mb-2">
+              <User className="w-4 h-4 text-slate-600" />
+              <span className="text-sm font-medium text-slate-700">Selected User</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-indigo-500 to-indigo-600 rounded-lg flex items-center justify-center text-white text-sm font-bold">
+                {selectedUser.firstName?.[0]?.toUpperCase() || 'U'}
               </div>
               <div>
-                <p className="font-medium text-slate-900">{selectedUser.firstName} {selectedUser.lastName}</p>
-                <p className="text-sm text-slate-600">{selectedUser.email}</p>
+                <p className="font-medium text-slate-900">
+                  {selectedUser.firstName} {selectedUser.lastName}
+                </p>
+                <p className="text-sm text-slate-500">{selectedUser.email}</p>
               </div>
             </div>
-          ) : (
-            <p className="text-sm text-slate-400 mt-2">No user selected</p>
-          )}
-        </div>
+          </div>
+        )}
 
-        <div className="p-4 bg-slate-50 rounded-lg">
-          <p className="text-sm text-slate-600 mb-1">Access Type</p>
-          <p className="font-medium text-slate-900 capitalize mt-2">{grantType}</p>
-        </div>
-
-        <div className="p-4 bg-slate-50 rounded-lg">
-          <p className="text-sm text-slate-600 mb-1">Selected Item</p>
-          {grantType === 'subscription' && selectedPlan ? (
-            <div className="mt-2">
-              <p className="font-medium text-slate-900">{selectedPlan.name} Plan</p>
-              <p className="text-sm text-slate-600 mt-1">
-                ₹{selectedPlan.price} • {selectedPlan.duration} month{selectedPlan.duration > 1 ? 's' : ''}
-              </p>
+        {/* Grant Type & Details */}
+        {(selectedPlan || selectedReport) && (
+          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="flex items-center gap-3 mb-3">
+              {grantType === 'subscription' ? (
+                <CreditCard className="w-4 h-4 text-slate-600" />
+              ) : (
+                <FileText className="w-4 h-4 text-slate-600" />
+              )}
+              <span className="text-sm font-medium text-slate-700">
+                {grantType === 'subscription' ? 'Subscription Plan' : 'Report Access'}
+              </span>
             </div>
-          ) : grantType === 'report' && selectedReport ? (
-            <div className="mt-2">
-              <p className="font-medium text-slate-900">{selectedReport.title}</p>
-              <p className="text-sm text-slate-600 mt-1">{selectedReport.sector}</p>
+            
+            {selectedPlan && (
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-900">{selectedPlan.name}</span>
+                  <span className="font-bold text-indigo-600">₹{selectedPlan.price}</span>
+                </div>
+                <div className="text-sm text-slate-600">
+                  <p>{selectedPlan.duration} month{selectedPlan.duration > 1 ? 's' : ''} access</p>
+                  <p>{selectedPlan.totalReports} reports included</p>
+                </div>
+              </div>
+            )}
+            
+            {selectedReport && (
+              <div className="space-y-2">
+                <div className="flex justify-between">
+                  <span className="font-medium text-slate-900">{selectedReport.title}</span>
+                  <span className="font-bold text-indigo-600">₹555</span>
+                </div>
+                <p className="text-sm text-slate-600">{selectedReport.category}</p>
+              </div>
+            )}
+          </div>
+        )}
+
+        {/* Payment Proof */}
+        {screenshot && (
+          <div className="p-4 bg-slate-50 rounded-lg border border-slate-200">
+            <div className="flex items-center gap-3 mb-2">
+              <Image className="w-4 h-4 text-slate-600" />
+              <span className="text-sm font-medium text-slate-700">Payment Proof</span>
             </div>
-          ) : (
-            <p className="text-sm text-slate-400 mt-2">No {grantType} selected</p>
-          )}
-        </div>
+            <div className="flex items-center gap-2">
+              <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+              <span className="text-sm text-green-600 font-medium">Screenshot uploaded</span>
+            </div>
+          </div>
+        )}
 
-        <div className="p-4 bg-slate-50 rounded-lg">
-          <p className="text-sm text-slate-600 mb-1">Payment Proof</p>
-          {screenshot ? (
-            <CheckCircle2 className="w-5 h-5 text-emerald-600 mt-2" />
-          ) : (
-            <p className="text-sm text-slate-400 mt-2">No image uploaded</p>
-          )}
-        </div>
-
-        <div className="p-4 bg-amber-50 border border-amber-200 rounded-lg flex items-start gap-2">
-          <AlertCircle className="w-5 h-5 text-amber-600 flex-shrink-0 mt-0.5" />
-          <div>
-            <p className="text-sm font-medium text-amber-900 mb-1">Approval Required</p>
-            <p className="text-sm text-amber-700">
-              This request will be sent for approval. The user will get access only after you approve it from the Requests section.
-            </p>
+        {/* Summary */}
+        <div className="pt-4 border-t border-slate-200">
+          <h3 className="font-medium text-slate-900 mb-2">Request Summary</h3>
+          <div className="text-sm text-slate-600 space-y-1">
+            <p>• User: {selectedUser ? `${selectedUser.firstName} ${selectedUser.lastName}` : 'Not selected'}</p>
+            <p>• Type: {grantType === 'subscription' ? 'Subscription Access' : 'Single Report Access'}</p>
+            <p>• Amount: ₹{grantType === 'subscription' ? selectedPlan?.price || 0 : 555}</p>
+            <p>• Payment Proof: {screenshot ? 'Uploaded' : 'Not uploaded'}</p>
           </div>
         </div>
       </div>
@@ -76,4 +122,4 @@ const RequestPreview = ({ selectedUser, grantType, selectedPlan, selectedReport,
   );
 };
 
-export default RequestPreview;
+export default React.memo(RequestPreview);
