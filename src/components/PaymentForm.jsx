@@ -462,14 +462,9 @@ const PaymentForm = () => {
                         <p className="text-sm text-gray-600 text-center px-4 mb-3">
                           QR Code unavailable
                         </p>
-                        {/* Replaced button with proper UPI app opening */}
-                        <button
-                          type="button"
-                          onClick={openUpiApp}
-                          className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-                        >
-                          Pay with UPI App
-                        </button>
+                        <p className="text-xs text-gray-500 text-center px-4">
+                          Please use the UPI ID below to make payment
+                        </p>
                       </div>
                     )}
                   </div>
@@ -508,14 +503,9 @@ const PaymentForm = () => {
                     </div>
                     
                     {isMobile && (
-                      <button
-                        type="button"
-                        onClick={openUpiApp}
-                        className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
-                      >
-                        <Smartphone size={18} />
-                        {translate('payUsingUpiApp')}
-                      </button>
+                      <div className="text-center">
+                        {/* Removed the "Pay Using UPI App" button from mobile view */}
+                      </div>
                     )}
                     
                     <div className="flex items-start gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
