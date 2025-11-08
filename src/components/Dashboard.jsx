@@ -223,6 +223,28 @@ const Dashboard = () => {
 
   const { user = {}, subscription = { hasActive: false }, pendingRequests = [], purchasedReports = [] } = dashboardData;
 
+  // Add expired subscription handling in the frontend
+  const ExpiredSubscriptionBanner = ({ subscription, onRenew }) => (
+    <div className="mb-6 bg-amber-50 border border-amber-200 rounded-lg p-4">
+      <div className="flex items-start gap-3">
+        <AlertCircle className="w-5 h-5 text-amber-600 mt-0.5 flex-shrink-0" />
+        <div className="flex-1">
+          <h3 className="font-semibold text-amber-900 mb-1">Subscription Expired</h3>
+          <p className="text-sm text-amber-700 mb-3">
+            Your {subscription.current?.planName} subscription expired on {new Date(subscription.current?.expiryDate).toLocaleDateString()}.
+            Renew to continue accessing premium reports.
+          </p>
+          <button
+            onClick={onRenew}
+            className="px-4 py-2 bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors text-sm font-medium"
+          >
+            Renew Subscription
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
       {/* Hero Header */}
