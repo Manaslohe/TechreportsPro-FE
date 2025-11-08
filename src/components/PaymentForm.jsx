@@ -276,21 +276,74 @@ const PaymentForm = () => {
   
   // Build a UPI deep link that UPI apps can open directly via an anchor tag
   const buildUpiLink = () => {
+    const amount = getAmount();
+    const description = encodeURIComponent(getDescription());
+    const merchantName = encodeURIComponent('TechReportsPro');
+    
+    // Try multiple UPI URL schemes for better compatibility
     const params = new URLSearchParams({
       pa: UPI_ID,
-      pn: 'TechReportsPro',
-      am: String(getAmount()),
+      pn: merchantName,
+      am: amount,
       cu: 'INR',
-      tn: getDescription()
+      tn: description
     });
+    
     return `upi://pay?${params.toString()}`;
   };
 
-  const openUpiApp = () => {
-    // Retained for compatibility, now uses the helper
-    window.location.href = buildUpiLink();
+  const buildAlternateUpiLink = () => {
+    // Alternative format that some apps prefer
+    const amount = getAmount();
+    const description = encodeURIComponent(getDescription());
+    return `phonepe://pay?pa=${UPI_ID}&pn=TechReportsPro&am=${amount}&cu=INR&tn=${description}`;
   };
-  
+
+  const openUpiApp = () => {
+    const primaryLink = buildUpiLink();
+    const fallbackLink = buildAlternateUpiLink();
+    
+    // Try to open UPI app with timeout fallback
+    const tryOpenUpiApp = (link) => {
+      return new Promise((resolve, reject) => {
+        const iframe = document.createElement('iframe');
+        iframe.style.display = 'none';
+        iframe.src = link;
+        document.body.appendChild(iframe);
+        
+        const timeout = setTimeout(() => {
+          document.body.removeChild(iframe);
+          reject(new Error('Timeout'));
+        }, 2000);
+        
+        // Clean up after successful attempt
+        setTimeout(() => {
+          if (document.body.contains(iframe)) {
+            document.body.removeChild(iframe);
+          }
+          clearTimeout(timeout);
+          resolve();
+        }, 1000);
+      });
+    };
+
+    // First try primary UPI link
+    tryOpenUpiApp(primaryLink)
+      .catch(() => {
+        // If primary fails, try fallback
+        return tryOpenUpiApp(fallbackLink);
+      })
+      .catch(() => {
+        // If both fail, show copy UPI ID message
+        setToast({
+          show: true,
+          message: 'Unable to open UPI app. Please copy the UPI ID manually.',
+          type: 'info',
+        });
+        copyUpiId();
+      });
+  };
+
   const toggleViewMode = () => {
     setViewMode(viewMode === 'qr' ? 'upload' : 'qr');
   };
@@ -409,13 +462,14 @@ const PaymentForm = () => {
                         <p className="text-sm text-gray-600 text-center px-4 mb-3">
                           QR Code unavailable
                         </p>
-                        {/* Replaced button with anchor tag that opens UPI app */}
-                        <a
-                          href={buildUpiLink()}
+                        {/* Replaced button with proper UPI app opening */}
+                        <button
+                          type="button"
+                          onClick={openUpiApp}
                           className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           Pay with UPI App
-                        </a>
+                        </button>
                       </div>
                     )}
                   </div>
@@ -454,14 +508,14 @@ const PaymentForm = () => {
                     </div>
                     
                     {isMobile && (
-                      /* Replaced button with anchor tag that opens UPI app */
-                      <a
-                        href={buildUpiLink()}
+                      <button
+                        type="button"
+                        onClick={openUpiApp}
                         className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <Smartphone size={18} />
                         {translate('payUsingUpiApp')}
-                      </a>
+                      </button>
                     )}
                     
                     <div className="flex items-start gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">
