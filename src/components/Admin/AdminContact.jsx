@@ -77,16 +77,15 @@ const AdminContact = () => {
 
   return (
     <div className="h-full flex flex-col bg-gray-50">
-      {/* Modern Header */}
+      {/* Stats and Search Section */}
       <motion.div 
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5 }}
         className="bg-white border-b border-gray-100"
       >
-        <div className="max-w-7xl mx-auto px-6 py-8">
-        
-        {/* Search Bar */}
+        <div className="max-w-7xl mx-auto px-6 py-6">
+          {/* Search Bar */}
           <div className="mb-6">
             <div className="relative max-w-md">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />

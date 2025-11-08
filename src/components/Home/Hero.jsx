@@ -236,8 +236,8 @@ const HomePage = () => {
               className="relative flex justify-center lg:justify-end order-1 lg:order-2 w-full"
             >
               <div className="relative w-full max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-none">
-                {/* Hero Video - Optimized for mobile */}
-                <div className="relative z-10 w-full h-40 sm:h-56 md:h-72 lg:h-80 xl:h-[20rem] 2xl:h-[24rem] group flex justify-center">
+                {/* Hero Video - Moved up for better positioning */}
+                <div className="relative z-10 w-full h-40 sm:h-56 md:h-72 lg:h-80 xl:h-[20rem] 2xl:h-[24rem] group flex justify-center -translate-y-2 sm:-translate-y-12 md:-translate-y-16 lg:-translate-y-10">
                   <motion.img
                     whileHover={{ scale: 0.55, rotate: 1 }}
                     transition={{ duration: 0.3 }}
@@ -261,7 +261,7 @@ const HomePage = () => {
                   `}
                 </style>
 
-                {/* Floating Cards - Enhanced mobile design */}
+                {/* Floating Cards - Keeping original positions relative to container */}
                 <motion.div
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
@@ -346,7 +346,7 @@ const HomePage = () => {
           variants={scrollDownVariants}
           initial="hidden"
           animate="visible"
-          className="absolute bottom-4 sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center cursor-pointer z-10"
+          className="hidden sm:flex sm:absolute sm:bottom-6 lg:bottom-8 left-1/2 transform -translate-x-1/2 flex-col items-center sm:cursor-pointer z-10 pointer-events-none sm:pointer-events-auto"
           onClick={handleScrollDown}
         >
           <motion.div

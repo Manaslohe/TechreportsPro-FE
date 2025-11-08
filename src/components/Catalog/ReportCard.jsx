@@ -54,7 +54,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
       return (
         <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-green-100 text-green-700 border border-green-200 shadow-sm">
           <Gift className="w-3 h-3" />
-          FREE
+          {translate('free')}
         </span>
       );
     }
@@ -62,7 +62,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
       return (
         <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-purple-100 text-purple-700 border border-purple-200 shadow-sm">
           <Gem className="w-3 h-3" />
-          BLUECHIP
+          {translate('bluechip')}
         </span>
       );
     }
@@ -70,7 +70,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
       return (
         <span className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-semibold bg-blue-100 text-blue-700 border border-blue-200 shadow-sm">
           <Crown className="w-3 h-3" />
-          PREMIUM
+          {translate('premium')}
         </span>
       );
     }
@@ -119,7 +119,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                 {/* Owned Badge - Compact */}
                 <span className="inline-flex items-center gap-1 px-2 py-1 rounded-lg text-xs font-semibold bg-emerald-50 text-emerald-700 border border-emerald-200 flex-shrink-0">
                   <CheckCircle className="w-3 h-3" />
-                  <span className="hidden sm:inline">Owned</span>
+                  <span className="hidden sm:inline">{translate('owned')}</span>
                 </span>
               </div>
               
@@ -134,12 +134,12 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                 {/* Text Badge for Bluechip or Premium */}
                 {report.reportType === 'bluechip' && (
                   <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-purple-100 text-purple-700 border border-purple-200">
-                    Bluechip
+                    {translate('bluechip')}
                   </span>
                 )}
                 {report.reportType === 'premium' && (
                   <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-medium bg-blue-100 text-blue-700 border border-blue-200">
-                    Premium
+                    {translate('premium')}
                   </span>
                 )}
               </div>
@@ -171,7 +171,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
               className="flex items-center justify-center gap-2 flex-1 px-4 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl hover:from-blue-700 hover:to-blue-800 transition-all duration-300 font-semibold shadow-md hover:shadow-lg text-sm group/btn"
             >
               <Eye className="h-4 w-4 group-hover/btn:scale-110 transition-transform" />
-              <span>View Report</span>
+              <span>{translate('viewReport')}</span>
             </Link>
             {onDownloadPurchased && (
               <button
@@ -191,7 +191,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
     );
   }
 
-  // List View - Update with report type badges
+  // List View
   if (viewMode === 'list') {
     return (
       <motion.div
@@ -263,7 +263,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
                       className="flex items-center justify-center gap-2 px-4 py-2.5 bg-green-600 text-white rounded-xl hover:bg-green-700 transition-all shadow-lg shadow-green-500/30 font-medium"
                     >
                       <Eye size={18} />
-                      View Sample
+                      {translate('viewSample')}
                     </motion.button>
                   ) : report.isPurchased ? (
                     <Link
@@ -296,7 +296,7 @@ const ReportCard = React.memo(({ report, type = 'paid', onPurchase, onSampleDown
     );
   }
 
-  // Grid View - Update with report type badges (similar changes to list view)
+  // Grid View
   return (
     <motion.div
       variants={cardVariants}

@@ -274,10 +274,21 @@ const PaymentForm = () => {
     });
   };
   
+  // Build a UPI deep link that UPI apps can open directly via an anchor tag
+  const buildUpiLink = () => {
+    const params = new URLSearchParams({
+      pa: UPI_ID,
+      pn: 'TechReportsPro',
+      am: String(getAmount()),
+      cu: 'INR',
+      tn: getDescription()
+    });
+    return `upi://pay?${params.toString()}`;
+  };
+
   const openUpiApp = () => {
-    // Format UPI deep link
-    const upiUrl = `upi://pay?pa=${UPI_ID}&pn=TechReportsPro&am=${getAmount()}&cu=INR&tn=${encodeURIComponent(getDescription())}`;
-    window.location.href = upiUrl;
+    // Retained for compatibility, now uses the helper
+    window.location.href = buildUpiLink();
   };
   
   const toggleViewMode = () => {
@@ -398,13 +409,13 @@ const PaymentForm = () => {
                         <p className="text-sm text-gray-600 text-center px-4 mb-3">
                           QR Code unavailable
                         </p>
-                        <button
-                          type="button"
-                          onClick={openUpiApp}
+                        {/* Replaced button with anchor tag that opens UPI app */}
+                        <a
+                          href={buildUpiLink()}
                           className="px-4 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
                         >
                           Pay with UPI App
-                        </button>
+                        </a>
                       </div>
                     )}
                   </div>
@@ -443,14 +454,14 @@ const PaymentForm = () => {
                     </div>
                     
                     {isMobile && (
-                      <button 
-                        type="button"
-                        onClick={openUpiApp}
+                      /* Replaced button with anchor tag that opens UPI app */
+                      <a
+                        href={buildUpiLink()}
                         className="w-full py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors flex items-center justify-center gap-2"
                       >
                         <Smartphone size={18} />
                         {translate('payUsingUpiApp')}
-                      </button>
+                      </a>
                     )}
                     
                     <div className="flex items-start gap-2 text-sm text-gray-600 bg-blue-50 p-3 rounded-lg">

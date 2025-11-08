@@ -1,8 +1,11 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { X, Sparkles, Crown, Gem, CheckCircle, Info, Clock, ShoppingCart, Calendar } from 'lucide-react';
+import { useTranslation } from '../../contexts/TranslationContext';
 
 const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
+  const { translate } = useTranslation();
+
   if (!subscriptionStatus || !subscriptionStatus.availableReports) {
     return null;
   }
@@ -70,11 +73,11 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
               <div className="flex-1 min-w-0">
                 <div className="flex items-start sm:items-center gap-2 mb-2 flex-wrap">
                   <h3 className="text-base sm:text-lg font-bold text-gray-900">
-                    Active Subscription
+                    {translate('activeSubscription')}
                   </h3>
                   <div className="flex items-center gap-2 flex-wrap">
                     <span className="px-2.5 py-1 bg-green-100 text-green-700 text-xs font-semibold rounded-full">
-                      ACTIVE
+                      {translate('active')}
                     </span>
                   </div>
                 </div>
@@ -84,7 +87,7 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                   {expiryDate && (
                     <div className="flex items-center gap-1.5 text-gray-600">
                       <Calendar className="h-4 w-4" />
-                      <span>Expires on <span className="font-semibold">{formatDate(expiryDate)}</span></span>
+                      <span>{translate('expiresOn')} <span className="font-semibold">{formatDate(expiryDate)}</span></span>
                     </div>
                   )}
                   {daysRemaining !== null && daysRemaining !== undefined && (
@@ -95,13 +98,17 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                     }`}>
                       <Clock className="h-3.5 w-3.5" />
                       <span className="font-bold">{daysRemaining}</span>
-                      <span>{daysRemaining === 1 ? 'day' : 'days'} left</span>
+                      <span>{daysRemaining === 1 ? translate('dayLeft') : translate('daysLeft')}</span>
                     </span>
                   )}
                 </div>
 
                 <p className="text-sm text-gray-600 mb-3">
-                  You have {subscriptionStatus.availableReports.total} report{subscriptionStatus.availableReports.total !== 1 ? 's' : ''} available in your subscription
+                  {translate('reportsAvailableInSubscription', {
+                    count: subscriptionStatus.availableReports.total,
+                    plural: subscriptionStatus.availableReports.total !== 1 ? 's' : '',
+                    plural2: subscriptionStatus.availableReports.total !== 1 ? 'हैं' : 'है'
+                  })}
                 </p>
 
                 {/* Stats - Compact Inline */}
@@ -110,7 +117,7 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                     <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 rounded-lg border border-blue-100">
                       <Crown className="h-3.5 w-3.5 text-blue-600" />
                       <span className="text-xs font-semibold text-blue-700">
-                        {subscriptionStatus.availableReports.premium} Premium
+                        {subscriptionStatus.availableReports.premium} {translate('premium')}
                       </span>
                     </div>
                   )}
@@ -118,7 +125,7 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                     <div className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-purple-50 rounded-lg border border-purple-100">
                       <Gem className="h-3.5 w-3.5 text-purple-600" />
                       <span className="text-xs font-semibold text-purple-700">
-                        {subscriptionStatus.availableReports.bluechip} Bluechip
+                        {subscriptionStatus.availableReports.bluechip} {translate('bluechip')}
                       </span>
                     </div>
                   )}
@@ -128,9 +135,6 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
 
             {/* Right Side - Info Card (Desktop Only) */}
             <div className="hidden lg:flex flex-col gap-3 max-w-xs">
-              {/* Days Remaining Card - Prominent - Updated condition */}
-             
- 
               {/* Info Card */}
               <div className="flex items-start gap-3 bg-blue-50 border border-blue-100 rounded-lg p-3">
                 <div className="flex-shrink-0 p-1.5 bg-blue-100 rounded-md">
@@ -138,22 +142,22 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                 </div>
                 <div className="flex-1 min-w-0">
                   <h4 className="text-xs font-semibold text-gray-900 mb-1">
-                    How to Use
+                    {translate('howToUse')}
                   </h4>
                   <p className="text-xs text-gray-600 leading-relaxed mb-2">
-                    Click the <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium">
+                    {translate('clickPurchaseButton')} <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium">
                       <ShoppingCart className="h-3 w-3" />
-                      Purchase Report
-                    </span> button and choose "Use Subscription"
+                      {translate('purchaseReportButton')}
+                    </span> {translate('chooseUseSubscription')}
                   </p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5 text-xs text-gray-600">
                       <CheckCircle className="h-3 w-3 text-green-600" />
-                      <span>No extra payment</span>
+                      <span>{translate('noExtraPayment')}</span>
                     </div>
                     <div className="flex items-center gap-1.5 text-xs text-gray-600">
                       <CheckCircle className="h-3 w-3 text-green-600" />
-                      <span>Instant access</span>
+                      <span>{translate('instantAccess')}</span>
                     </div>
                   </div>
                 </div>
@@ -191,7 +195,7 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
                   <span className={`text-sm font-medium ml-1 ${
                     daysRemaining <= 7 ? 'text-red-600' : 'text-blue-600'
                   }`}>
-                    {daysRemaining === 1 ? 'day left' : 'days left'}
+                    {daysRemaining === 1 ? translate('dayLeft') : translate('daysLeft')}
                   </span>
                 </div>
               </div>
@@ -201,10 +205,10 @@ const SubscriptionBanner = ({ subscriptionStatus, onDismiss }) => {
               <Info className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
               <div>
                 <p className="text-xs text-gray-700 leading-relaxed">
-                  Click the <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium">
+                  {translate('clickPurchaseButton')} <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-blue-600 text-white rounded text-xs font-medium">
                     <ShoppingCart className="h-3 w-3" />
-                    Purchase Report
-                  </span> button and choose <span className="font-semibold">"Use Subscription"</span> to access it for free. No additional payment required!
+                    {translate('purchaseReportButton')}
+                  </span> {translate('chooseUseSubscription')}
                 </p>
               </div>
             </div>
