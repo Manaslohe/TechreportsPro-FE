@@ -93,8 +93,10 @@ const AdminReport = () => {
             console.error('Invalid report ID for preview');
             return;
         }
+
+        // Include authentication token in the preview URL if required
         const token = localStorage.getItem('authToken');
-        const url = `${axios.defaults.baseURL || ''}/api/reports/${reportId}/pdf?token=${encodeURIComponent(token)}`;
+        const url = `${axios.defaults.baseURL || ''}/api/reports/${reportId}/pdf${token ? `?token=${encodeURIComponent(token)}` : ''}`;
         setPreviewFileUrl(url);
         setPreviewReport({
             id: reportId,
@@ -117,6 +119,10 @@ const AdminReport = () => {
             const baseURL = import.meta.env.VITE_REACT_APP_API_BASE_URL;
             const response = await axios.get(`${baseURL}/api/reports/${reportId}/download`, {
                 responseType: 'blob',
+                // Include authentication token if required by the server
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem('authToken')}` // Ensure the token is sent
+                }
             });
 
             const url = window.URL.createObjectURL(new Blob([response.data]));

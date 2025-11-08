@@ -48,40 +48,40 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
 
   const renderPreview = () => {
     if (previewError) {
-      return (
-        <div className="flex flex-col items-center justify-center h-full bg-white rounded-lg border border-slate-200 p-6">
-          <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
-            <AlertTriangle size={32} className="text-amber-600" />
-          </div>
-          <h3 className="text-xl font-medium text-slate-800 mb-2">{translate('previewBlocked')}</h3>
-          <p className="text-slate-600 text-center mb-6 max-w-md">
-            {translate('previewBlockedMessage')}
-          </p>
-          <div className="flex flex-wrap gap-3 justify-center">
-            {onDownload && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onDownload();
-                }}
-                className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Download size={18} />
-                {translate('downloadPdf')}
-              </button>
-            )}
-            <a 
-              href={fileUrl}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
-            >
-              <ExternalLink size={18} />
-              {translate('openInNewTab')}
-            </a>
-          </div>
-        </div>
-      );
+        return (
+            <div className="flex flex-col items-center justify-center h-full bg-white rounded-lg border border-slate-200 p-6">
+                <div className="w-16 h-16 rounded-full bg-amber-100 flex items-center justify-center mb-4">
+                    <AlertTriangle size={32} className="text-amber-600" />
+                </div>
+                <h3 className="text-xl font-medium text-slate-800 mb-2">{translate('previewBlocked')}</h3>
+                <p className="text-slate-600 text-center mb-6 max-w-md">
+                    {translate('previewBlockedMessage')}
+                </p>
+                <div className="flex flex-wrap gap-3 justify-center">
+                    {onDownload && (
+                        <button
+                            onClick={(e) => {
+                                e.stopPropagation();
+                                onDownload();
+                            }}
+                            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                            <Download size={18} />
+                            {translate('downloadPdf')}
+                        </button>
+                    )}
+                    <a 
+                        href={fileUrl} // Ensure direct access to the file URL
+                        target="_blank" 
+                        rel="noopener noreferrer"
+                        className="flex items-center gap-2 px-4 py-2.5 border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-50 transition-colors"
+                    >
+                        <ExternalLink size={18} />
+                        {translate('openInNewTab')}
+                    </a>
+                </div>
+            </div>
+        );
     }
 
     // Render based on the current preview method
@@ -89,18 +89,18 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
       case 'iframe':
         return (
           <iframe
-            src={fileUrl}
+            src={fileUrl} // Ensure direct access to the file URL
             title="PDF Preview"
             className="w-full h-full border border-slate-200 rounded-lg bg-white shadow-sm"
             onError={handlePreviewError}
             onLoad={handlePreviewLoad}
-            referrerPolicy="no-referrer"
+            referrerPolicy="no-referrer" // Ensure no referrer is sent
           />
         );
       case 'object':
         return (
           <object
-            data={fileUrl}
+            data={fileUrl} // Ensure direct access to the file URL
             type="application/pdf"
             className="w-full h-full border border-slate-200 rounded-lg bg-white shadow-sm"
             onError={handlePreviewError}
@@ -114,7 +114,7 @@ const ReportPreview = ({ fileUrl, onClose, reportTitle, onDownload }) => {
       case 'embed':
         return (
           <embed
-            src={fileUrl}
+            src={fileUrl} // Ensure direct access to the file URL
             type="application/pdf"
             className="w-full h-full border border-slate-200 rounded-lg bg-white shadow-sm"
             onError={handlePreviewError}
