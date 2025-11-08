@@ -4,7 +4,7 @@ import {
   MessageSquare, User, Calendar, Clock, CheckCircle, XCircle, 
   Search, Filter, Eye, DollarSign, FileText, X, ArrowRight,
   ChevronDown, ExternalLink, AlertCircle, Clipboard, Shield,
-  TrendingUp, Bell, Send
+  TrendingUp, Bell, Send, Sparkles, Crown, Gem
 } from 'lucide-react';
 import axios from 'axios';
 import Toast from '../common/Toast';
@@ -464,6 +464,24 @@ const RequestCard = React.memo(({
 
   const statusConfig = getStatusConfig(request.status);
 
+  const getReportTypeBadge = (reportType) => {
+    const badges = {
+      free: { color: 'bg-emerald-100 text-emerald-700 border-emerald-200', icon: Sparkles, label: 'Free' },
+      premium: { color: 'bg-indigo-100 text-indigo-700 border-indigo-200', icon: Crown, label: 'Premium' },
+      bluechip: { color: 'bg-purple-100 text-purple-700 border-purple-200', icon: Gem, label: 'Bluechip' }
+    };
+    
+    const badge = badges[reportType] || badges.premium;
+    const Icon = badge.icon;
+    
+    return (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium border ${badge.color}`}>
+        <Icon size={12} />
+        {badge.label}
+      </span>
+    );
+  };
+
   return (
     <motion.div
       variants={variants}
@@ -479,12 +497,18 @@ const RequestCard = React.memo(({
             <div className="flex-1 min-w-0">
               <div className="flex flex-wrap items-center gap-2 mb-2">
                 <h3 className="font-semibold text-slate-900 line-clamp-1 max-w-xs">
-                  {request.report?.title || "Payment Request"}
+                  {request.report?.title || request.subscriptionPlan?.planName || "Payment Request"}
                 </h3>
                 <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium border ${statusConfig.badgeClass}`}>
                   <statusConfig.icon size={12} />
                   {request.status.charAt(0).toUpperCase() + request.status.slice(1)}
                 </span>
+                {request.isAdminGrant && (
+                  <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-medium bg-violet-100 text-violet-700 border border-violet-200">
+                    <Shield size={12} />
+                    Admin
+                  </span>
+                )}
               </div>
               <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 text-xs sm:text-sm text-slate-600">
                 <div className="flex items-center gap-1.5 min-w-0">
@@ -549,8 +573,15 @@ const RequestCard = React.memo(({
                   </h4>
                   <div className="bg-white rounded-lg border border-slate-200 p-4 space-y-3">
                     <div>
-                      <p className="text-xs text-slate-500 font-medium mb-1">Report Title</p>
-                      <p className="text-sm text-slate-900">{request.report?.title || "Unnamed Report"}</p>
+                      <p className="text-xs text-slate-500 font-medium mb-1">
+                        {request.paymentType === 'subscription' ? 'Subscription Plan' : 'Report Title'}
+                      </p>
+                      <div className="flex items-center gap-2">
+                        <p className="text-sm text-slate-900">
+                          {request.report?.title || request.subscriptionPlan?.planName || "Unnamed"}
+                        </p>
+                        {request.paymentType === 'report' && request.report && getReportTypeBadge(request.report.reportType || 'premium')}
+                      </div>
                     </div>
                     <div>
                       <p className="text-xs text-slate-500 font-medium mb-1">Requested By</p>

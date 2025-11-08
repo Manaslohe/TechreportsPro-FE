@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { LayoutDashboard, FileText, Users, ClipboardList, Mail, X, BarChart3, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, FileText, Users, ClipboardList, Mail, X, BarChart3, ChevronRight, Gift } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 const navItems = [
@@ -8,6 +8,7 @@ const navItems = [
   { icon: Users, label: 'Users', path: '/admin/users' },
   { icon: FileText, label: 'Reports', path: '/admin/reports' },
   { icon: ClipboardList, label: 'Requests', path: '/admin/requests' },
+  { icon: Gift, label: 'Submit for Approval', path: '/admin/grant-access' },
   { icon: Mail, label: 'Contacts', path: '/admin/contacts' },
 ];
 

@@ -18,6 +18,7 @@ import axios from 'axios';
 import AdminRequest from './components/Admin/AdminRequest';
 import AdminContact from './components/Admin/AdminContact';
 import AdminUser from './components/Admin/AdminUser';
+import AdminGrantAccess from './components/Admin/AdminGrantAccess'; // This now imports from index.jsx
 import { TranslationProvider } from './contexts/TranslationContext';
 import PrivacyPolicy from './components/Legal/PrivacyPolicy';
 import TermsAndConditions from './components/Legal/TermsAndConditions';
@@ -172,6 +173,7 @@ function App() {
                 <Route path="requests" element={<AdminRequest />} />
                 <Route path="contacts" element={<AdminContact />} />
                 <Route path="users" element={<AdminUser />} />
+                <Route path="grant-access" element={<AdminGrantAccess />} /> {/* New route for AdminGrantAccess */}
               </Route>
             </Routes>
           </div>
