@@ -249,7 +249,8 @@ const Catalog = () => {
   const filterAndSortReports = (reportsList) => {
     let filtered = reportsList.filter(report => {
       const matchesSearch = report.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                           report.description.toLowerCase().includes(searchTerm.toLowerCase());
+                           report.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                           report.sector?.toLowerCase().includes(searchTerm.toLowerCase()); // Added sector search
       return matchesSearch;
     });
 
